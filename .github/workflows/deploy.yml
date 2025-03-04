@@ -1,0 +1,89 @@
+name: Build Check
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: tsc
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Start Docker containers
+        run: docker-compose -f docker-compose.test.yml up -d
+
+      - name: Wait for databases to be ready
+        run: |
+          docker exec postgres-1 pg_isready -U postgres
+
+      - name: Run prisma generate
+        run: npx prisma generate
+
+      - name: Run tests
+        env:
+          DATABASE_URL_1: postgresql://postgres:postgres@localhost:5432/test_db_1
+          DATABASE_URL_2: postgresql://postgres:postgres@localhost:5433/test_db_2
+          DATABASE_URL_3: postgresql://postgres:postgres@localhost:5434/test_db_3
+        run: npm test
+
+      - name: Stop Docker containers
+        if: always()
+        run: docker-compose -f docker-compose.test.yml down
+
+  deploy:
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: tsc
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ~/fs3-moving-team2-BE
+            git pull
+            npm install
+            tsc
+            pm2 restart all
