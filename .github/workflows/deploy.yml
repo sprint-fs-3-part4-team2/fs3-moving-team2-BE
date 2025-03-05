@@ -51,7 +51,7 @@ jobs:
           fi
 
           # 데이터베이스 연결 확인
-          docker exec postgres-1 pg_isready -U postgres || exit 1
+          docker exec fs3-moving-team2-be-postgres-1-1 pg_isready -U postgres || exit 1
 
       - name: Run prisma generate
         run: npx prisma generate
