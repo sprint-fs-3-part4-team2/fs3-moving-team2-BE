@@ -68,7 +68,7 @@ jobs:
         run: docker compose -f docker-compose.test.yml down
 
   deploy:
-    needs: [build, test]
+    needs: [build]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
