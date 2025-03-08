@@ -37,11 +37,21 @@ jobs:
         run: npm install
 
       - name: Start Docker containers
-        run: docker-compose -f docker-compose.test.yml up -d
-
-      - name: Wait for databases to be ready
         run: |
-          docker exec postgres-1 pg_isready -U postgres
+          docker compose -f docker-compose.test.yml up -d
+          sleep 15
+
+          # 컨테이너 상태 확인
+          docker ps
+
+          if ! docker ps | grep postgres-1; then
+            echo "postgres-1 컨테이너가 실행되지 않았습니다."
+            docker compose -f docker-compose.test.yml logs
+            exit 1
+          fi
+
+          # 데이터베이스 연결 확인
+          docker exec fs3-moving-team2-be-postgres-1-1 pg_isready -U postgres || exit 1
 
       - name: Run prisma generate
         run: npx prisma generate
@@ -55,10 +65,10 @@ jobs:
 
       - name: Stop Docker containers
         if: always()
-        run: docker-compose -f docker-compose.test.yml down
+        run: docker compose -f docker-compose.test.yml down
 
   deploy:
-    needs: build
+    needs: [build]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:

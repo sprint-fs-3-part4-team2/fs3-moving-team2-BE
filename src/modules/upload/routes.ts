@@ -1,0 +1,12 @@
+import Express from 'express';
+import { UploadService } from './service/service';
+import { UploadController } from './controller/controller';
+import asyncRequestHandler from '@/core/handlers/asyncRequestHandler';
+
+const uploadService = new UploadService();
+const uploadController = new UploadController(uploadService);
+const router = Express.Router();
+
+router.get('/url', asyncRequestHandler(uploadController.generateUploadUrl));
+
+export default router;

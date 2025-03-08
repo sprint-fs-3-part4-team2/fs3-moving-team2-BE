@@ -1,8 +1,11 @@
-import { Prisma } from '@prisma/client';
 import { Response } from 'express';
+import {
+  PrismaClientKnownRequestError,
+  PrismaClientValidationError,
+} from '@prisma/client/runtime/library';
 
 export const handlePrismaError = (e: unknown, res: Response) => {
-  if (e instanceof Prisma.PrismaClientKnownRequestError) {
+  if (e instanceof PrismaClientKnownRequestError) {
     switch (e.code) {
       case 'P2002':
         return res.status(409).json({
@@ -23,7 +26,7 @@ export const handlePrismaError = (e: unknown, res: Response) => {
     }
   }
 
-  if (e instanceof Prisma.PrismaClientValidationError) {
+  if (e instanceof PrismaClientValidationError) {
     return res.status(400).json({
       message: '잘못된 데이터 형식입니다.',
     });
