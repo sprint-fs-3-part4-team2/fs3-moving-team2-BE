@@ -4,7 +4,7 @@
   "description": "moving service backend",
   "scripts": {
     "test": "jest",
-    "start": "node ./dist/app.js",
+    "start": "tsc-alias && node ./dist/app.js",
     "start:dev": "nodemon --exec ts-node src/app.ts",
     "build": "npm install && tsc",
     "dev": "nodemon --watch src --ext ts --exec \"tsc && tsc-alias && node dist/app.js\"",
