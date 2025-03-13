@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './core/docs/swagger';
 import imageRouter from './modules/upload/routes';
+import userRouter from './modules/users/routes';
 
 dotenv.config();
 
@@ -37,6 +38,7 @@ app.get('/', (req: Request, res: Response) => {
 
 // 라우터 설정 (여기에 라우터를 추가하세요)
 app.use('/upload', imageRouter);
+app.use('/users', userRouter);
 
 // 서버 실행
 app.listen(port, () => {
