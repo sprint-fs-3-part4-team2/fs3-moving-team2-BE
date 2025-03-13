@@ -9,6 +9,8 @@ class userService {
     this.user = user;
     this.repository = new UserRepository(user);
   }
+
+  // mover basic info edit
   async mbiEdit(body: Omit<EditBaiscInfoBody, 'current_password' | 'email' | 'user_type'>) {
     const { new_password, phone_number, name } = body;
     const updated: boolean = await this.repository.userEdit({
