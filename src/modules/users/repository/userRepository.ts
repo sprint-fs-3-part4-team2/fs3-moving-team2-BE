@@ -1,28 +1,32 @@
 import prismaClient from '@/prismaClient';
 import { InfoEditType } from '../types/repo.type';
+import { Request } from 'express';
 
-async function userEdit({ where, data }: InfoEditType): Promise<boolean> {
-  const { email, user_type } = where;
-  const { name, password, phone_number } = data;
-  try {
-    const confirm = await prismaClient.user.update({
-      where: {
-        email,
-        user_type,
-      },
-      data: {
-        name,
-        password,
-        phone_number,
-      },
-    });
-    return !!confirm;
-  } catch (err: any) {
-    console.error('userReository edit error', err);
-    return false;
+class UserRepository {
+  user: Request['user'];
+  constructor(user: Request['user']) {
+    this.user = user;
+  }
+  async userEdit({ data }: InfoEditType): Promise<boolean> {
+    const { name, password, phone_number } = data;
+    if (!this.user) return false;
+    try {
+      const confirm: boolean = !!(await prismaClient.user.update({
+        where: {
+          id: this.user.userId,
+        },
+        data: {
+          name,
+          password,
+          phone_number,
+        },
+      }));
+      return confirm;
+    } catch (err: any) {
+      console.error('userReository edit error', err);
+      return false;
+    }
   }
 }
 
-// 통합
-const userRepository = { userEdit };
-export default userRepository;
+export default UserRepository;

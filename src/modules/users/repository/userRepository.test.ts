@@ -1,6 +1,7 @@
 import prismaClient from '@/prismaClient';
-import userRepository from './userRepository';
+import { Request } from 'express';
 import { InfoEditType } from '../types/repo.type';
+import userRepository from './userRepository';
 
 jest.mock('@/prismaClient', () => ({
   user: {
@@ -9,29 +10,33 @@ jest.mock('@/prismaClient', () => ({
 }));
 
 describe('userRepository.userEdit', () => {
-  const testInfo: InfoEditType = {
-    where: { email: 'test@example.com', user_type: 'MOVER' },
-    data: {
-      name: 'tester',
-      password: 'test1234', // hash 필요함
-      phone_number: '01012345678',
-    },
-  };
+  let repository: userRepository;
+
+  beforeEach(() => {
+    const mockUser: Request['user'] = { userId: '123' };
+    repository = new userRepository(mockUser);
+  });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it('정보수정 성공', async () => {
+  const testInfo: InfoEditType = {
+    where: { id: '123' },
+    data: {
+      name: 'new name',
+      password: 'newPassword', // hash 필요
+      phone_number: '01012345678', // 010-0000-0000 ?
+    },
+  };
+
+  it('successful', async () => {
     (prismaClient.user.update as jest.Mock).mockResolvedValue(testInfo.data);
 
-    const result = await userRepository.userEdit(testInfo);
+    const result = await repository.userEdit(testInfo);
 
     expect(prismaClient.user.update).toHaveBeenCalledWith({
-      where: {
-        email: testInfo.where.email,
-        user_type: testInfo.where.user_type,
-      },
+      where: { id: testInfo.where.id },
       data: {
         name: testInfo.data.name,
         password: testInfo.data.password,
@@ -41,10 +46,10 @@ describe('userRepository.userEdit', () => {
     expect(result).toBe(true);
   });
 
-  it('정보수정 실패', async () => {
-    (prismaClient.user.update as jest.Mock).mockRejectedValue(new Error('Update error'));
+  it('fails', async () => {
+    (prismaClient.user.update as jest.Mock).mockRejectedValue(new Error('update failed'));
 
-    const result = await userRepository.userEdit(testInfo);
+    const result = await repository.userEdit(testInfo);
 
     expect(prismaClient.user.update).toHaveBeenCalled();
     expect(result).toBe(false);

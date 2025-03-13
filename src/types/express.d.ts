@@ -12,7 +12,7 @@ declare global {
     interface Request {
       validatedQuery: ValidatedQuery;
       user?: {
-        userId: number;
+        userId: string;
       };
     }
   }
