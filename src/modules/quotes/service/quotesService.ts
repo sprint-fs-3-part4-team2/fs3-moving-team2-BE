@@ -2,6 +2,7 @@ import { ForbiddenException, NotFoundException } from '@/core/errors';
 import QuotesRepository from '../repository/quotesRepository';
 import { EXCEPTION_MESSAGES } from '@/constants/exceptionMessages';
 import { AUTH_MESSAGES } from '@/constants/authMessages';
+import { MOVE_TYPE } from '@/constants/serviceType';
 
 export default class QuotesService {
   constructor(private quotesRepository: QuotesRepository) {}
@@ -19,6 +20,8 @@ export default class QuotesService {
       (address) => address.type === 'DEPARTURE',
     )?.fullAddress;
 
+    const moveType = MOVE_TYPE[quote.quoteRequest.moveType];
+
     return {
       price: quote.price,
       mover: { ...quote.mover, user: undefined, moverName: quote.mover.user.name },
@@ -29,6 +32,7 @@ export default class QuotesService {
         quoteRequestAddresses: undefined,
         arrival: arrivalAddress,
         departure: departureAddress,
+        moveType,
       },
       customRequest: quote.targetedQuoteRequestId ? true : false,
       matched: quote.quoteMatch ? true : false,
