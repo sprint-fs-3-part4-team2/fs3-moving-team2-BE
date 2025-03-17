@@ -1,0 +1,122 @@
+[
+  {
+    "message": "견적이 확정 되었습니다",
+    "is_read": false,
+    "url": "https://example.com/notification/1",
+    "created_at": "2025-03-17T19:00:00+09:00"
+  },
+  {
+    "message": "내일은 이사 일입니다",
+    "is_read": false,
+    "url": "https://example.com/notification/2",
+    "created_at": "2025-03-17T19:05:00+09:00"
+  },
+  {
+    "message": "오늘은 이사 당일입니다",
+    "is_read": true,
+    "url": null,
+    "created_at": "2025-03-17T19:10:00+09:00"
+  },
+  {
+    "message": "견적이 확정 되었습니다",
+    "is_read": false,
+    "url": "https://example.com/notification/4",
+    "created_at": "2025-03-17T19:15:00+09:00"
+  },
+  {
+    "message": "내일은 이사 일입니다",
+    "is_read": true,
+    "url": null,
+    "created_at": "2025-03-17T19:20:00+09:00"
+  },
+  {
+    "message": "오늘은 이사 당일입니다",
+    "is_read": false,
+    "url": "https://example.com/notification/6",
+    "created_at": "2025-03-17T19:25:00+09:00"
+  },
+  {
+    "message": "견적이 확정 되었습니다",
+    "is_read": false,
+    "url": "https://example.com/notification/7",
+    "created_at": "2025-03-17T19:30:00+09:00"
+  },
+  {
+    "message": "내일은 이사 일입니다",
+    "is_read": true,
+    "url": null,
+    "created_at": "2025-03-17T19:35:00+09:00"
+  },
+  {
+    "message": "오늘은 이사 당일입니다",
+    "is_read": true,
+    "url": null,
+    "created_at": "2025-03-17T19:40:00+09:00"
+  },
+  {
+    "message": "견적이 확정 되었습니다",
+    "is_read": false,
+    "url": "https://example.com/notification/10",
+    "created_at": "2025-03-17T19:45:00+09:00"
+  },
+  {
+    "message": "내일은 이사 일입니다",
+    "is_read": false,
+    "url": "https://example.com/notification/11",
+    "created_at": "2025-03-17T19:50:00+09:00"
+  },
+  {
+    "message": "오늘은 이사 당일입니다",
+    "is_read": true,
+    "url": null,
+    "created_at": "2025-03-17T19:55:00+09:00"
+  },
+  {
+    "message": "견적이 확정 되었습니다",
+    "is_read": false,
+    "url": "https://example.com/notification/13",
+    "created_at": "2025-03-17T20:00:00+09:00"
+  },
+  {
+    "message": "내일은 이사 일입니다",
+    "is_read": false,
+    "url": "https://example.com/notification/14",
+    "created_at": "2025-03-17T20:05:00+09:00"
+  },
+  {
+    "message": "오늘은 이사 당일입니다",
+    "is_read": true,
+    "url": null,
+    "created_at": "2025-03-17T20:10:00+09:00"
+  },
+  {
+    "message": "견적이 확정 되었습니다",
+    "is_read": false,
+    "url": "https://example.com/notification/16",
+    "created_at": "2025-03-17T20:15:00+09:00"
+  },
+  {
+    "message": "내일은 이사 일입니다",
+    "is_read": false,
+    "url": "https://example.com/notification/17",
+    "created_at": "2025-03-17T20:20:00+09:00"
+  },
+  {
+    "message": "오늘은 이사 당일입니다",
+    "is_read": true,
+    "url": null,
+    "created_at": "2025-03-17T20:25:00+09:00"
+  },
+  {
+    "message": "견적이 확정 되었습니다",
+    "is_read": false,
+    "url": "https://example.com/notification/19",
+    "created_at": "2025-03-17T20:30:00+09:00"
+  },
+  {
+    "message": "내일은 이사 일입니다",
+    "is_read": false,
+    "url": "https://example.com/notification/20",
+    "created_at": "2025-03-17T20:35:00+09:00"
+  }
+]

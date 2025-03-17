@@ -14,7 +14,8 @@
     "lint:strict": "eslint 'src/**/*.{ts,tsx}' --config .eslintrc-strict.json",
     "format": "prettier --check 'src/**/*.{ts,tsx,js,jsx,json,css,scss,md}'",
     "format:fix": "prettier --write 'src/**/*.{ts,tsx,js,jsx,json,css,scss,md}'",
-    "prepare": "husky"
+    "prepare": "husky",
+    "seed": "npx tsc && node ./dist/mocks/seed.js"
   },
   "engines": {
     "node": ">=20",
@@ -79,6 +80,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "fs": "^0.0.1-security",
     "jsonwebtoken": "^9.0.2",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"
