@@ -26,7 +26,7 @@ describe('userRepository.userEdit', () => {
     data: {
       name: 'new name',
       password: 'newPassword', // hash 필요
-      phone_number: '01012345678', // 010-0000-0000 ?
+      phoneNumber: '01012345678', // 010-0000-0000 ?
     },
   };
 
@@ -40,7 +40,7 @@ describe('userRepository.userEdit', () => {
       data: {
         name: testInfo.data.name,
         password: testInfo.data.password,
-        phone_number: testInfo.data.phone_number,
+        phone_number: testInfo.data.phoneNumber,
       },
     });
     expect(result).toBe(true);

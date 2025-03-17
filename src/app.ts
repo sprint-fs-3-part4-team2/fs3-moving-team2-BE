@@ -7,6 +7,8 @@ import { swaggerSpec } from './core/docs/swagger';
 import imageRouter from './modules/upload/routes';
 import userRouter from './modules/users/routes';
 import reviewRouter from './modules/reviews/routes';
+import quotesRouter from './modules/quotes/routes';
+import { extractUserMiddleware } from './core/middleware/auth/extractUser';
 import profileRouter from './modules/profile/routes';
 
 dotenv.config();
@@ -30,6 +32,7 @@ app.use(
 );
 app.use(cookieParser());
 app.use(express.json());
+app.use(extractUserMiddleware);
 app.use(express.urlencoded({ extended: true })); // 필요한거야?  // body-parser 대체
 app.use('/api', swaggerUi.serve, swaggerUi.setup(swaggerSpec)); // swagger 설정
 
@@ -42,6 +45,7 @@ app.get('/', (req: Request, res: Response) => {
 app.use('/upload', imageRouter);
 app.use('/users', userRouter);
 app.use('/reviews', reviewRouter);
+app.use('/quotes', quotesRouter);
 app.use('/profile', profileRouter);
 
 // 서버 실행

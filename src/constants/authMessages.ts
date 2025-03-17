@@ -8,4 +8,5 @@ export const AUTH_MESSAGES = {
   invalidRefreshToken: '유효하지 않은 refreshToken 입니다.',
   invalidPassword: '비밀번호가 일치하지 않습니다.',
   needLogin: '로그인이 필요합니다.',
+  forbidden: '접근 권한이 없습니다.',
 };

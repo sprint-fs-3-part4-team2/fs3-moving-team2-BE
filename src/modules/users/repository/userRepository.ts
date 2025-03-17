@@ -8,7 +8,7 @@ class UserRepository {
     this.user = user;
   }
   async userEdit({ data }: InfoEditType): Promise<boolean> {
-    const { name, password, phone_number } = data;
+    const { name, password, phoneNumber } = data;
     if (!this.user) return false;
     try {
       const confirm: boolean = !!(await prismaClient.user.update({
@@ -18,7 +18,7 @@ class UserRepository {
         data: {
           name,
           password,
-          phone_number,
+          phoneNumber,
         },
       }));
       return confirm;
