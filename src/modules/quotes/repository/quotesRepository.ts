@@ -30,7 +30,11 @@ export default class QuotesRepository {
             id: true,
           },
         },
-        quoteRequest: true,
+        quoteRequest: {
+          include: {
+            quoteRequestAddresses: true,
+          },
+        },
       },
     });
   }

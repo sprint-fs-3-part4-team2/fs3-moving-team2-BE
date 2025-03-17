@@ -12,9 +12,24 @@ export default class QuotesService {
     // if (quote?.quote_request.customer_id !== customerId)
     //   throw new ForbiddenException(AUTH_MESSAGES.forbidden);
 
+    const arrivalAddress = quote.quoteRequest.quoteRequestAddresses.find(
+      (address) => address.type === 'ARRIVAL',
+    )?.fullAddress;
+    const departureAddress = quote.quoteRequest.quoteRequestAddresses.find(
+      (address) => address.type === 'DEPARTURE',
+    )?.fullAddress;
+
     return {
+      price: quote.price,
       mover: { ...quote.mover, user: undefined, moverName: quote.mover.user.name },
-      request: quote.quoteRequest,
+      request: {
+        ...quote.quoteRequest,
+        fromRegion: undefined,
+        toRegion: undefined,
+        quoteRequestAddresses: undefined,
+        arrival: arrivalAddress,
+        departure: departureAddress,
+      },
       customRequest: quote.targetedQuoteRequestId ? true : false,
       matched: quote.quoteMatch ? true : false,
     };
