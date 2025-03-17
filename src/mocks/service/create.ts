@@ -49,8 +49,8 @@ const createCustomer = async () => {
       customer.map((user): Prisma.CustomerCreateManyInput => {
         const { id } = user;
         return {
-          user_id: id,
-          profile_image: customerMock[random(customerMock)].profile_image,
+          userId: id,
+          profileImage: customerMock[random(customerMock)].profile_image,
           location: enArea[random(enArea)] as Region,
         };
       }),
@@ -71,9 +71,9 @@ const createMover = async () => {
         const { profile_image, experience_years, introduction, description } =
           moverMock[randomMover];
         return {
-          user_id: id,
-          profile_image: profile_image || 'profile_img_error',
-          experience_years: experience_years || 0,
+          userId: id,
+          profileImage: profile_image || 'profile_img_error',
+          experienceYears: experience_years || 0,
           introduction: introduction || '',
           description: description || '',
         };
@@ -94,10 +94,10 @@ const createNotification = async () => {
         const { id } = customer[customerIndex];
         const { message, url, is_read } = val;
         return {
-          user_id: id || customer[0].id,
+          userId: id || customer[0].id,
           message: message,
           url,
-          is_read,
+          isRead: is_read,
         };
       }),
     );
@@ -117,8 +117,8 @@ const createCustomerService = async () => {
           const { id } = customer[customerIndex];
           const { service_type } = val;
           return {
-            customer_id: id,
-            service_type: service_type as ServiceType,
+            customerId: id,
+            serviceType: service_type as ServiceType,
           };
         }),
       );

@@ -7,7 +7,7 @@ const userMoverFind = async () => {
   try {
     const result = await prismaClient.user.findMany({
       where: {
-        user_type: 'MOVER',
+        userType: 'MOVER',
       },
     });
     if (result.length === 0) throw console.error(`❌ user mover 없음 `);
@@ -21,7 +21,7 @@ const userCustomerFind = async () => {
   try {
     const result = await prismaClient.user.findMany({
       where: {
-        user_type: 'CUSTOMER',
+        userType: 'CUSTOMER',
       },
     });
     if (result.length === 0) throw console.error(`❌ user customer 없음 `);
