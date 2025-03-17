@@ -1,5 +1,5 @@
 export const MOVE_TYPE = {
-  HOME_MOVE: '가정이사',
-  SMALL_MOVE: '소형이사',
-  OFFICE_MOVE: '사무실이사',
+  HOME_MOVE: 'home',
+  SMALL_MOVE: 'small',
+  OFFICE_MOVE: 'office',
 } as const;
