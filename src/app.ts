@@ -7,6 +7,7 @@ import { swaggerSpec } from './core/docs/swagger';
 import imageRouter from './modules/upload/routes';
 import userRouter from './modules/users/routes';
 import reviewRouter from './modules/reviews/routes';
+import quotesRouter from './modules/quotes/routes';
 
 dotenv.config();
 
@@ -41,6 +42,7 @@ app.get('/', (req: Request, res: Response) => {
 app.use('/upload', imageRouter);
 app.use('/users', userRouter);
 app.use('/reviews', reviewRouter);
+app.use('/quotes', quotesRouter);
 
 // 서버 실행
 app.listen(port, () => {
