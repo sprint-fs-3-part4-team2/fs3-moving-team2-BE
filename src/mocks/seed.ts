@@ -15,13 +15,13 @@ async function main() {
       'user',
       userMock.map(
         (user): Prisma.UserCreateInput => ({
-          user_type: user.user_type as UserType,
+          userType: user.user_type as UserType,
           email: user.email,
           name: user.name,
-          phone_number: user.phone_number,
+          phoneNumber: user.phone_number,
           password: user.password,
-          created_at: new Date(user.created_at),
-          updated_at: new Date(user.updated_at),
+          createdAt: new Date(user.created_at),
+          updatedAt: new Date(user.updated_at),
         }),
       ),
       false,

@@ -19,7 +19,7 @@ class userService {
       },
       data: {
         password: newPassword,
-        phone_number: phoneNumber,
+        phoneNumber,
         name,
       },
     });
