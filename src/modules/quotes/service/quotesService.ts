@@ -13,10 +13,10 @@ export default class QuotesService {
     //   throw new ForbiddenException(AUTH_MESSAGES.forbidden);
 
     return {
-      mover: quote.mover,
-      request: quote.quote_request,
-      customRequest: quote.targeted_quote_request_id ? true : false,
-      matched: quote.quote_match ? true : false,
+      mover: { ...quote.mover, user: undefined, moverName: quote.mover.user.name },
+      request: quote.quoteRequest,
+      customRequest: quote.targetedQuoteRequestId ? true : false,
+      matched: quote.quoteMatch ? true : false,
     };
   }
 }
