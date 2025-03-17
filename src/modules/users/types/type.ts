@@ -1,8 +1,8 @@
 export type EditBaiscInfoBody = {
-  current_password: string;
+  currentPassword: string;
   email: string;
   name: string;
-  user_type: 'CUSTOMER' | 'MOVER';
-  new_password: string;
-  phone_number: string;
+  userType: 'CUSTOMER' | 'MOVER';
+  newPassword: string;
+  phoneNumber: string;
 };
