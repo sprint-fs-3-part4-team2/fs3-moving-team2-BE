@@ -44,3 +44,19 @@ export async function getPendingReviews() {
 
   return formattedData;
 }
+
+export async function createReview(reviewData: {
+  estimateId: string;
+  rating: number;
+  comment: string;
+}) {
+  const { estimateId, rating, comment } = reviewData;
+  const review = await prisma.review.create({
+    data: {
+      quote_match_id: estimateId, // QuoteMatch.id와 연결
+      rating,
+      content: comment, // 스키마의 content 필드에 매핑
+    },
+  });
+  return review;
+}

@@ -1,34 +1,12 @@
-# npx lint-staged
-# npm test
-
-# !/bin/sh
-
+#!/bin/sh
 # 스크립트 실패 시 즉시 중단
 set -e
 
 echo "\033[34m🔍 commit 하기 전 코드 품질 검사를 시작합니다...\033[0m"
 START_TIME=$(date +%s)
 
-# Prettier로 코드 스타일 검사
-echo "\n📝 Prettier 검사 중..."
-if npm run format:fix; then
-  echo "\033[32m✓ 코드 스타일 검사 완료\033[0m"
-else
-  echo "\033[31m❌ 코드 스타일 검사 실패\033[0m"
-  exit 1
-fi
-
-# ESLint로 코드 품질 검사
-echo "\n🔍 ESLint 검사 중..."
-if npm run lint:fix; then
-  echo "\033[32m✓ 코드 품질 검사 완료\033[0m"
-else
-  echo "\033[31m❌ 코드 품질 검사 실패\033[0m"
-  exit 1
-fi
-
-# staged 파일만 최종 검사
-echo "\n⚡ 스테이징된 파일 최종 검사 중..."
+# 스테이징된 파일만 검사하도록 최적화
+echo "\n⚡ 스테이징된 파일 검사 중..."
 if npx lint-staged; then
   echo "\033[32m✓ 스테이징된 파일 검사 완료\033[0m"
 else
@@ -38,6 +16,5 @@ fi
 
 END_TIME=$(date +%s)
 DURATION=$((END_TIME - START_TIME))
-
-echo "\n\033[32m✨ 모든 검사가 성공적으로 완료되었습니다! (소요시간: ${DURATION}초)\033[0m"
+echo "\n\033[32m✨ 검사가 성공적으로 완료되었습니다! (소요시간: ${DURATION}초)\033[0m"
 exit 0
