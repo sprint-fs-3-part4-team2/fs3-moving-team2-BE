@@ -11,15 +11,15 @@ class userService {
   }
 
   // mover basic info edit
-  async mbiEdit(body: Omit<EditBaiscInfoBody, 'current_password' | 'email' | 'user_type'>) {
-    const { new_password, phone_number, name } = body;
+  async mbiEdit(body: Omit<EditBaiscInfoBody, 'currentPassword' | 'email' | 'userType'>) {
+    const { newPassword, phoneNumber, name } = body;
     const updated: boolean = await this.repository.userEdit({
       where: {
         id: this.user?.userId,
       },
       data: {
-        password: new_password,
-        phone_number,
+        password: newPassword,
+        phoneNumber,
         name,
       },
     });

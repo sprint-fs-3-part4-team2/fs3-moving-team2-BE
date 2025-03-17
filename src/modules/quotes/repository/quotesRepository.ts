@@ -16,21 +16,21 @@ export default class QuotesRepository {
                 name: true,
               },
             },
-            experience_years: true,
-            profile_image: true,
+            experienceYears: true,
+            profileImage: true,
             description: true,
-            total_confirmed_count: true,
-            total_customer_favorite: true,
-            total_reviews: true,
-            average_rating: true,
+            totalConfirmedCount: true,
+            totalCustomerFavorite: true,
+            totalReviews: true,
+            averageRating: true,
           },
         },
-        quote_match: {
+        quoteMatch: {
           select: {
             id: true,
           },
         },
-        quote_request: true,
+        quoteRequest: true,
       },
     });
   }
