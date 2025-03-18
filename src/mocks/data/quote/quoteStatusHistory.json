@@ -1,0 +1,8 @@
+[
+  { "status": "QUOTE_REQUESTED" },
+  { "status": "MOVER_SUBMITTED" },
+  { "status": "QUOTE_CONFIRMED" },
+  { "status": "QUOTE_CANCELED" },
+  { "status": "REQUEST_EXPIRED" },
+  { "status": "MOVE_COMPLETED" }
+]

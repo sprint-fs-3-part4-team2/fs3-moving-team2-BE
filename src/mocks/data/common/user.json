@@ -1,0 +1,102 @@
+[
+  {
+    "user_type": "CUSTOMER",
+    "email": "user1@example.com",
+    "name": "김철수",
+    "phone_number": "010-1234-5678",
+    "password": "hashedpassword1",
+    "created_at": "2025-03-17T10:00:00Z",
+    "updated_at": "2025-03-17T12:00:00Z",
+    "notifications": []
+  },
+  {
+    "user_type": "MOVER",
+    "email": "user2@example.com",
+    "name": "이영희",
+    "phone_number": "010-9876-5432",
+    "password": "hashedpassword2",
+    "created_at": "2025-03-16T09:30:00Z",
+    "updated_at": "2025-03-17T11:45:00Z",
+    "notifications": []
+  },
+  {
+    "user_type": "CUSTOMER",
+    "email": "user3@example.com",
+    "name": "박민수",
+    "phone_number": "010-5678-1234",
+    "password": "hashedpassword3",
+    "created_at": "2025-03-15T08:20:00Z",
+    "updated_at": "2025-03-17T10:15:00Z",
+    "notifications": []
+  },
+  {
+    "user_type": "MOVER",
+    "email": "user4@example.com",
+    "name": "최지우",
+    "phone_number": "010-1111-2222",
+    "password": "hashedpassword4",
+    "created_at": "2025-03-14T14:10:00Z",
+    "updated_at": "2025-03-17T09:30:00Z",
+    "notifications": []
+  },
+  {
+    "user_type": "CUSTOMER",
+    "email": "user5@example.com",
+    "name": "손예진",
+    "phone_number": "010-3333-4444",
+    "password": "hashedpassword5",
+    "created_at": "2025-03-13T12:45:00Z",
+    "updated_at": "2025-03-17T08:50:00Z",
+    "notifications": []
+  },
+  {
+    "user_type": "MOVER",
+    "email": "user6@example.com",
+    "name": "강동원",
+    "phone_number": "010-5555-6666",
+    "password": "hashedpassword6",
+    "created_at": "2025-03-12T10:05:00Z",
+    "updated_at": "2025-03-17T07:40:00Z",
+    "notifications": []
+  },
+  {
+    "user_type": "CUSTOMER",
+    "email": "user7@example.com",
+    "name": "이정재",
+    "phone_number": "010-7777-8888",
+    "password": "hashedpassword7",
+    "created_at": "2025-03-11T09:30:00Z",
+    "updated_at": "2025-03-17T06:30:00Z",
+    "notifications": []
+  },
+  {
+    "user_type": "MOVER",
+    "email": "user8@example.com",
+    "name": "정우성",
+    "phone_number": "010-9999-0000",
+    "password": "hashedpassword8",
+    "created_at": "2025-03-10T08:15:00Z",
+    "updated_at": "2025-03-17T05:20:00Z",
+    "notifications": []
+  },
+  {
+    "user_type": "CUSTOMER",
+    "email": "user9@example.com",
+    "name": "공유",
+    "phone_number": "010-1212-3434",
+    "password": "hashedpassword9",
+    "created_at": "2025-03-09T07:50:00Z",
+    "updated_at": "2025-03-17T04:10:00Z",
+    "notifications": []
+  },
+  {
+    "user_type": "MOVER",
+    "email": "user10@example.com",
+    "name": "조인성",
+    "phone_number": "010-5656-7878",
+    "password": "hashedpassword10",
+    "created_at": "2025-03-08T06:40:00Z",
+    "updated_at": "2025-03-17T03:00:00Z",
+    "notifications": []
+  }
+]
