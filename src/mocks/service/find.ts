@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Prisma, PrismaClient } from '@prisma/client';
 import { CustomerFind, MoverFind } from '../types/type';
+import { errorMsg, passMsg } from '../lib/msg';
 
 const prismaClient = new PrismaClient();
 
@@ -22,13 +23,13 @@ const find = <T extends ModelWithFindMany>(
       try {
         const delegate = prismaClient[model] as unknown as { findMany: FindManyFn };
         const data = await delegate.findMany(args);
-        if (data) console.log(`✅ ${model} 테이블 조회 완료`, `조회 Length: ${data.length}`);
+        if (data) passMsg(`${model} 테이블 조회 //`, `조회 Length: ${data.length}`);
         resolve(data);
       } catch (err) {
-        console.error(`❌ ${model} (find) Error: ${err}`);
+        errorMsg(`${model} (find)`, err);
         reject(err);
       }
-    }, leanTime ?? 500);
+    }, leanTime ?? 50);
   });
 };
 
@@ -39,10 +40,10 @@ const userMoverFind = async () => {
         userType: 'MOVER',
       },
     });
-    if (result.length === 0) throw console.error(`❌ user mover 없음 `);
+    if (result.length === 0) throw errorMsg(`user mover 없음`, {});
     return result;
   } catch (err) {
-    throw console.error(`❌ user mover 찾기 Error: ${err}`);
+    throw errorMsg(`user mover 찾기`, err);
   }
 };
 
@@ -56,7 +57,7 @@ const userCustomerFind = async () => {
     if (result.length === 0) throw console.error(`❌ user customer 없음 `);
     return result;
   } catch (err) {
-    throw console.error(`❌ user customer 찾기 Error: ${err}`);
+    throw errorMsg(`user customer 찾기`, err);
   }
 };
 
@@ -74,11 +75,11 @@ const customerFind = async (
           }
           resolve(result);
         } catch (err) {
-          console.error(`❌ customerFind 찾기 Error: ${err}`);
+          errorMsg(`customerFind 찾기`, err);
           reject(err);
         }
       },
-      leanTime ?? 0 + 100,
+      leanTime ?? 0 + 10,
     );
   });
 };
@@ -97,11 +98,11 @@ const moverFind = async (
           }
           resolve(result);
         } catch (err) {
-          console.error(`❌ customerFind 찾기 Error: ${err}`);
+          errorMsg(`moverFind 찾기`, err);
           reject(err);
         }
       },
-      leanTime ?? 0 + 100,
+      leanTime ?? 0 + 10,
     );
   });
 };

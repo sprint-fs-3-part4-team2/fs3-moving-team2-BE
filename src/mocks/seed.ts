@@ -1,3 +1,4 @@
+import { endMsg } from './lib/msg';
 import {
   createCustomer,
   createCustomerFavorite,
@@ -11,6 +12,7 @@ import {
   createQuoteRequest,
   createQuoteRequestAddress,
   createQuoteStatusHistory,
+  createReview,
   createTargetedQuoteReject,
   createTargetedQuoteRequest,
   createUser,
@@ -19,10 +21,8 @@ import {
 async function main() {
   const timeText = '걸린 시간:';
   console.time(timeText);
-  //시작 하는 부분
-  console.log(`🎉 seed 작업 시작`);
+  console.log(`🎉🤡 seed 작업 시작`);
   try {
-    // user
     await createUser();
     await createCustomer();
     await createMover();
@@ -38,11 +38,11 @@ async function main() {
     await createQuoteStatusHistory();
     await createTargetedQuoteRequest();
     await createTargetedQuoteReject();
+    await createReview();
   } catch (err) {
-    // 끝나는 부분
     console.error(`seed 실패 : ${err}`);
   } finally {
-    console.log(`🚀 seed 작업완료`);
+    endMsg(`seed 작업완료`);
     console.timeEnd(timeText);
   }
 }

@@ -5,6 +5,7 @@ import {
   QuoteRequest,
   MoverQuote,
   TargetedQuoteRequest,
+  QuoteMatch,
 } from '@prisma/client';
 import { enArea } from '../types/resion.type';
 import { Region, ServiceType, UserType } from '@prisma/client';
@@ -23,10 +24,11 @@ import moverServiceRegionMock from '../data/mover/moverServiceRegion.json';
 import quoteRequestAddressMock from '../data/quote/quoteRequestAddress.json';
 import quoteStatusHistoryMock from '../data/quote/quoteStatusHistory.json';
 import targetedQuoteRejectionMock from '../data/quote/targetedQuoteRejection.json';
-import { startMsg } from '../lib/msg';
+import reviewMock from '../data/Review.json';
+import { errorMsg, passMsg, startMsg } from '../lib/msg';
 
 const prismaClient = new PrismaClient();
-const leanTime = 1000;
+const leanTime = 10;
 
 type ModelWithCreateMany = {
   [K in keyof PrismaClient]: PrismaClient[K] extends { createMany: (...args: any) => any }
@@ -43,13 +45,13 @@ const create = async <T extends ModelWithCreateMany>(model: T, data: any[]) => {
       deleteMany: DeleteManyFn;
     };
     const deletes = await delegate.deleteMany({});
-    if (deletes) console.log(`✅ ${model} 테이블 정리`);
+    if (deletes) passMsg(`${model} 테이블 정리`);
     const createData = await delegate.createMany({
       data: data,
     });
-    if (createData) console.log(`✅ ${model} 테이블 데이터 생성`);
+    if (createData) passMsg(`${model} 테이블 데이터 생성`);
   } catch (err) {
-    console.error(`❌ ${model} (create fn) Error: ${err}`);
+    errorMsg(`${model} (create fn)`, err);
   }
 };
 
@@ -71,7 +73,7 @@ const createUser = async () => {
       ),
     );
   } catch (err) {
-    console.error(`❌ user mock 데이터 생성 Error: ${err}`);
+    errorMsg(`user mock 데이터 생성`, err);
   }
 };
 
@@ -91,7 +93,7 @@ const createCustomer = async () => {
       }),
     );
   } catch (err) {
-    console.error(`❌ customer mock 데이터 생성 Error: ${err}`);
+    errorMsg(`customer mock 데이터 생성`, err);
   }
 };
 
@@ -116,7 +118,7 @@ const createMover = async () => {
       }),
     );
   } catch (err) {
-    console.error(`❌ mover mock 데이터 생성 Error: ${err}`);
+    errorMsg(`mover mock 데이터 생성`, err);
   }
 };
 
@@ -140,7 +142,7 @@ const createNotification = async () => {
       }),
     );
   } catch (err) {
-    console.error(`❌ notification mock 데이터 생성 Error: ${err}`);
+    errorMsg(`notification mock 데이터 생성`, err);
   }
 };
 
@@ -162,7 +164,7 @@ const createCustomerService = async () => {
         }),
       );
   } catch (err) {
-    console.error(`❌ customerService mock 데이터 생성 Error: ${err}`);
+    errorMsg(`customerService mock 데이터 생성`, err);
   }
 };
 
@@ -183,7 +185,7 @@ const createCustomerFavorite = async () => {
       }),
     );
   } catch (err) {
-    console.error(`❌ customerFavorite mock 데이터 생성 Error: ${err}`);
+    errorMsg(`customerFavorite mock 데이터 생성`, err);
   }
 };
 
@@ -206,7 +208,7 @@ const createQuoteRequest = async () => {
       }),
     );
   } catch (err) {
-    console.error(`❌ quoteRequest mock 데이터 생성 Error: ${err}`);
+    errorMsg(`quoteRequest mock 데이터 생성`, err);
   }
 };
 
@@ -229,7 +231,7 @@ const createMoverQuote = async () => {
       }),
     );
   } catch (err) {
-    console.error(`❌ moverQuote mock 데이터 생성 Error: ${err}`);
+    errorMsg(`moverQuote mock 데이터 생성`, err);
   }
 };
 
@@ -249,7 +251,7 @@ const createQuoteMatch = async () => {
       }),
     );
   } catch (err) {
-    console.error(`❌ quoteMatch mock 데이터 생성 Error: ${err}`);
+    errorMsg(`quoteMatch mock 데이터 생성`, err);
   }
 };
 
@@ -268,7 +270,7 @@ const createMoverService = async () => {
       }),
     );
   } catch (err) {
-    console.error(`❌ moverService mock 데이터 생성 Error: ${err}`);
+    errorMsg(`moverService mock 데이터 생성`, err);
   }
 };
 
@@ -288,7 +290,7 @@ const createMoverServiceResion = async () => {
       }),
     );
   } catch (err) {
-    console.error(`❌ moverServiceRegion mock 데이터 생성 Error: ${err}`);
+    errorMsg(`moverServiceRegion mock 데이터 생성`, err);
   }
 };
 
@@ -323,7 +325,7 @@ const createQuoteRequestAddress = async () => {
       }),
     );
   } catch (err) {
-    console.error(`❌ quoteRequestAddress mock 데이터 생성 Error: ${err}`);
+    errorMsg(`quoteRequestAddress mock 데이터 생성`, err);
   }
 };
 
@@ -345,7 +347,7 @@ const createQuoteStatusHistory = async () => {
       }),
     );
   } catch (err) {
-    console.error(`❌ QuoteStatusHistory mock 데이터 생성 Error: ${err}`);
+    errorMsg(`QuoteStatusHistory mock 데이터 생성`, err);
   }
 };
 
@@ -367,7 +369,7 @@ const createTargetedQuoteRequest = async () => {
       }),
     );
   } catch (err) {
-    console.error(`❌ targetedQuoteRequest mock 데이터 생성 Error: ${err}`);
+    errorMsg(`targetedQuoteRequest mock 데이터 생성`, err);
   }
 };
 
@@ -388,7 +390,33 @@ const createTargetedQuoteReject = async () => {
       }),
     );
   } catch (err) {
-    console.error(`❌ targetedQuoteRejection mock 데이터 생성 Error: ${err}`);
+    errorMsg(`targetedQuoteRejection mock 데이터 생성`, err);
+  }
+};
+
+const createReview = async () => {
+  startMsg('createReview create');
+  try {
+    const quoteMatch: QuoteMatch[] = await find('quoteMatch', {
+      where: {
+        isCompleted: true,
+      } as Prisma.QuoteMatchWhereInput,
+    });
+    await create(
+      'review',
+      quoteMatch.map((val): Prisma.ReviewCreateManyInput => {
+        const { id: quoteMatchId } = val;
+        const ranIndex = random(reviewMock);
+        const { rating, content } = reviewMock[ranIndex];
+        return {
+          quoteMatchId,
+          rating,
+          content,
+        };
+      }),
+    );
+  } catch (err) {
+    errorMsg(`createReview mock 데이터 생성`, err);
   }
 };
 
@@ -408,5 +436,6 @@ export {
   createQuoteStatusHistory,
   createTargetedQuoteRequest,
   createTargetedQuoteReject,
+  createReview,
 };
 export default create;
