@@ -1,0 +1,12 @@
+[
+  { "rejectionReason": "주소 오류" },
+  { "rejectionReason": "이사 날짜 변경 불가" },
+  { "rejectionReason": "서비스 불가 지역" },
+  { "rejectionReason": "이사 업체가 제공할 수 없는 서비스" },
+  { "rejectionReason": "고객 정보 누락" },
+  { "rejectionReason": "이사 범위 초과" },
+  { "rejectionReason": "이사 차량 부족" },
+  { "rejectionReason": "고객의 의사 철회" },
+  { "rejectionReason": "이사 관련 서류 미제출" },
+  { "rejectionReason": "예상 이사 비용 초과" }
+]

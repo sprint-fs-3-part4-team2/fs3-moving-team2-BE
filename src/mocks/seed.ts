@@ -1,43 +1,49 @@
-import userMock from './data/common/user.json';
-import { Prisma } from '@prisma/client';
-import create, {
+import {
   createCustomer,
+  createCustomerFavorite,
   createCustomerService,
   createMover,
+  createMoverQuote,
+  createMoverService,
+  createMoverServiceResion,
   createNotification,
+  createQuoteMatch,
+  createQuoteRequest,
+  createQuoteRequestAddress,
+  createQuoteStatusHistory,
+  createTargetedQuoteReject,
+  createTargetedQuoteRequest,
+  createUser,
 } from './service/create';
-import { UserType } from '@prisma/client';
 
 async function main() {
+  const timeText = '걸린 시간:';
+  console.time(timeText);
+  //시작 하는 부분
+  console.log(`🎉 seed 작업 시작`);
   try {
     // user
-    await create(
-      'user',
-      userMock.map(
-        (user): Prisma.UserCreateInput => ({
-          userType: user.user_type as UserType,
-          email: user.email,
-          name: user.name,
-          phoneNumber: user.phone_number,
-          password: user.password,
-          createdAt: new Date(user.created_at),
-          updatedAt: new Date(user.updated_at),
-        }),
-      ),
-      false,
-    );
-    setTimeout(async () => {
-      // customer
-      await createCustomer();
-      // mover
-      await createMover();
-      // notificaition
-      await createNotification();
-      // customerService
-      await createCustomerService();
-    }, 1000);
+    await createUser();
+    await createCustomer();
+    await createMover();
+    await createNotification();
+    await createCustomerService();
+    await createCustomerFavorite();
+    await createQuoteRequest();
+    await createMoverQuote();
+    await createQuoteMatch();
+    await createMoverService();
+    await createMoverServiceResion();
+    await createQuoteRequestAddress();
+    await createQuoteStatusHistory();
+    await createTargetedQuoteRequest();
+    await createTargetedQuoteReject();
   } catch (err) {
+    // 끝나는 부분
     console.error(`seed 실패 : ${err}`);
+  } finally {
+    console.log(`🚀 seed 작업완료`);
+    console.timeEnd(timeText);
   }
 }
 
