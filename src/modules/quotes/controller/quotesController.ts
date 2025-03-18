@@ -10,4 +10,11 @@ export default class QuotesController {
 
     res.status(200).json(quote);
   };
+
+  getQuoteByIdForMover = async (req: Request, res: Response) => {
+    const quoteId = req.params.quoteId;
+    const quote = await this.quoteService.getQuoteByIdForMover(quoteId);
+
+    res.status(200).json(quote);
+  };
 }
