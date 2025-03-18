@@ -11,8 +11,9 @@ const quotesRepository = new QuotesRepository(prismaClient);
 const quoteService = new QuotesService(quotesRepository);
 const quoteController = new QuotesController(quoteService);
 
-const { getQuoteByIdForCustomer } = quoteController;
+const { getQuoteByIdForCustomer, getQuoteByIdForMover } = quoteController;
 
-router.route('/:quoteId').get(asyncRequestHandler(getQuoteByIdForCustomer));
+router.route('/:quoteId/customer').get(asyncRequestHandler(getQuoteByIdForCustomer));
+router.route('/:quoteId/mover').get(asyncRequestHandler(getQuoteByIdForMover));
 
 export default router;
