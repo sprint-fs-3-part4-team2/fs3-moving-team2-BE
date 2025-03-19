@@ -1,9 +1,9 @@
 import { Router } from 'express';
-import * as reviewController from './controller/reviewController';
+import { getPendingReviews, submitReview } from './controller/reviewController';
 
 const router = Router();
 
-router.get('/pending', reviewController.getPendingReviews);
-router.post('/', reviewController.submitReview);
+router.get('/pending', getPendingReviews);
+router.post('/', submitReview);
 
 export default router;
