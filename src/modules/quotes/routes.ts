@@ -20,6 +20,7 @@ const {
 } = quoteController;
 
 router.route('/request').post(asyncRequestHandler(createQuoteRequest));
+router.route('/latest').get(asyncRequestHandler(getLatestQuoteForCustomer));
 router
   .route('/:quoteId/customer')
   .get(createAuthMiddleware('customer'), asyncRequestHandler(getQuoteByIdForCustomer));
