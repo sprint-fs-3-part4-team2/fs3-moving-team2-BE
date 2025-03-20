@@ -5,7 +5,6 @@ import QuotesRepository from './repository/quotesRepository';
 import QuotesController from './controller/quotesController';
 import asyncRequestHandler from '../../core/handlers/asyncRequestHandler';
 import { createAuthMiddleware } from '../../core/middleware/auth/auth';
-import { AUTH_MESSAGES } from '@/constants/authMessages';
 
 const router = express.Router();
 
