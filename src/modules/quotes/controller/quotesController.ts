@@ -19,4 +19,26 @@ export default class QuotesController {
     const quoteRequest = await this.quoteService.createQuoteRequest(customerId, req.body);
     res.status(201).json(quoteRequest);
   };
+
+  getQuoteByIdForMover = async (req: Request, res: Response) => {
+    const quoteId = req.params.quoteId;
+    const quote = await this.quoteService.getQuoteByIdForMover(quoteId);
+
+    res.status(200).json(quote);
+  };
+
+  getQuotesListByMover = async (req: Request, res: Response) => {
+    const moverId = req.params.moverId;
+    const { page, pageSize } = req.query;
+    const numberedPage = page !== undefined ? Number(page) : 1;
+    const numberedPageSize = pageSize !== undefined ? Number(pageSize) : 10;
+
+    const data = await this.quoteService.getQuotesListByMover(
+      numberedPage,
+      numberedPageSize,
+      moverId,
+    );
+
+    res.status(200).json(data);
+  };
 }

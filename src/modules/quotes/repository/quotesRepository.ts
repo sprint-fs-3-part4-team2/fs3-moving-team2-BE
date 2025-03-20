@@ -3,35 +3,74 @@ import { PrismaClient, ServiceType, Region } from '@prisma/client';
 export default class QuotesRepository {
   constructor(private prismaClient: PrismaClient) {}
 
+  private MOVER_INCLUDE_CLAUSE = {
+    mover: {
+      select: {
+        user: {
+          select: {
+            name: true,
+          },
+        },
+        experienceYears: true,
+        profileImage: true,
+        introduction: true,
+        totalConfirmedCount: true,
+        totalCustomerFavorite: true,
+        totalReviews: true,
+        averageRating: true,
+      },
+    },
+  };
+
+  private CUSTOMER_INCLUDE_CLAUSE = {
+    customer: {
+      select: {
+        user: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    },
+  };
+
+  //   private makeQuoteClause(includeCustomer: boolean) {
+  //     const quoteRequestInclude: any = {
+  //       quoteRequestAddress: true,
+  //       quoteStatusHistory: true,
+  //     };
+
+  //     if (includeCustomer) quoteRequestInclude.customer = this.CUSTOMER_INCLUDE_CLAUSE;
+
+  //     return {
+  //       quoteMatch: {
+  //         select: {
+  //           id: true,
+  //         },
+  //       },
+  //       quoteRequest: {
+  //         include: quoteRequestInclude,
+  //       },
+  //     };
+  //   }
+
   async getQuoteForCustomer(quoteId: string) {
     return await this.prismaClient.moverQuote.findUnique({
       where: {
         id: quoteId,
       },
       include: {
-        mover: {
-          select: {
-            user: {
-              select: {
-                name: true,
-              },
-            },
-            experienceYears: true,
-            profileImage: true,
-            description: true,
-            totalConfirmedCount: true,
-            totalCustomerFavorite: true,
-            totalReviews: true,
-            averageRating: true,
-          },
-        },
+        ...this.MOVER_INCLUDE_CLAUSE,
         quoteMatch: {
           select: {
             id: true,
           },
         },
         quoteRequest: {
-          include: {
+          select: {
+            moveType: true,
+            moveDate: true,
+            createdAt: true,
             quoteRequestAddresses: true,
           },
         },
@@ -68,5 +107,77 @@ export default class QuotesRepository {
         quoteStatusHistories: true,
       },
     });
+  }
+
+  async getQuoteForMover(quoteId: string) {
+    return await this.prismaClient.moverQuote.findUnique({
+      where: {
+        id: quoteId,
+      },
+      include: {
+        quoteMatch: {
+          select: {
+            id: true,
+          },
+        },
+        quoteRequest: {
+          select: {
+            moveType: true,
+            moveDate: true,
+            createdAt: true,
+            ...this.CUSTOMER_INCLUDE_CLAUSE,
+            quoteRequestAddresses: true,
+          },
+        },
+      },
+    });
+  }
+
+  async getQuotesListByMover(page: number, pageSize: number, moverId: string) {
+    const skip = (page - 1) * pageSize;
+    const whereClause = {
+      moverId,
+      quoteMatch: {
+        isNot: null,
+      },
+    };
+
+    const [list, totalCount] = await Promise.all([
+      this.prismaClient.moverQuote.findMany({
+        skip,
+        take: pageSize,
+        orderBy: {
+          createdAt: 'desc',
+        },
+        where: whereClause,
+        include: {
+          quoteMatch: {
+            select: {
+              id: true,
+            },
+          },
+          quoteRequest: {
+            select: {
+              moveType: true,
+              moveDate: true,
+              createdAt: true,
+              ...this.CUSTOMER_INCLUDE_CLAUSE,
+              quoteRequestAddresses: true,
+            },
+          },
+        },
+      }),
+      this.prismaClient.moverQuote.count({
+        where: whereClause,
+      }),
+    ]);
+
+    return {
+      list,
+      totalCount,
+      page,
+      pageSize,
+      totalPages: Math.ceil(totalCount / pageSize),
+    };
   }
 }

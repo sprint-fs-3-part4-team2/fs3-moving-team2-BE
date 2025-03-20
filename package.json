@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "moving service backend",
   "scripts": {
-    "test": "jest",
+    "test": "dotenv -e .env.test jest --runInBand",
     "start": "tsc-alias && node ./dist/app.js",
     "start:dev": "nodemon --exec ts-node src/app.ts",
     "build": "npm install && tsc",
@@ -14,7 +14,9 @@
     "lint:strict": "eslint 'src/**/*.{ts,tsx}' --config .eslintrc-strict.json",
     "format": "prettier --check 'src/**/*.{ts,tsx,js,jsx,json,css,scss,md}'",
     "format:fix": "prettier --write 'src/**/*.{ts,tsx,js,jsx,json,css,scss,md}'",
-    "prepare": "husky"
+    "prepare": "husky",
+    "seedtsc": "tsc --resolveJsonModule --esModuleInterop ./src/mocks/**/*.ts --outDir ./dist/mocks",
+    "seed": "tsc && node ./dist/mocks/seed.js"
   },
   "engines": {
     "node": ">=20",

@@ -1,0 +1,104 @@
+[
+  {
+    "resion": "SEOUL",
+    "sido": "서울특별시",
+    "sigungu": "강남구",
+    "street": "테헤란로"
+  },
+  {
+    "resion": "BUSAN",
+    "sido": "부산광역시",
+    "sigungu": "해운대구",
+    "street": "광안리"
+  },
+  {
+    "resion": "DAEGU",
+    "sido": "대구광역시",
+    "sigungu": "수성구",
+    "street": "동대구로"
+  },
+  {
+    "resion": "INCHEON",
+    "sido": "인천광역시",
+    "sigungu": "연수구",
+    "street": "인천대로"
+  },
+  {
+    "resion": "GWANGJU",
+    "sido": "광주광역시",
+    "sigungu": "동구",
+    "street": "광주로"
+  },
+  {
+    "resion": "DAEJEON",
+    "sido": "대전광역시",
+    "sigungu": "유성구",
+    "street": "대전로"
+  },
+  {
+    "resion": "ULSAN",
+    "sido": "울산광역시",
+    "sigungu": "남구",
+    "street": "울산로"
+  },
+  {
+    "resion": "SEJONG",
+    "sido": "세종특별자치시",
+    "sigungu": "조치원읍",
+    "street": "세종대로"
+  },
+  {
+    "resion": "GYEONGGI",
+    "sido": "경기도",
+    "sigungu": "수원시",
+    "street": "영통로"
+  },
+  {
+    "resion": "GANGWON",
+    "sido": "강원도",
+    "sigungu": "춘천시",
+    "street": "춘천로"
+  },
+  {
+    "resion": "CHUNGBUK",
+    "sido": "충청북도",
+    "sigungu": "청주시",
+    "street": "상당로"
+  },
+  {
+    "resion": "CHUNGNAM",
+    "sido": "충청남도",
+    "sigungu": "천안시",
+    "street": "명성로"
+  },
+  {
+    "resion": "JEONBUK",
+    "sido": "전라북도",
+    "sigungu": "전주시",
+    "street": "완산로"
+  },
+  {
+    "resion": "JEONNAM",
+    "sido": "전라남도",
+    "sigungu": "목포시",
+    "street": "해남로"
+  },
+  {
+    "resion": "GYEONGBUK",
+    "sido": "경상북도",
+    "sigungu": "포항시",
+    "street": "구룡포로"
+  },
+  {
+    "resion": "GYEONGNAM",
+    "sido": "경상남도",
+    "sigungu": "창원시",
+    "street": "의창로"
+  },
+  {
+    "resion": "JEJU",
+    "sido": "제주특별자치도",
+    "sigungu": "제주시",
+    "street": "용담로"
+  }
+]

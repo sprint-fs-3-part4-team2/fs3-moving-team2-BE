@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import * as reviewService from '../service/reviewService';
+import * as completedService from '../service/completedService'; // 이 부분 수정했습니다 확인 부탁드려요
 
 export async function getPendingReviews(req: Request, res: Response) {
   try {

@@ -1,0 +1,32 @@
+[
+  {
+    "service_type": "SMALL_MOVE"
+  },
+  {
+    "service_type": "HOME_MOVE"
+  },
+  {
+    "service_type": "OFFICE_MOVE"
+  },
+  {
+    "service_type": "SMALL_MOVE"
+  },
+  {
+    "service_type": "HOME_MOVE"
+  },
+  {
+    "service_type": "OFFICE_MOVE"
+  },
+  {
+    "service_type": "SMALL_MOVE"
+  },
+  {
+    "service_type": "HOME_MOVE"
+  },
+  {
+    "service_type": "OFFICE_MOVE"
+  },
+  {
+    "service_type": "SMALL_MOVE"
+  }
+]
