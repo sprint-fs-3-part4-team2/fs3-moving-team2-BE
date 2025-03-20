@@ -11,8 +11,10 @@ const quotesRepository = new QuotesRepository(prismaClient);
 const quoteService = new QuotesService(quotesRepository);
 const quoteController = new QuotesController(quoteService);
 
-const { getQuoteByIdForCustomer } = quoteController;
+// 고정 경로를 먼저 선언
+router.route('/request').post(asyncRequestHandler(quoteController.createQuoteRequest));
 
-router.route('/:quoteId').get(asyncRequestHandler(getQuoteByIdForCustomer));
+// 가장 마지막에 파라미터 라우팅을 선언
+router.route('/:quoteId').get(asyncRequestHandler(quoteController.getQuoteByIdForCustomer));
 
 export default router;
