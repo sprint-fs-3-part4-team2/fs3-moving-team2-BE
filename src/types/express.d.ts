@@ -13,6 +13,7 @@ declare global {
       validatedQuery: ValidatedQuery;
       user?: {
         userId: string;
+        type: 'customer' | 'mover';
       };
     }
   }

@@ -22,6 +22,6 @@ router.route('/request').post(asyncRequestHandler(createQuoteRequest));
 router.route('/latest').get(asyncRequestHandler(getLatestQuoteForCustomer));
 router.route('/:quoteId/customer').get(asyncRequestHandler(getQuoteByIdForCustomer));
 router.route('/:quoteId/mover').get(asyncRequestHandler(getQuoteByIdForMover));
-router.route('/:moverId/matched').get(asyncRequestHandler(getQuotesListByMover));
+router.route('/:moverId/submitted').get(asyncRequestHandler(getQuotesListByMover));
 
 export default router;

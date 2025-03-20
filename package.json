@@ -23,7 +23,7 @@
     "npm": ">=10"
   },
   "prisma": {
-    "seed": "ts-node prisma/seed.ts",
+    "seed": "ts-node ./src/mocks/seed.ts",
     "generate": "prisma generate"
   },
   "lint-staged": {
