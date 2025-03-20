@@ -60,17 +60,17 @@ const createUser = async () => {
   try {
     await create(
       'user',
-      userMock.map(
-        (user): Prisma.UserCreateInput => ({
-          userType: user.user_type as UserType,
+      userMock.map((user, i: number): Prisma.UserCreateInput => {
+        return {
+          userType: i % 2 === 0 ? 'CUSTOMER' : 'MOVER',
           email: user.email,
           name: user.name,
           phoneNumber: user.phone_number,
           password: user.password,
           createdAt: new Date(user.created_at),
           updatedAt: new Date(user.updated_at),
-        }),
-      ),
+        };
+      }),
     );
   } catch (err) {
     errorMsg(`user mock 데이터 생성`, err);
@@ -196,13 +196,18 @@ const createQuoteRequest = async () => {
     await create(
       'quoteRequest',
       customer.map((val, i: number): Prisma.QuoteRequestCreateManyInput => {
-        const { moveType, fromRegion, toRegion, moveDate } = quotesRequestMock[i];
+        const qrmIndex = random(quotesRequestMock);
+        const { moveDate } = quotesRequestMock[qrmIndex];
         const { id } = val;
+        const region = Object.values(Region);
+        const regionIndex = random(region);
+        const serviceType = Object.values(ServiceType);
+        const serviceTypeIndex = random(serviceType);
         return {
           customerId: id,
-          moveType: moveType as ServiceType,
-          fromRegion: fromRegion as Region,
-          toRegion: toRegion as Region,
+          moveType: serviceType[serviceTypeIndex],
+          fromRegion: region[regionIndex],
+          toRegion: region[regionIndex + 1 >= region.length ? 0 : regionIndex + 1],
           moveDate: moveDate,
         };
       }),
@@ -220,7 +225,8 @@ const createMoverQuote = async () => {
     await create(
       'moverQuote',
       mover.map((val, i: number): Prisma.MoverQuoteCreateManyInput => {
-        const { price } = moverQuoteMock[i];
+        const mqmIndex = random(moverQuoteMock);
+        const { price } = moverQuoteMock[mqmIndex];
         const { id: quoteRequestId } = quoteRequest[i];
         const { id: moverId } = val;
         return {
@@ -242,11 +248,9 @@ const createQuoteMatch = async () => {
     await create(
       'quoteMatch',
       moverQuote.map((val, i): Prisma.QuoteMatchCreateManyInput => {
-        let isCompleted = false;
-        if (i < 3) isCompleted = true;
         return {
           moverQuoteId: val.id,
-          isCompleted,
+          isCompleted: i % 2 === 0 ? true : false,
         };
       }),
     );
