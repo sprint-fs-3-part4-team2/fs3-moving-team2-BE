@@ -17,4 +17,19 @@ export default class QuotesController {
 
     res.status(200).json(quote);
   };
+
+  getQuotesListByMover = async (req: Request, res: Response) => {
+    const moverId = req.params.moverId;
+    const { page, pageSize } = req.query;
+    const numberedPage = page !== undefined ? Number(page) : 1;
+    const numberedPageSize = pageSize !== undefined ? Number(pageSize) : 10;
+
+    const data = await this.quoteService.getQuotesListByMover(
+      numberedPage,
+      numberedPageSize,
+      moverId,
+    );
+
+    res.status(200).json(data);
+  };
 }

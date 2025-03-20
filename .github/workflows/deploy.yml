@@ -53,14 +53,17 @@ jobs:
           # 데이터베이스 연결 확인
           docker exec fs3-moving-team2-be-postgres-1-1 pg_isready -U postgres || exit 1
 
+      - name: Create .env.test file
+        run: |
+          echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/test_db_1" > .env.test
+          echo "DATABASE_URL_1=postgresql://postgres:postgres@localhost:5432/test_db_1" >> .env.test
+          echo "DATABASE_URL_2=postgresql://postgres:postgres@localhost:5433/test_db_2" >> .env.test
+          echo "DATABASE_URL_3=postgresql://postgres:postgres@localhost:5434/test_db_3" >> .env.test
+
       - name: Run prisma generate
         run: npx prisma generate
 
       - name: Run tests
-        env:
-          DATABASE_URL_1: postgresql://postgres:postgres@localhost:5432/test_db_1
-          DATABASE_URL_2: postgresql://postgres:postgres@localhost:5433/test_db_2
-          DATABASE_URL_3: postgresql://postgres:postgres@localhost:5434/test_db_3
         run: npm test
 
       - name: Stop Docker containers
