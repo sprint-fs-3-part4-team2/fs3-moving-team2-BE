@@ -9,6 +9,7 @@ import userRouter from './modules/users/routes';
 import reviewRouter from './modules/reviews/routes';
 import quotesRouter from './modules/quotes/routes';
 import { extractUserMiddleware } from './core/middleware/auth/extractUser';
+import notificationRouter from './modules/notification/routes';
 
 dotenv.config();
 
@@ -45,6 +46,7 @@ app.use('/upload', imageRouter);
 app.use('/users', userRouter);
 app.use('/reviews', reviewRouter);
 app.use('/quotes', quotesRouter);
+app.use('/notification', notificationRouter);
 
 // 서버 실행
 app.listen(port, () => {
