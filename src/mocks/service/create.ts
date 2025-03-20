@@ -282,14 +282,17 @@ const createMoverServiceResion = async () => {
   startMsg('moverServiceResion create');
   try {
     const mover = await moverFind({}, leanTime);
+    const regionArr = Object.values(Region);
+
     await create(
       'moverServiceRegion',
-      moverServiceRegionMock.map((val, i: number): Prisma.MoverServiceRegionCreateManyInput => {
-        const len = Object.values(Region).length;
-        const { region } = val;
+      Array.from({ length: mover.length * 3 }, (_, i) => ({
+        moverId: Math.floor(i / 3),
+      })).map((info, i): Prisma.MoverServiceRegionCreateManyInput => {
+        const { moverId } = info;
         return {
-          moverId: mover[Math.floor(i / len)].id,
-          region: region as Region,
+          moverId: mover[moverId].id,
+          region: regionArr[i % 3],
         };
       }),
     );

@@ -25,13 +25,3 @@ export async function submitReview(req: Request, res: Response) {
     res.status(500).json({ error: '리뷰 제출에 실패했습니다.' });
   }
 }
-
-export async function getSubmittedReviews(req: Request, res: Response) {
-  try {
-    const submittedReviews = await completedService.getSubmittedReviews(); // 이 부분 수정했습니다 확인 부탁드려요
-    res.status(200).json(submittedReviews);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: '제출된 리뷰 조회에 실패했습니다.' });
-  }
-}
