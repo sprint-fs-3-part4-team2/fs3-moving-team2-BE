@@ -4,7 +4,10 @@ export interface UserWithName {
   user: Pick<User, 'name'>;
 }
 
-export type QuoteRequestDto = Pick<QuoteRequest, 'moveType' | 'moveDate' | 'createdAt'> & {
+export type QuoteRequestDto = Pick<
+  QuoteRequest,
+  'customerId' | 'moveType' | 'moveDate' | 'createdAt'
+> & {
   quoteRequestAddresses: QuoteRequestAddress[];
 };
 
