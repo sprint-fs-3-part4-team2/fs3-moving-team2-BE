@@ -1,4 +1,4 @@
-import { QuoteRequestAddress, QuoteMatch } from '@prisma/client';
+import { QuoteRequestAddress } from '@prisma/client';
 import { QuoteForCustomerDto } from '../dto/quoteForCustomer.dto';
 import { MOVE_TYPE } from '@/constants/serviceType';
 import { QuoteForMoverDto } from '../dto/quoteForMover.dto';

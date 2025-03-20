@@ -40,7 +40,7 @@ describe('userRepository.userEdit', () => {
       data: {
         name: testInfo.data.name,
         password: testInfo.data.password,
-        phone_number: testInfo.data.phoneNumber,
+        phoneNumber: testInfo.data.phoneNumber,
       },
     });
     expect(result).toBe(true);
