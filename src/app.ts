@@ -10,6 +10,7 @@ import reviewRouter from './modules/reviews/routes';
 import quotesRouter from './modules/quotes/routes';
 import { extractUserMiddleware } from './core/middleware/auth/extractUser';
 import favoriteRouter from './modules/favorites/routes';
+import authRouter from './modules/auth/routes';
 
 dotenv.config();
 
@@ -47,6 +48,7 @@ app.use('/users', userRouter);
 app.use('/reviews', reviewRouter);
 app.use('/quotes', quotesRouter);
 app.use('/favorites', favoriteRouter);
+app.use('/auth', authRouter);
 
 // 서버 실행
 app.listen(port, () => {

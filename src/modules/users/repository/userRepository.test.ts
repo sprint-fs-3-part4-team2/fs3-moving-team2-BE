@@ -13,7 +13,7 @@ describe('userRepository.userEdit', () => {
   let repository: userRepository;
 
   beforeEach(() => {
-    const mockUser: Request['user'] = { userId: '123' };
+    const mockUser: Request['user'] = { userId: '123', type: 'mover' };
     repository = new userRepository(mockUser);
   });
 
