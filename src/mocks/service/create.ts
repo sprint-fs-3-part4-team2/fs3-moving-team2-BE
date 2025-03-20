@@ -248,11 +248,9 @@ const createQuoteMatch = async () => {
     await create(
       'quoteMatch',
       moverQuote.map((val, i): Prisma.QuoteMatchCreateManyInput => {
-        let isCompleted = false;
-        if (i < 3) isCompleted = true;
         return {
           moverQuoteId: val.id,
-          isCompleted,
+          isCompleted: i % 2 === 0 ? true : false,
         };
       }),
     );
