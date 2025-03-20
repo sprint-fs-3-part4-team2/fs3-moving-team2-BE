@@ -13,7 +13,7 @@ describe('userRepository.userEdit', () => {
   let repository: userRepository;
 
   beforeEach(() => {
-    const mockUser: Request['user'] = { userId: '123' };
+    const mockUser: Request['user'] = { userId: '123', type: 'mover' };
     repository = new userRepository(mockUser);
   });
 
@@ -40,7 +40,7 @@ describe('userRepository.userEdit', () => {
       data: {
         name: testInfo.data.name,
         password: testInfo.data.password,
-        phone_number: testInfo.data.phoneNumber,
+        phoneNumber: testInfo.data.phoneNumber,
       },
     });
     expect(result).toBe(true);
