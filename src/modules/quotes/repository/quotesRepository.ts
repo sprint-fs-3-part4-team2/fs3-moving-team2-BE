@@ -117,9 +117,16 @@ export default class QuotesRepository {
     const skip = (page - 1) * pageSize;
     const whereClause = {
       moverId,
-      quoteMatch: {
-        isNot: null,
-      },
+      OR: [
+        {
+          targetedQuoteRequest: {
+            targetedQuoteRejection: null,
+          },
+        },
+        {
+          targetedQuoteRequest: null,
+        },
+      ],
     };
 
     const [list, totalCount] = await Promise.all([

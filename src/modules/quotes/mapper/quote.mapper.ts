@@ -40,7 +40,7 @@ export default class QuoteMapper {
         departure: addresses.departure,
         moveType: MOVE_TYPE[quote.quoteRequest.moveType],
       },
-      customRequest: Boolean(quote.targetedQuoteRequestId),
+      isCustomRequest: Boolean(quote.targetedQuoteRequestId),
       matched: Boolean(quote.quoteMatch),
     };
   }
