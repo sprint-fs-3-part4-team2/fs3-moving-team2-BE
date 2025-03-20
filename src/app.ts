@@ -9,12 +9,14 @@ import userRouter from './modules/users/routes';
 import reviewRouter from './modules/reviews/routes';
 import quotesRouter from './modules/quotes/routes';
 import { extractUserMiddleware } from './core/middleware/auth/extractUser';
+import favoriteRouter from './modules/favorites/routes';
+import authRouter from './modules/auth/routes';
 import profileRouter from './modules/profile/routes';
 
 dotenv.config();
 
 // 환경 변수 설정
-const port = process.env.PORT || 8000;
+const port = process.env.PORT || 8080;
 const allowedOrigins: string[] = [
   process.env.DEPLOYED_URL ?? '',
   process.env.LOCALHOST_URL ?? '',
@@ -34,7 +36,7 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(extractUserMiddleware);
 app.use(express.urlencoded({ extended: true })); // 필요한거야?  // body-parser 대체
-app.use('/api', swaggerUi.serve, swaggerUi.setup(swaggerSpec)); // swagger 설정
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec)); // swagger 설정
 
 // 기본 라우터 설정
 app.get('/', (req: Request, res: Response) => {
@@ -46,6 +48,8 @@ app.use('/upload', imageRouter);
 app.use('/users', userRouter);
 app.use('/reviews', reviewRouter);
 app.use('/quotes', quotesRouter);
+app.use('/favorites', favoriteRouter);
+app.use('/auth', authRouter);
 app.use('/profile', profileRouter);
 
 // 서버 실행

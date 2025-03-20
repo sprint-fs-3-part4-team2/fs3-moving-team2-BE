@@ -10,10 +10,12 @@ const router = express.Router();
 const quotesRepository = new QuotesRepository(prismaClient);
 const quoteService = new QuotesService(quotesRepository);
 const quoteController = new QuotesController(quoteService);
+const { getQuoteByIdForCustomer, getQuoteByIdForMover, getQuotesListByMover, createQuoteRequest } =
+  quoteController;
 
-const { getQuoteByIdForCustomer, getQuoteByIdForMover } = quoteController;
-
+router.route('/request').post(asyncRequestHandler(createQuoteRequest));
 router.route('/:quoteId/customer').get(asyncRequestHandler(getQuoteByIdForCustomer));
 router.route('/:quoteId/mover').get(asyncRequestHandler(getQuoteByIdForMover));
+router.route('/:moverId/submitted').get(asyncRequestHandler(getQuotesListByMover));
 
 export default router;
