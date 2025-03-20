@@ -27,8 +27,8 @@ export async function submitReview(req: Request, res: Response) {
 
 export async function getSubmittedReviews(req: Request, res: Response) {
   try {
-    const submittedReviews = await reviewService.getSubmittedReviews();
-    res.status(200).json(submittedReviews);
+    // const submittedReviews = await reviewService.getSubmittedReviews();
+    // res.status(200).json(submittedReviews);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: '제출된 리뷰 조회에 실패했습니다.' });
