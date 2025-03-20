@@ -16,7 +16,7 @@
     "format:fix": "prettier --write 'src/**/*.{ts,tsx,js,jsx,json,css,scss,md}'",
     "prepare": "husky",
     "seedtsc": "tsc --resolveJsonModule --esModuleInterop ./src/mocks/**/*.ts --outDir ./dist/mocks",
-    "seed": "npm run seedtsc && node ./dist/mocks/seed.js"
+    "seed": "tsc && node ./dist/mocks/seed.js"
   },
   "engines": {
     "node": ">=20",
