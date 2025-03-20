@@ -16,6 +16,6 @@ const { getQuoteByIdForCustomer, getQuoteByIdForMover, getQuotesListByMover, cre
 router.route('/request').post(asyncRequestHandler(createQuoteRequest));
 router.route('/:quoteId/customer').get(asyncRequestHandler(getQuoteByIdForCustomer));
 router.route('/:quoteId/mover').get(asyncRequestHandler(getQuoteByIdForMover));
-router.route('/:moverId/submitted').get(asyncRequestHandler(getQuotesListByMover));
+router.route('/submitted').get(asyncRequestHandler(getQuotesListByMover));
 
 export default router;
