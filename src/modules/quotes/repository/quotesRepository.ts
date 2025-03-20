@@ -48,6 +48,7 @@ export default class QuotesRepository {
         },
         quoteRequest: {
           select: {
+            customerId: true,
             moveType: true,
             moveDate: true,
             createdAt: true,
@@ -102,6 +103,7 @@ export default class QuotesRepository {
         },
         quoteRequest: {
           select: {
+            customerId: true,
             moveType: true,
             moveDate: true,
             createdAt: true,
@@ -147,6 +149,7 @@ export default class QuotesRepository {
           },
           quoteRequest: {
             select: {
+              customerId: true,
               moveType: true,
               moveDate: true,
               createdAt: true,
