@@ -103,4 +103,28 @@ export default class QuotesService {
 
     return { message: '견적 요청이 성공적으로 생성되었습니다.' };
   }
+
+  async getLatestQuoteForCustomer(customerId: string) {
+    const quote = await this.quotesRepository.getLatestQuoteRequestByCustomer(customerId);
+
+    if (!quote) throw new NotFoundException(EXCEPTION_MESSAGES.quoteNotFound);
+    const latestStatus = quote.quoteStatusHistories[0];
+
+    // 견적 요청 상태가 견적 요청, 견적 제출, 견적 확정 중 하나이면 true를 반환
+    const activeStatuses = ['QUOTE_REQUESTED', 'MOVER_SUBMITTED', 'QUOTE_CONFIRMED'];
+    const isRequested = activeStatuses.includes(latestStatus.status);
+
+    return {
+      isRequested,
+      quote: {
+        createdAt: quote.createdAt,
+        moveType: quote.moveType,
+        moveDate: quote.moveDate,
+        moveFrom: quote.quoteRequestAddresses.find((address) => address.type === 'DEPARTURE')
+          ?.fullAddress,
+        moveTo: quote.quoteRequestAddresses.find((address) => address.type === 'ARRIVAL')
+          ?.fullAddress,
+      },
+    };
+  }
 }
