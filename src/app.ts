@@ -14,7 +14,7 @@ import favoriteRouter from './modules/favorites/routes';
 dotenv.config();
 
 // 환경 변수 설정
-const port = process.env.PORT || 8000;
+const port = process.env.PORT || 8080;
 const allowedOrigins: string[] = [
   process.env.DEPLOYED_URL ?? '',
   process.env.LOCALHOST_URL ?? '',
@@ -34,7 +34,7 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(extractUserMiddleware);
 app.use(express.urlencoded({ extended: true })); // 필요한거야?  // body-parser 대체
-app.use('/api', swaggerUi.serve, swaggerUi.setup(swaggerSpec)); // swagger 설정
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec)); // swagger 설정
 
 // 기본 라우터 설정
 app.get('/', (req: Request, res: Response) => {
