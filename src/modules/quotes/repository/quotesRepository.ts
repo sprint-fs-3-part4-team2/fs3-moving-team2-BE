@@ -180,4 +180,23 @@ export default class QuotesRepository {
       totalPages: Math.ceil(totalCount / pageSize),
     };
   }
+
+  async getLatestQuoteRequestByCustomer(customerId: string) {
+    return await this.prismaClient.quoteRequest.findFirst({
+      where: {
+        customerId,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      include: {
+        quoteRequestAddresses: true,
+        quoteStatusHistories: {
+          orderBy: {
+            createdAt: 'desc',
+          },
+        },
+      },
+    });
+  }
 }
