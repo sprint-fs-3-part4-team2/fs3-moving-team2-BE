@@ -49,6 +49,7 @@ export default class QuoteMapper {
     const addresses = this.extractAddresses(quote.quoteRequest.quoteRequestAddresses);
 
     return {
+      id: quote.id,
       price: quote.price,
       customerName: quote?.quoteRequest.customer.user.name,
       request: {

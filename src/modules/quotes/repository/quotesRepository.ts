@@ -34,26 +34,6 @@ export default class QuotesRepository {
     },
   };
 
-  //   private makeQuoteClause(includeCustomer: boolean) {
-  //     const quoteRequestInclude: any = {
-  //       quoteRequestAddress: true,
-  //       quoteStatusHistory: true,
-  //     };
-
-  //     if (includeCustomer) quoteRequestInclude.customer = this.CUSTOMER_INCLUDE_CLAUSE;
-
-  //     return {
-  //       quoteMatch: {
-  //         select: {
-  //           id: true,
-  //         },
-  //       },
-  //       quoteRequest: {
-  //         include: quoteRequestInclude,
-  //       },
-  //     };
-  //   }
-
   async getQuoteForCustomer(quoteId: string) {
     return await this.prismaClient.moverQuote.findUnique({
       where: {
@@ -147,7 +127,9 @@ export default class QuotesRepository {
         skip,
         take: pageSize,
         orderBy: {
-          createdAt: 'desc',
+          quoteRequest: {
+            moveDate: 'desc',
+          },
         },
         where: whereClause,
         include: {
