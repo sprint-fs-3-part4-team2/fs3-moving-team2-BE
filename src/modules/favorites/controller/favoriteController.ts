@@ -40,3 +40,5 @@ export async function removeFavorite(req: Request, res: Response) {
     res.status(500).json({ error: '찜하기 취소 실패' });
   }
 }
+
+//test
