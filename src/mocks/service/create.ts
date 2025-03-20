@@ -6,9 +6,10 @@ import {
   MoverQuote,
   TargetedQuoteRequest,
   QuoteMatch,
+  Region,
+  ServiceType,
 } from '@prisma/client';
 import { enArea } from '../types/resion.type';
-import { Region, ServiceType, UserType } from '@prisma/client';
 import { customerFind, find, moverFind, userCustomerFind, userMoverFind } from './find';
 import { random } from '../lib/lib';
 // mock data
@@ -20,12 +21,12 @@ import customerServiceMock from '../data/customer/customerService.json';
 import quotesRequestMock from '../data/quote/quoteRequest.json';
 import moverQuoteMock from '../data/quote/moverQuote.json';
 import moverServiceMock from '../data/mover/moverService.json';
-import moverServiceRegionMock from '../data/mover/moverServiceRegion.json';
 import quoteRequestAddressMock from '../data/quote/quoteRequestAddress.json';
 import quoteStatusHistoryMock from '../data/quote/quoteStatusHistory.json';
 import targetedQuoteRejectionMock from '../data/quote/targetedQuoteRejection.json';
 import reviewMock from '../data/Review.json';
 import { errorMsg, passMsg, startMsg } from '../lib/msg';
+import { update } from './update';
 
 const prismaClient = new PrismaClient();
 const leanTime = 10;
@@ -195,7 +196,7 @@ const createQuoteRequest = async () => {
     const customer = await customerFind({}, leanTime);
     await create(
       'quoteRequest',
-      customer.map((val, i: number): Prisma.QuoteRequestCreateManyInput => {
+      customer.map((val): Prisma.QuoteRequestCreateManyInput => {
         const qrmIndex = random(quotesRequestMock);
         const { moveDate } = quotesRequestMock[qrmIndex];
         const { id } = val;
@@ -229,6 +230,7 @@ const createMoverQuote = async () => {
         const { price } = moverQuoteMock[mqmIndex];
         const { id: quoteRequestId } = quoteRequest[i];
         const { id: moverId } = val;
+
         return {
           quoteRequestId: quoteRequestId,
           moverId,
@@ -343,7 +345,7 @@ const createQuoteStatusHistory = async () => {
 
     await create(
       'quoteStatusHistory',
-      quoteRequest.map((val, i: number): Prisma.QuoteStatusHistoryCreateManyInput => {
+      quoteRequest.map((val): Prisma.QuoteStatusHistoryCreateManyInput => {
         const index = random(quoteStatusHistoryMock);
         const { status } = quoteStatusHistoryMock[index];
         const { id: quoteRequestId } = val;
@@ -363,20 +365,38 @@ const createTargetedQuoteRequest = async () => {
   try {
     const mover = await moverFind({}, leanTime);
     const quoteRequest: QuoteRequest[] = await find('quoteRequest', {});
-
     await create(
       'targetedQuoteRequest',
-      quoteRequest.map((req, i: number): Prisma.TargetedQuoteRequestCreateManyInput => {
-        const { id: quoteRequestId } = req;
-        const { id: moverId } = mover[i];
-        return {
-          moverId,
-          quoteRequestId,
-        };
-      }),
+      Array.from({ length: quoteRequest.length / 2 }).map(
+        (_, i: number): Prisma.TargetedQuoteRequestCreateManyInput => {
+          const { id: quoteRequestId } = quoteRequest[i];
+          const { id: moverId } = mover[i];
+          return {
+            moverId,
+            quoteRequestId,
+          };
+        },
+      ),
     );
   } catch (err) {
     errorMsg(`targetedQuoteRequest mock 데이터 생성`, err);
+  } finally {
+    try {
+      const tqr: TargetedQuoteRequest[] = await find('targetedQuoteRequest', {});
+      await Promise.all(
+        tqr.map(async (v) => {
+          const { quoteRequestId, id } = v;
+          const args: Prisma.MoverQuoteUpdateManyArgs = {
+            where: { quoteRequestId },
+            data: { targetedQuoteRequestId: id },
+          };
+          await update('moverQuote', args);
+        }),
+      );
+      passMsg('moverQuote update', `Length ${tqr.length}`);
+    } catch (error) {
+      errorMsg('moverQuote update ', error);
+    }
   }
 };
 
@@ -386,15 +406,17 @@ const createTargetedQuoteReject = async () => {
     const tqr: TargetedQuoteRequest[] = await find('targetedQuoteRequest', {});
     await create(
       'targetedQuoteRejection',
-      tqr.map((req): Prisma.TargetedQuoteRejectionCreateManyInput => {
-        const ranIndex = random(targetedQuoteRejectionMock);
-        const { rejectionReason } = targetedQuoteRejectionMock[ranIndex];
-        const { id: targetedQuoteRequestId } = req;
-        return {
-          targetedQuoteRequestId,
-          rejectionReason,
-        };
-      }),
+      Array.from({ length: tqr.length / 2 }).map(
+        (_, i): Prisma.TargetedQuoteRejectionCreateManyInput => {
+          const ranIndex = random(targetedQuoteRejectionMock);
+          const { rejectionReason } = targetedQuoteRejectionMock[ranIndex];
+          const { id: targetedQuoteRequestId } = tqr[i];
+          return {
+            targetedQuoteRequestId,
+            rejectionReason,
+          };
+        },
+      ),
     );
   } catch (err) {
     errorMsg(`targetedQuoteRejection mock 데이터 생성`, err);

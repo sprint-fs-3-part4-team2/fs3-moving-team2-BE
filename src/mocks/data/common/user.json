@@ -298,5 +298,305 @@
     "created_at": "2025-03-17T12:25:00Z",
     "updated_at": "2025-03-17T14:25:00Z",
     "notifications": []
+  },
+  {
+    "user_type": "CUSTOMER",
+    "email": "user31@example.com",
+    "name": "정은지",
+    "phone_number": "010-1234-5708",
+    "password": "hashedpassword31",
+    "created_at": "2025-03-17T12:25:00Z",
+    "updated_at": "2025-03-17T14:25:00Z",
+    "notifications": []
+  },
+  {
+    "user_type": "CUSTOMER",
+    "email": "user32@example.com",
+    "name": "김민수",
+    "phone_number": "010-1234-5709",
+    "password": "hashedpassword32",
+    "created_at": "2025-03-17T12:26:00Z",
+    "updated_at": "2025-03-17T14:26:00Z",
+    "notifications": []
+  },
+  {
+    "user_type": "CUSTOMER",
+    "email": "user33@example.com",
+    "name": "박지훈",
+    "phone_number": "010-1234-5710",
+    "password": "hashedpassword33",
+    "created_at": "2025-03-17T12:27:00Z",
+    "updated_at": "2025-03-17T14:27:00Z",
+    "notifications": []
+  },
+  {
+    "user_type": "CUSTOMER",
+    "email": "user34@example.com",
+    "name": "이서연",
+    "phone_number": "010-1234-5711",
+    "password": "hashedpassword34",
+    "created_at": "2025-03-17T12:28:00Z",
+    "updated_at": "2025-03-17T14:28:00Z",
+    "notifications": []
+  },
+  {
+    "user_type": "CUSTOMER",
+    "email": "user35@example.com",
+    "name": "최영준",
+    "phone_number": "010-1234-5712",
+    "password": "hashedpassword35",
+    "created_at": "2025-03-17T12:29:00Z",
+    "updated_at": "2025-03-17T14:29:00Z",
+    "notifications": []
+  },
+  {
+    "user_type": "CUSTOMER",
+    "email": "user36@example.com",
+    "name": "윤다은",
+    "phone_number": "010-1234-5713",
+    "password": "hashedpassword36",
+    "created_at": "2025-03-17T12:30:00Z",
+    "updated_at": "2025-03-17T14:30:00Z",
+    "notifications": []
+  },
+  {
+    "user_type": "CUSTOMER",
+    "email": "user37@example.com",
+    "name": "서지우",
+    "phone_number": "010-1234-5714",
+    "password": "hashedpassword37",
+    "created_at": "2025-03-17T12:31:00Z",
+    "updated_at": "2025-03-17T14:31:00Z",
+    "notifications": []
+  },
+  {
+    "user_type": "CUSTOMER",
+    "email": "user38@example.com",
+    "name": "이민재",
+    "phone_number": "010-1234-5715",
+    "password": "hashedpassword38",
+    "created_at": "2025-03-17T12:32:00Z",
+    "updated_at": "2025-03-17T14:32:00Z",
+    "notifications": []
+  },
+  {
+    "user_type": "CUSTOMER",
+    "email": "user39@example.com",
+    "name": "정수빈",
+    "phone_number": "010-1234-5716",
+    "password": "hashedpassword39",
+    "created_at": "2025-03-17T12:33:00Z",
+    "updated_at": "2025-03-17T14:33:00Z",
+    "notifications": []
+  },
+  {
+    "user_type": "CUSTOMER",
+    "email": "user40@example.com",
+    "name": "김서연",
+    "phone_number": "010-1234-5717",
+    "password": "hashedpassword40",
+    "created_at": "2025-03-17T12:34:00Z",
+    "updated_at": "2025-03-17T14:34:00Z",
+    "notifications": []
+  },
+  {
+    "user_type": "CUSTOMER",
+    "email": "user41@example.com",
+    "name": "박민재",
+    "phone_number": "010-1234-5718",
+    "password": "hashedpassword41",
+    "created_at": "2025-03-17T12:35:00Z",
+    "updated_at": "2025-03-17T14:35:00Z",
+    "notifications": []
+  },
+  {
+    "user_type": "CUSTOMER",
+    "email": "user42@example.com",
+    "name": "송하윤",
+    "phone_number": "010-1234-5719",
+    "password": "hashedpassword42",
+    "created_at": "2025-03-17T12:36:00Z",
+    "updated_at": "2025-03-17T14:36:00Z",
+    "notifications": []
+  },
+  {
+    "user_type": "CUSTOMER",
+    "email": "user43@example.com",
+    "name": "오지훈",
+    "phone_number": "010-1234-5720",
+    "password": "hashedpassword43",
+    "created_at": "2025-03-17T12:37:00Z",
+    "updated_at": "2025-03-17T14:37:00Z",
+    "notifications": []
+  },
+  {
+    "user_type": "CUSTOMER",
+    "email": "user44@example.com",
+    "name": "강민정",
+    "phone_number": "010-1234-5721",
+    "password": "hashedpassword44",
+    "created_at": "2025-03-17T12:38:00Z",
+    "updated_at": "2025-03-17T14:38:00Z",
+    "notifications": []
+  },
+  {
+    "user_type": "CUSTOMER",
+    "email": "user45@example.com",
+    "name": "한서준",
+    "phone_number": "010-1234-5722",
+    "password": "hashedpassword45",
+    "created_at": "2025-03-17T12:39:00Z",
+    "updated_at": "2025-03-17T14:39:00Z",
+    "notifications": []
+  },
+  {
+    "user_type": "CUSTOMER",
+    "email": "user46@example.com",
+    "name": "홍예은",
+    "phone_number": "010-1234-5723",
+    "password": "hashedpassword46",
+    "created_at": "2025-03-17T12:40:00Z",
+    "updated_at": "2025-03-17T14:40:00Z",
+    "notifications": []
+  },
+  {
+    "user_type": "CUSTOMER",
+    "email": "user47@example.com",
+    "name": "윤지훈",
+    "phone_number": "010-1234-5724",
+    "password": "hashedpassword47",
+    "created_at": "2025-03-17T12:41:00Z",
+    "updated_at": "2025-03-17T14:41:00Z",
+    "notifications": []
+  },
+  {
+    "user_type": "CUSTOMER",
+    "email": "user48@example.com",
+    "name": "이예린",
+    "phone_number": "010-1234-5725",
+    "password": "hashedpassword48",
+    "created_at": "2025-03-17T12:42:00Z",
+    "updated_at": "2025-03-17T14:42:00Z",
+    "notifications": []
+  },
+  {
+    "user_type": "CUSTOMER",
+    "email": "user49@example.com",
+    "name": "최민서",
+    "phone_number": "010-1234-5726",
+    "password": "hashedpassword49",
+    "created_at": "2025-03-17T12:43:00Z",
+    "updated_at": "2025-03-17T14:43:00Z",
+    "notifications": []
+  },
+  {
+    "user_type": "CUSTOMER",
+    "email": "user50@example.com",
+    "name": "박서연",
+    "phone_number": "010-1234-5727",
+    "password": "hashedpassword50",
+    "created_at": "2025-03-17T12:44:00Z",
+    "updated_at": "2025-03-17T14:44:00Z",
+    "notifications": []
+  },
+  {
+    "user_type": "CUSTOMER",
+    "email": "user51@example.com",
+    "name": "김현수",
+    "phone_number": "010-1234-5728",
+    "password": "hashedpassword51",
+    "created_at": "2025-03-17T12:45:00Z",
+    "updated_at": "2025-03-17T14:45:00Z",
+    "notifications": []
+  },
+  {
+    "user_type": "CUSTOMER",
+    "email": "user52@example.com",
+    "name": "이준호",
+    "phone_number": "010-1234-5729",
+    "password": "hashedpassword52",
+    "created_at": "2025-03-17T12:46:00Z",
+    "updated_at": "2025-03-17T14:46:00Z",
+    "notifications": []
+  },
+  {
+    "user_type": "CUSTOMER",
+    "email": "user53@example.com",
+    "name": "정유리",
+    "phone_number": "010-1234-5730",
+    "password": "hashedpassword53",
+    "created_at": "2025-03-17T12:47:00Z",
+    "updated_at": "2025-03-17T14:47:00Z",
+    "notifications": []
+  },
+  {
+    "user_type": "CUSTOMER",
+    "email": "user54@example.com",
+    "name": "조민재",
+    "phone_number": "010-1234-5731",
+    "password": "hashedpassword54",
+    "created_at": "2025-03-17T12:48:00Z",
+    "updated_at": "2025-03-17T14:48:00Z",
+    "notifications": []
+  },
+  {
+    "user_type": "CUSTOMER",
+    "email": "user55@example.com",
+    "name": "서유진",
+    "phone_number": "010-1234-5732",
+    "password": "hashedpassword55",
+    "created_at": "2025-03-17T12:49:00Z",
+    "updated_at": "2025-03-17T14:49:00Z",
+    "notifications": []
+  },
+  {
+    "user_type": "CUSTOMER",
+    "email": "user56@example.com",
+    "name": "배민정",
+    "phone_number": "010-1234-5733",
+    "password": "hashedpassword56",
+    "created_at": "2025-03-17T12:50:00Z",
+    "updated_at": "2025-03-17T14:50:00Z",
+    "notifications": []
+  },
+  {
+    "user_type": "CUSTOMER",
+    "email": "user57@example.com",
+    "name": "홍지수",
+    "phone_number": "010-1234-5734",
+    "password": "hashedpassword57",
+    "created_at": "2025-03-17T12:51:00Z",
+    "updated_at": "2025-03-17T14:51:00Z",
+    "notifications": []
+  },
+  {
+    "user_type": "CUSTOMER",
+    "email": "user58@example.com",
+    "name": "김은서",
+    "phone_number": "010-1234-5735",
+    "password": "hashedpassword58",
+    "created_at": "2025-03-17T12:52:00Z",
+    "updated_at": "2025-03-17T14:52:00Z",
+    "notifications": []
+  },
+  {
+    "user_type": "CUSTOMER",
+    "email": "user59@example.com",
+    "name": "박상민",
+    "phone_number": "010-1234-5736",
+    "password": "hashedpassword59",
+    "created_at": "2025-03-17T12:53:00Z",
+    "updated_at": "2025-03-17T14:53:00Z",
+    "notifications": []
+  },
+  {
+    "user_type": "CUSTOMER",
+    "email": "user60@example.com",
+    "name": "이진아",
+    "phone_number": "010-1234-5737",
+    "password": "hashedpassword60",
+    "created_at": "2025-03-17T12:54:00Z",
+    "updated_at": "2025-03-17T14:54:00Z",
+    "notifications": []
   }
 ]
