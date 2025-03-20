@@ -8,7 +8,10 @@ class UserController {
   static async MoverBaiscInfoEdit(req: Request, res: Response) {
     const { email, currentPassword, newPassword, userType, phoneNumber, name }: EditBaiscInfoBody =
       req.body;
-    const service = new userService({ userId: req.user?.userId || '1234' });
+    const service = new userService({
+      userId: req.user?.userId || '1234',
+      type: req.user?.type || 'mover',
+    });
 
     if (userType !== 'MOVER') {
       res.status(403).json({
