@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
-import * as completedController from '../service/completedService';
+import * as completedService from '../service/completedService';
 
 export async function getSubmittedReviews(req: Request, res: Response) {
   try {
-    const submittedReviews = await completedController.getSubmittedReviews();
+    const submittedReviews = await completedService.getSubmittedReviews();
     res.status(200).json(submittedReviews);
   } catch (error) {
     console.error(error);
