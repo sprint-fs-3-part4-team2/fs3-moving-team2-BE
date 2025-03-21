@@ -12,15 +12,6 @@ export default class QuotesController {
     res.status(200).json(quote);
   };
 
-  createQuoteRequest = async (req: Request, res: Response) => {
-    // 고객인지 확인하는 코드 필요
-    // 데이터 유효성 검사 필요
-    const customerId = 'cm8h58x7b000uws8j7ivn6ihf';
-
-    const quoteRequest = await this.quoteService.createQuoteRequest(customerId, req.body);
-    res.status(201).json(quoteRequest);
-  };
-
   getQuoteByIdForMover = async (req: Request, res: Response) => {
     const moverId = req.user?.userId ?? '';
     const quoteId = req.params.quoteId;
@@ -42,12 +33,5 @@ export default class QuotesController {
     );
 
     res.status(200).json(data);
-  };
-
-  getLatestQuoteForCustomer = async (req: Request, res: Response) => {
-    const customerId = 'cm8h58x7b000uws8j7ivn6ihf';
-    const quote = await this.quoteService.getLatestQuoteForCustomer(customerId);
-
-    res.status(200).json(quote);
   };
 }
