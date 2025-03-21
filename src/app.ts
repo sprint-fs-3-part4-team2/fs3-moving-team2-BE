@@ -12,6 +12,7 @@ import quoteRequestRouter from './modules/quoteRequests/routes';
 import { extractUserMiddleware } from './core/middleware/auth/extractUser';
 import favoriteRouter from './modules/favorites/routes';
 import authRouter from './modules/auth/routes';
+import notificationRouter from './modules/notification/routes';
 
 dotenv.config();
 
@@ -51,6 +52,7 @@ app.use('/mover-quotes', moverQuotesRouter);
 app.use('/favorites', favoriteRouter);
 app.use('/auth', authRouter);
 app.use('/quote-requests', quoteRequestRouter);
+app.use('/notification', notificationRouter);
 
 // 서버 실행
 app.listen(port, () => {
