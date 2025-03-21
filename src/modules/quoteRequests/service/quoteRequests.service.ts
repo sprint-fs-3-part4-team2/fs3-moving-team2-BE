@@ -2,8 +2,8 @@ import { NotFoundException } from '@/core/errors';
 import QuoteRequestsRepository from '../repository/quoteRequests.repository';
 import { EXCEPTION_MESSAGES } from '@/constants/exceptionMessages';
 import { Region, ServiceType } from '@prisma/client';
-import QuoteMapper from '@/modules/moverQuotes/mapper/moverQuote.mapper';
 import { MOVE_TYPE_KOREAN } from '@/constants/serviceType';
+import QuoteRequestsMapper from '../mapper/quoteRequests.mapper';
 
 export default class QuoteRequestsService {
   constructor(private quoteRequestRepository: QuoteRequestsRepository) {}
@@ -111,11 +111,37 @@ export default class QuoteRequestsService {
     }
   }
 
-  async getAllQuoteRequests(page: number, pageSize: number) {
-    const data = await this.quoteRequestRepository.getAllQuoteRequests(page, pageSize);
+  async getAllQuoteRequests(
+    page: number,
+    pageSize: number,
+    searchQuery: string,
+    moveTypeQuery: string,
+    isServiceRegionMatchQuery: boolean,
+    isTargetedQuoteQuery: boolean,
+    sortByQuery: string,
+  ) {
+    const whereClause: any = {};
+
+    if (searchQuery) {
+      whereClause.customer = {
+        user: {
+          name: {
+            contains: searchQuery, // 검색어가 포함되는지 확인
+            mode: 'insensitive', // 대소문자 구분 없이 검색
+          },
+        },
+      };
+    }
+
+    const data = await this.quoteRequestRepository.getAllQuoteRequests(
+      page,
+      pageSize,
+      whereClause,
+      // sortBy = 'moveDate', moveDate를 기준으로 정렬 + requestDate를 기준으로 정렬
+    );
 
     return {
-      list: data.list.map((quote) => QuoteMapper.toQuoteForMoverListDto(quote)),
+      list: data.list.map((quote) => QuoteRequestsMapper.toQuoteForMoverListDto(quote)),
       totalCount: data.totalCount,
       page: data.page,
       pageSize: data.pageSize,
