@@ -2,6 +2,8 @@ import { NotFoundException } from '@/core/errors';
 import QuoteRequestsRepository from '../repository/quoteRequests.repository';
 import { EXCEPTION_MESSAGES } from '@/constants/exceptionMessages';
 import { Region, ServiceType } from '@prisma/client';
+import QuoteMapper from '@/modules/moverQuotes/mapper/moverQuote.mapper';
+import { MOVE_TYPE_KOREAN } from '@/constants/serviceType';
 
 export default class QuoteRequestsService {
   constructor(private quoteRequestRepository: QuoteRequestsRepository) {}
@@ -80,20 +82,44 @@ export default class QuoteRequestsService {
     const latestStatus = quote.quoteStatusHistories[0];
 
     // 견적 요청 상태가 견적 요청, 견적 제출, 견적 확정 중 하나이면 true를 반환
-    const activeStatuses = ['QUOTE_REQUESTED', 'MOVER_SUBMITTED', 'QUOTE_CONFIRMED'];
+
+    // 견적 확정하면 새로운 견적 요청을 할 수 있도록 구현됨 -> 확장시 수정 필요
+    const activeStatuses = ['QUOTE_REQUESTED', 'MOVER_SUBMITTED'];
+
+    // 견적 요청 상태가 이사 완료이면 새로운 견적 요청을 할 수 있도록 구현됨 -> 확장시 수정 필요
+    // const activeStatuses = ['QUOTE_REQUESTED', 'MOVER_SUBMITTED', 'QUOTE_CONFIRMED'];
     const isRequested = activeStatuses.includes(latestStatus.status);
 
+    if (isRequested) {
+      // active 상태일 때 필요한 정보 매핑
+      return {
+        isRequested: true,
+        quote: {
+          movingDate: quote.moveDate,
+          // 내부에 저장된 enum값(예: "HOME_MOVE")을 한글로 변환
+          movingType: MOVE_TYPE_KOREAN[quote.moveType],
+          requestedDate: quote.createdAt,
+          arrival: quote.quoteRequestAddresses.find((address) => address.type === 'ARRIVAL')
+            ?.fullAddress,
+          departure: quote.quoteRequestAddresses.find((address) => address.type === 'DEPARTURE')
+            ?.fullAddress,
+        },
+      };
+    } else {
+      // active 상태가 아니라면
+      return { isRequested: false };
+    }
+  }
+
+  async getAllQuoteRequests(page: number, pageSize: number) {
+    const data = await this.quoteRequestRepository.getAllQuoteRequests(page, pageSize);
+
     return {
-      isRequested,
-      quote: {
-        createdAt: quote.createdAt,
-        moveType: quote.moveType,
-        moveDate: quote.moveDate,
-        moveFrom: quote.quoteRequestAddresses.find((address) => address.type === 'DEPARTURE')
-          ?.fullAddress,
-        moveTo: quote.quoteRequestAddresses.find((address) => address.type === 'ARRIVAL')
-          ?.fullAddress,
-      },
+      list: data.list.map((quote) => QuoteMapper.toQuoteForMoverListDto(quote)),
+      totalCount: data.totalCount,
+      page: data.page,
+      pageSize: data.pageSize,
+      totalPages: data.totalPages,
     };
   }
 }

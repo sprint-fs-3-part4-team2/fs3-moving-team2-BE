@@ -19,4 +19,17 @@ export default class QuoteRequestsController {
 
     res.status(200).json(quote);
   };
+
+  getAllQuoteRequests = async (req: Request, res: Response) => {
+    // query 파라미터로부터 페이지와 페이지 크기 추출, 기본값 설정
+    const { page, pageSize } = req.query;
+    const numberedPage = page !== undefined ? Number(page) : 1;
+    const numberedPageSize = pageSize !== undefined ? Number(pageSize) : 10;
+
+    const data = await this.quoteRequestsService.getAllQuoteRequests(
+      numberedPage,
+      numberedPageSize,
+    );
+    res.status(200).json(data);
+  };
 }
