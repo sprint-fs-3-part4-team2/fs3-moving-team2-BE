@@ -9,8 +9,8 @@ const router = express.Router();
 
 const quoteRequestsRepository = new QuoteRequestsRepository(prismaClient);
 const quoteRequestsService = new QuoteRequestsService(quoteRequestsRepository);
-const quoteReqeustsController = new QuoteRequestsController(quoteRequestsService);
-const { getLatestQuoteForCustomer, createQuoteRequest } = quoteReqeustsController;
+const quoteRequestsController = new QuoteRequestsController(quoteRequestsService);
+const { getLatestQuoteForCustomer, createQuoteRequest } = quoteRequestsController;
 
 router.route('/').post(asyncRequestHandler(createQuoteRequest));
 router.route('/latest').get(asyncRequestHandler(getLatestQuoteForCustomer));
