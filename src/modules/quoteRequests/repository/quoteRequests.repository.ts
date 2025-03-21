@@ -65,7 +65,7 @@ export default class QuoteRequestsRepository {
     });
   }
 
-  async getAllQuoteRequests(page: number, pageSize: number) {
+  async getAllQuoteRequests(page: number, pageSize: number, whereClause?: any, sortBy?: any) {
     const skip = (page - 1) * pageSize;
     const totalCount = await this.prismaClient.quoteRequest.count();
     const list = await this.prismaClient.quoteRequest.findMany({
@@ -74,6 +74,7 @@ export default class QuoteRequestsRepository {
       orderBy: {
         createdAt: 'desc',
       },
+      where: whereClause,
       include: {
         quoteRequestAddresses: true,
         quoteStatusHistories: {

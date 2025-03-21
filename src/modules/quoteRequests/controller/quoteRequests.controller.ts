@@ -22,13 +22,28 @@ export default class QuoteRequestsController {
 
   getAllQuoteRequests = async (req: Request, res: Response) => {
     // query 파라미터로부터 페이지와 페이지 크기 추출, 기본값 설정
-    const { page, pageSize } = req.query;
+    const { page, pageSize, search, moveType, isServiceRegionMatch, isTargetedQuote, sortBy } =
+      req.query;
+
     const numberedPage = page !== undefined ? Number(page) : 1;
     const numberedPageSize = pageSize !== undefined ? Number(pageSize) : 10;
+    const searchQuery = search !== undefined ? String(search) : '';
+    const moveTypeQuery = moveType !== undefined ? String(moveType) : '';
+    const isServiceRegionMatchQuery =
+      isServiceRegionMatch !== undefined ? Boolean(isServiceRegionMatch) : false;
+    const isTargetedQuoteQuery = isTargetedQuote !== undefined ? Boolean(isTargetedQuote) : false;
+    const sortByQuery = sortBy !== undefined ? String(sortBy) : '';
+
+    console.log('query', req.query);
 
     const data = await this.quoteRequestsService.getAllQuoteRequests(
       numberedPage,
       numberedPageSize,
+      searchQuery,
+      moveTypeQuery,
+      isServiceRegionMatchQuery,
+      isTargetedQuoteQuery,
+      sortByQuery,
     );
     res.status(200).json(data);
   };
