@@ -20,8 +20,8 @@ export default class AuthController {
   };
 
   fakeSignIn = async (req: Request, res: Response) => {
-    const { userId } = req.params;
-    const type = req.params.type as 'customer' | 'mover';
+    const userId = req.query.userId as string;
+    const type = req.query.type as 'customer' | 'mover';
 
     const tokens = this.authService.fakeSignIn(userId, type);
     this.setAccessToken(res, tokens.accessToken);

@@ -1,4 +1,4 @@
-import { PrismaClient, ServiceType, Region } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 
 export default class QuotesRepository {
   constructor(private prismaClient: PrismaClient) {}
@@ -48,43 +48,13 @@ export default class QuotesRepository {
         },
         quoteRequest: {
           select: {
+            customerId: true,
             moveType: true,
             moveDate: true,
             createdAt: true,
             quoteRequestAddresses: true,
           },
         },
-      },
-    });
-  }
-
-  async createQuoteRequest(data: {
-    customerId: string;
-    moveType: ServiceType;
-    fromRegion: Region;
-    toRegion: Region;
-    moveDate: Date;
-    quoteRequestAddresses: {
-      create: Array<{
-        type: 'DEPARTURE' | 'ARRIVAL';
-        sido: string;
-        sigungu: string;
-        street: string;
-        fullAddress: string;
-      }>;
-    };
-  }) {
-    return await this.prismaClient.quoteRequest.create({
-      data: {
-        ...data,
-        quoteStatusHistories: {
-          // 견적 요청 상태 기록도 함께 생성
-          create: [{ status: 'QUOTE_REQUESTED' }],
-        },
-      },
-      include: {
-        quoteRequestAddresses: true,
-        quoteStatusHistories: true,
       },
     });
   }
@@ -102,6 +72,7 @@ export default class QuotesRepository {
         },
         quoteRequest: {
           select: {
+            customerId: true,
             moveType: true,
             moveDate: true,
             createdAt: true,
@@ -147,6 +118,7 @@ export default class QuotesRepository {
           },
           quoteRequest: {
             select: {
+              customerId: true,
               moveType: true,
               moveDate: true,
               createdAt: true,
@@ -168,24 +140,5 @@ export default class QuotesRepository {
       pageSize,
       totalPages: Math.ceil(totalCount / pageSize),
     };
-  }
-
-  async getLatestQuoteRequestByCustomer(customerId: string) {
-    return await this.prismaClient.quoteRequest.findFirst({
-      where: {
-        customerId,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-      include: {
-        quoteRequestAddresses: true,
-        quoteStatusHistories: {
-          orderBy: {
-            createdAt: 'desc',
-          },
-        },
-      },
-    });
   }
 }
