@@ -11,25 +11,31 @@ type ModelWithFindMany = {
     : never;
 }[keyof PrismaClient];
 
-type FindManyFn = (args?: { where?: any }) => Promise<any>;
+type FindArgs = {
+  where?: any;
+  include?: any;
+};
+
+type FindManyFn = (args?: FindArgs) => Promise<any>;
 
 const find = <T extends ModelWithFindMany>(
   model: T,
-  args?: { where?: any },
+  args?: FindArgs,
+  noMsg?: boolean,
   leanTime?: number,
 ): Promise<any[]> => {
   return new Promise((resolve, reject) => {
     setTimeout(async () => {
       try {
         const delegate = prismaClient[model] as unknown as { findMany: FindManyFn };
-        const data = await delegate.findMany(args);
-        if (data) passMsg(`${model} 테이블 조회 //`, `조회 Length: ${data.length}`);
-        resolve(data);
+        const result = await delegate.findMany(args);
+        if (result && !noMsg) passMsg(`${model} 테이블 조회 //`, `조회 Length: ${result.length}`);
+        resolve(result);
       } catch (err) {
         errorMsg(`${model} (find)`, err);
         reject(err);
       }
-    }, leanTime ?? 50);
+    }, leanTime ?? 10);
   });
 };
 
@@ -41,6 +47,8 @@ const userMoverFind = async () => {
       },
     });
     if (result.length === 0) throw errorMsg(`user mover 없음`, {});
+    passMsg(`user(mover) 테이블 조회`, `조회 Length: ${result.length}`);
+
     return result;
   } catch (err) {
     throw errorMsg(`user mover 찾기`, err);
@@ -55,6 +63,7 @@ const userCustomerFind = async () => {
       },
     });
     if (result.length === 0) throw console.error(`❌ user customer 없음 `);
+    passMsg(`user(customer) 테이블 조회`, `조회 Length: ${result.length}`);
     return result;
   } catch (err) {
     throw errorMsg(`user customer 찾기`, err);
@@ -66,21 +75,19 @@ const customerFind = async (
   leanTime: number,
 ): Promise<CustomerFind[]> => {
   return new Promise((resolve, reject) => {
-    setTimeout(
-      async () => {
-        try {
-          const result = await prismaClient.customer.findMany({ where });
-          if (result.length === 0) {
-            return reject(new Error('❌ customer 없음'));
-          }
-          resolve(result);
-        } catch (err) {
-          errorMsg(`customerFind 찾기`, err);
-          reject(err);
+    setTimeout(async () => {
+      try {
+        const result = await prismaClient.customer.findMany({ where });
+        if (result.length === 0) {
+          return reject(new Error('❌ customer 없음'));
         }
-      },
-      leanTime ?? 0 + 10,
-    );
+        passMsg(`customer 테이블 조회`, `조회 Length: ${result.length}`);
+        resolve(result);
+      } catch (err) {
+        errorMsg(`customerFind 찾기`, err);
+        reject(err);
+      }
+    }, leanTime ?? 10);
   });
 };
 
@@ -89,21 +96,19 @@ const moverFind = async (
   leanTime: number,
 ): Promise<MoverFind[]> => {
   return new Promise((resolve, reject) => {
-    setTimeout(
-      async () => {
-        try {
-          const result = await prismaClient.mover.findMany({ where });
-          if (result.length === 0) {
-            return reject(new Error('❌ customer 없음'));
-          }
-          resolve(result);
-        } catch (err) {
-          errorMsg(`moverFind 찾기`, err);
-          reject(err);
+    setTimeout(async () => {
+      try {
+        const result = await prismaClient.mover.findMany({ where });
+        if (result.length === 0) {
+          return reject(new Error('❌ customer 없음'));
         }
-      },
-      leanTime ?? 0 + 10,
-    );
+        passMsg(`mover 테이블 조회`, `조회 Length: ${result.length}`);
+        resolve(result);
+      } catch (err) {
+        errorMsg(`moverFind 찾기`, err);
+        reject(err);
+      }
+    }, leanTime ?? 10);
   });
 };
 

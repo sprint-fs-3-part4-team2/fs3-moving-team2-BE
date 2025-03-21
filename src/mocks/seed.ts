@@ -31,8 +31,8 @@ async function main() {
     await createCustomerFavorite();
     await createQuoteRequest();
     await createMoverQuote();
-    await createQuoteMatch();
     await createMoverService();
+    await createQuoteMatch();
     await createMoverServiceResion();
     await createQuoteRequestAddress();
     await createQuoteStatusHistory();
