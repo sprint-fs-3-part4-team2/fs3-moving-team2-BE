@@ -7,7 +7,7 @@ const router = Router();
 router.get('/', notificationController.getNotifications);
 
 // 알람 읽음 업데이트
-router.patch('/read/:id', notificationController.updateToRead);
+router.patch('/:id', notificationController.updateToRead);
 
 // 오늘 알림만 조회
 // router.get('/today');

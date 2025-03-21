@@ -3,8 +3,8 @@ import * as notificationService from '../service/notificationService';
 
 export async function getNotifications(req: Request, res: Response) {
   try {
-    // const userId = req.user?.userId ?? '123';
-    const userId = 'cm8e7iwp80003votcone90fqc';
+    const userId = req.user?.userId ?? '123';
+    // const userId = 'cm8e7iwp80003votcone90fqc';
 
     if (!userId) {
       res.status(401).json({ message: 'Unauthorized' });
@@ -21,8 +21,9 @@ export async function getNotifications(req: Request, res: Response) {
 
 export async function updateToRead(req: Request, res: Response) {
   try {
-    // const userId = req.user?.userId ?? '123';
-    const userId = 'cm8e7iwp80003votcone90fqc';
+    const userId = req.user?.userId ?? '123';
+    // const userId = 'cm8e7iwp80003votcone90fqc';
+
     if (!userId) {
       res.status(401).json({ message: 'Unauthorized' });
       return;
