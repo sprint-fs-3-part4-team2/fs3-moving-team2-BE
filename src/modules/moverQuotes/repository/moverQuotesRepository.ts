@@ -1,4 +1,4 @@
-import { PrismaClient, ServiceType, Region } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 
 export default class QuotesRepository {
   constructor(private prismaClient: PrismaClient) {}
@@ -34,26 +34,6 @@ export default class QuotesRepository {
     },
   };
 
-  //   private makeQuoteClause(includeCustomer: boolean) {
-  //     const quoteRequestInclude: any = {
-  //       quoteRequestAddress: true,
-  //       quoteStatusHistory: true,
-  //     };
-
-  //     if (includeCustomer) quoteRequestInclude.customer = this.CUSTOMER_INCLUDE_CLAUSE;
-
-  //     return {
-  //       quoteMatch: {
-  //         select: {
-  //           id: true,
-  //         },
-  //       },
-  //       quoteRequest: {
-  //         include: quoteRequestInclude,
-  //       },
-  //     };
-  //   }
-
   async getQuoteForCustomer(quoteId: string) {
     return await this.prismaClient.moverQuote.findUnique({
       where: {
@@ -68,43 +48,13 @@ export default class QuotesRepository {
         },
         quoteRequest: {
           select: {
+            customerId: true,
             moveType: true,
             moveDate: true,
             createdAt: true,
             quoteRequestAddresses: true,
           },
         },
-      },
-    });
-  }
-
-  async createQuoteRequest(data: {
-    customerId: string;
-    moveType: ServiceType;
-    fromRegion: Region;
-    toRegion: Region;
-    moveDate: Date;
-    quoteRequestAddresses: {
-      create: Array<{
-        type: 'DEPARTURE' | 'ARRIVAL';
-        sido: string;
-        sigungu: string;
-        street: string;
-        fullAddress: string;
-      }>;
-    };
-  }) {
-    return await this.prismaClient.quoteRequest.create({
-      data: {
-        ...data,
-        quoteStatusHistories: {
-          // 견적 요청 상태 기록도 함께 생성
-          create: [{ status: 'QUOTE_REQUESTED' }],
-        },
-      },
-      include: {
-        quoteRequestAddresses: true,
-        quoteStatusHistories: true,
       },
     });
   }
@@ -122,6 +72,7 @@ export default class QuotesRepository {
         },
         quoteRequest: {
           select: {
+            customerId: true,
             moveType: true,
             moveDate: true,
             createdAt: true,
@@ -137,9 +88,16 @@ export default class QuotesRepository {
     const skip = (page - 1) * pageSize;
     const whereClause = {
       moverId,
-      quoteMatch: {
-        isNot: null,
-      },
+      OR: [
+        {
+          targetedQuoteRequest: {
+            targetedQuoteRejection: null,
+          },
+        },
+        {
+          targetedQuoteRequest: null,
+        },
+      ],
     };
 
     const [list, totalCount] = await Promise.all([
@@ -147,7 +105,9 @@ export default class QuotesRepository {
         skip,
         take: pageSize,
         orderBy: {
-          createdAt: 'desc',
+          quoteRequest: {
+            moveDate: 'desc',
+          },
         },
         where: whereClause,
         include: {
@@ -158,6 +118,7 @@ export default class QuotesRepository {
           },
           quoteRequest: {
             select: {
+              customerId: true,
               moveType: true,
               moveDate: true,
               createdAt: true,

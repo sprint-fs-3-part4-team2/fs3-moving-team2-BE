@@ -215,6 +215,7 @@ model QuoteStatusHistory {
   id             String       @id @default(cuid())
   quoteRequestId String       @map("quote_request_id")
   status         String // 견적 상태
+  createdAt      DateTime     @default(now()) @map("created_at")
   updatedAt      DateTime     @updatedAt @map("updated_at")
   quoteRequest   QuoteRequest @relation(fields: [quoteRequestId], references: [id], onDelete: Cascade) // 견적상태이력-견적요청 1:N
 
