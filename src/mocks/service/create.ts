@@ -16,16 +16,15 @@ import { random } from '../lib/lib';
 import userMock from '../data/common/user.json';
 import moverMock from '../data/mover/mover.json';
 import notiMock from '../data/common/notification.json';
-import customerServiceMock from '../data/customer/customerService.json';
 import quotesRequestMock from '../data/quote/quoteRequest.json';
 import moverQuoteMock from '../data/quote/moverQuote.json';
-import moverServiceMock from '../data/mover/moverService.json';
 import quoteRequestAddressMock from '../data/quote/quoteRequestAddress.json';
 import quoteStatusHistoryMock from '../data/quote/quoteStatusHistory.json';
 import targetedQuoteRejectionMock from '../data/quote/targetedQuoteRejection.json';
 import reviewMock from '../data/Review.json';
 import { errorMsg, passMsg, startMsg } from '../lib/msg';
 import { update } from './update';
+import bcrypt from 'bcrypt';
 
 const prismaClient = new PrismaClient();
 const leanTime = 10;
@@ -58,6 +57,9 @@ const create = async <T extends ModelWithCreateMany>(model: T, data: any[], noMs
 const createUser = async () => {
   startMsg('user create');
   try {
+    const saltRounds = 10;
+    const password = 'qwer1234!';
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
     await create(
       'user',
       userMock.map((user, i: number): Prisma.UserCreateInput => {
@@ -66,7 +68,7 @@ const createUser = async () => {
           email: user.email,
           name: user.name,
           phoneNumber: user.phone_number,
-          password: user.password,
+          password: hashedPassword,
           createdAt: new Date(user.created_at),
           updatedAt: new Date(user.updated_at),
         };
