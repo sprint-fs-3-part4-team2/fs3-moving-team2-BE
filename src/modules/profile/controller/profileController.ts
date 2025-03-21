@@ -31,7 +31,7 @@ const moveTypeMap: Record<string, string> = {
 export async function postCustomerProfileInfo(req: Request, res: Response) {
   try {
     // const userId = req.user?.userId ?? '123';
-    const userId = 'cm8e7iwp80003votcone90fqc';
+    const userId = 'cm8i5fpf10000voq4h7rowska';
 
     console.log();
     if (!userId) {
@@ -64,7 +64,7 @@ export async function postCustomerProfileInfo(req: Request, res: Response) {
 export async function patchCustomerProfileInfo(req: Request, res: Response) {
   try {
     // const userId = req.user?.userId ?? '123';
-    const userId = 'cm8e7iwp80003votcone90fqc';
+    const userId = 'cm8i5fpf10000voq4h7rowska';
 
     if (!userId) {
       res.status(401).json({ message: 'Unauthorized' });
@@ -103,7 +103,7 @@ export async function patchCustomerProfileInfo(req: Request, res: Response) {
 export async function postMoverProfileInfo(req: Request, res: Response) {
   try {
     // const userId = req.user?.userId ?? '123';
-    const userId = 'cm8e7iwp80003votcone90fqc';
+    const userId = 'cm8i5fpf10000voq4h7rowska';
 
     if (!userId) {
       res.status(401).json({ message: 'Unauthorized' });
@@ -146,7 +146,7 @@ export async function postMoverProfileInfo(req: Request, res: Response) {
 export async function patchMoverProfileInfo(req: Request, res: Response) {
   try {
     // const userId = req.user?.userId ?? '123';
-    const userId = 'cm8e7iwp80003votcone90fqc';
+    const userId = 'cm8i5fpf10000voq4h7rowska';
 
     if (!userId) {
       res.status(401).json({ message: 'Unauthorized' });
