@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response, Router } from 'express';
 import userControlelr from './controller/controller';
+import * as moverController from './controller/moverController';
 
 const userRouter = Router();
 
@@ -12,5 +13,6 @@ userRouter.post(
   },
   userControlelr.MoverBaiscInfoEdit,
 );
+userRouter.get('/movers', moverController.getMovers);
 
 export default userRouter;
