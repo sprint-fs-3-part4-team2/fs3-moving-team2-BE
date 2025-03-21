@@ -1,8 +1,8 @@
 import express from 'express';
-import QuotesService from './service/quotesService';
+import QuotesService from './service/moverQuotesService';
 import prismaClient from '@/prismaClient';
-import QuotesRepository from './repository/quotesRepository';
-import QuotesController from './controller/quotesController';
+import QuotesRepository from './repository/moverQuotesRepository';
+import QuotesController from './controller/moverQuotesController';
 import asyncRequestHandler from '../../core/handlers/asyncRequestHandler';
 import { createAuthMiddleware } from '../../core/middleware/auth/auth';
 

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import QuotesService from '../service/quotesService';
+import QuotesService from '../service/moverQuotesService';
 
 export default class QuotesController {
   constructor(private quoteService: QuotesService) {}

@@ -58,6 +58,7 @@ export default class QuotesRepository {
       },
     });
   }
+  //////////////////////////////
 
   async createQuoteRequest(data: {
     customerId: string;
@@ -89,6 +90,8 @@ export default class QuotesRepository {
       },
     });
   }
+
+  /////////////////////////////////
 
   async getQuoteForMover(quoteId: string) {
     return await this.prismaClient.moverQuote.findUnique({
@@ -173,6 +176,8 @@ export default class QuotesRepository {
     };
   }
 
+  /// ---------------------------------------------------------
+
   async getLatestQuoteRequestByCustomer(customerId: string) {
     return await this.prismaClient.quoteRequest.findFirst({
       where: {
@@ -191,4 +196,6 @@ export default class QuotesRepository {
       },
     });
   }
+
+  /// ---------------------------------------------------------
 }

@@ -7,7 +7,8 @@ import { swaggerSpec } from './core/docs/swagger';
 import imageRouter from './modules/upload/routes';
 import userRouter from './modules/users/routes';
 import reviewRouter from './modules/reviews/routes';
-import quotesRouter from './modules/quotes/routes';
+import quotesRouter from './modules/moverQuotes/routes';
+import quoteRequestRouter from './modules/quoteRequests/routes';
 import { extractUserMiddleware } from './core/middleware/auth/extractUser';
 import favoriteRouter from './modules/favorites/routes';
 import authRouter from './modules/auth/routes';
@@ -49,6 +50,7 @@ app.use('/reviews', reviewRouter);
 app.use('/quotes', quotesRouter);
 app.use('/favorites', favoriteRouter);
 app.use('/auth', authRouter);
+app.use('/quote-requests', quoteRequestRouter);
 
 // 서버 실행
 app.listen(port, () => {
