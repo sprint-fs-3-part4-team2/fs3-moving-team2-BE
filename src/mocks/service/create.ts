@@ -14,7 +14,6 @@ import { customerFind, find, moverFind, userCustomerFind, userMoverFind } from '
 import { random } from '../lib/lib';
 // mock data
 import userMock from '../data/common/user.json';
-import customerMock from '../data/customer/customer.json';
 import moverMock from '../data/mover/mover.json';
 import notiMock from '../data/common/notification.json';
 import customerServiceMock from '../data/customer/customerService.json';
@@ -39,18 +38,18 @@ type ModelWithCreateMany = {
 type CreateManyFn = (args: { data: any[] }) => Promise<any>;
 type DeleteManyFn = (args?: { where?: any }) => Promise<any>;
 
-const create = async <T extends ModelWithCreateMany>(model: T, data: any[]) => {
+const create = async <T extends ModelWithCreateMany>(model: T, data: any[], noMsg?: boolean) => {
   try {
     const delegate = prismaClient[model] as unknown as {
       createMany: CreateManyFn;
       deleteMany: DeleteManyFn;
     };
     const deletes = await delegate.deleteMany({});
-    if (deletes) passMsg(`${model} 테이블 정리`);
+    if (deletes && !noMsg) passMsg(`${model} 테이블 정리`);
     const createData = await delegate.createMany({
       data: data,
     });
-    if (createData) passMsg(`${model} 테이블 데이터 생성`);
+    if (createData && !noMsg) passMsg(`${model} 테이블 데이터 생성`);
   } catch (err) {
     errorMsg(`${model} (create fn)`, err);
   }
@@ -63,7 +62,7 @@ const createUser = async () => {
       'user',
       userMock.map((user, i: number): Prisma.UserCreateInput => {
         return {
-          userType: i % 2 === 0 ? 'CUSTOMER' : 'MOVER',
+          userType: i % 5 !== 0 ? 'CUSTOMER' : 'MOVER',
           email: user.email,
           name: user.name,
           phoneNumber: user.phone_number,
@@ -86,9 +85,11 @@ const createCustomer = async () => {
       'customer',
       customer.map((user): Prisma.CustomerCreateManyInput => {
         const { id } = user;
+        const imgPath =
+          'd3h2ixicz4w2p.cloudfront.net/uploads/1742216810416-스크린샷 2025-01-03 131708.png';
         return {
           userId: id,
-          profileImage: customerMock[random(customerMock)].profile_image,
+          profileImage: imgPath,
           location: enArea[random(enArea)] as Region,
         };
       }),
@@ -107,11 +108,12 @@ const createMover = async () => {
       mover.map((user): Prisma.MoverCreateManyInput => {
         const randomMover = random(moverMock);
         const { id } = user;
-        const { profile_image, experience_years, introduction, description } =
-          moverMock[randomMover];
+        const { experience_years, introduction, description } = moverMock[randomMover];
+        const imgPath =
+          'd3h2ixicz4w2p.cloudfront.net/uploads/1742216810416-스크린샷 2025-01-03 131708.png';
         return {
           userId: id,
-          profileImage: profile_image || 'profile_img_error',
+          profileImage: imgPath,
           experienceYears: experience_years || 0,
           introduction: introduction || '',
           description: description || '',
@@ -127,21 +129,25 @@ const createNotification = async () => {
   startMsg('notification create');
 
   try {
-    const customer = await userCustomerFind();
-    await create(
-      'notification',
-      notiMock.map((val): Prisma.NotificationCreateManyInput => {
-        const customerIndex = random(customer as any[]);
-        const { id } = customer[customerIndex];
-        const { message, url, is_read } = val;
-        return {
-          userId: id || customer[0].id,
-          message: message,
-          url,
-          isRead: is_read,
-        };
-      }),
-    );
+    const user = await find('user', {});
+    user.forEach(async (v) => {
+      const { id: userId } = v;
+      const renIndex = random(notiMock);
+      await create(
+        'notification',
+        Array.from({ length: renIndex }).map((_, i2): Prisma.NotificationCreateManyInput => {
+          const { message, url, is_read: isRead } = notiMock[i2];
+          return {
+            userId,
+            message,
+            url,
+            isRead,
+          };
+        }),
+        true,
+      );
+    });
+    passMsg('notification 테이블 데이터 생성');
   } catch (err) {
     errorMsg(`notification mock 데이터 생성`, err);
   }
@@ -151,16 +157,16 @@ const createCustomerService = async () => {
   startMsg('customerService create');
   try {
     const customer = await customerFind({}, leanTime);
+    const serviceType = Object.values(ServiceType);
     if (customer)
       await create(
         'customerService',
-        customerServiceMock.map((val): Prisma.CustomerServiceCreateManyInput => {
-          const customerIndex = random(customer);
-          const { id } = customer[customerIndex];
-          const { service_type } = val;
+        customer.map((val): Prisma.CustomerServiceCreateManyInput => {
+          const serviceIndex = random(serviceType);
+          const { id: customerId } = val;
           return {
-            customerId: id,
-            serviceType: service_type as ServiceType,
+            customerId,
+            serviceType: serviceType[serviceIndex],
           };
         }),
       );
@@ -174,17 +180,20 @@ const createCustomerFavorite = async () => {
   try {
     const customer = await customerFind({}, leanTime);
     const mover = await moverFind({}, leanTime);
-
-    await create(
-      'customerFavorite',
-      customer.map((val): Prisma.CustomerFavoriteCreateManyInput => {
-        const moverIndex = random(mover);
-        return {
-          customerId: val.id,
-          moverId: mover[moverIndex].id,
-        };
-      }),
-    );
+    customer.forEach(async (v, i) => {
+      const { id: customerId } = v;
+      const moverLength = random(mover);
+      await create(
+        'customerFavorite',
+        Array.from({ length: moverLength }).map((_, i2): Prisma.CustomerFavoriteCreateManyInput => {
+          return {
+            customerId,
+            moverId: mover[i2].id,
+          };
+        }),
+        true,
+      );
+    });
   } catch (err) {
     errorMsg(`customerFavorite mock 데이터 생성`, err);
   }
@@ -223,21 +232,26 @@ const createMoverQuote = async () => {
   try {
     const mover = await moverFind({}, leanTime);
     const quoteRequest: QuoteRequest[] = await find('quoteRequest', {});
-    await create(
-      'moverQuote',
-      mover.map((val, i: number): Prisma.MoverQuoteCreateManyInput => {
-        const mqmIndex = random(moverQuoteMock);
-        const { price } = moverQuoteMock[mqmIndex];
-        const { id: quoteRequestId } = quoteRequest[i];
-        const { id: moverId } = val;
+    quoteRequest.forEach(async (v) => {
+      const { id: quoteRequestId } = v;
+      const requestMoverLength = random(mover);
+      await create(
+        'moverQuote',
+        Array.from({ length: requestMoverLength }).map((_, i): Prisma.MoverQuoteCreateManyInput => {
+          const mqmIndex = random(moverQuoteMock);
+          const { price } = moverQuoteMock[mqmIndex];
+          const { id: moverId } = mover[i];
 
-        return {
-          quoteRequestId: quoteRequestId,
-          moverId,
-          price,
-        };
-      }),
-    );
+          return {
+            quoteRequestId,
+            moverId,
+            price,
+          };
+        }),
+        true,
+      );
+    });
+    passMsg(`moverQuote 테이블 데이터 생성`);
   } catch (err) {
     errorMsg(`moverQuote mock 데이터 생성`, err);
   }
@@ -246,15 +260,37 @@ const createMoverQuote = async () => {
 const createQuoteMatch = async () => {
   startMsg('quoteMatch create');
   try {
-    const moverQuote: MoverQuote[] = await find('moverQuote', {});
+    const quoteRequest: QuoteRequest[] = await find('quoteRequest', {});
+
+    const target = (
+      await Promise.all(
+        quoteRequest.map(async (v) => {
+          const moverQuote: MoverQuote[] = await find(
+            'moverQuote',
+            {
+              where: {
+                quoteRequestId: v.id,
+              } as Prisma.MoverQuoteWhereInput,
+            },
+            true,
+          );
+
+          const ranIndex = random(moverQuote);
+          return moverQuote[ranIndex]; // moverQuote가 비어 있으면 undefined 가능
+        }),
+      )
+    ).filter(Boolean); // <-- 여기에서 필터링 적용
+
     await create(
       'quoteMatch',
-      moverQuote.map((val, i): Prisma.QuoteMatchCreateManyInput => {
-        return {
-          moverQuoteId: val.id,
-          isCompleted: i % 2 === 0 ? true : false,
-        };
-      }),
+      await Promise.all(
+        target.map(async (val, i): Promise<Prisma.QuoteMatchCreateManyInput> => {
+          return {
+            moverQuoteId: val.id,
+            isCompleted: i % 2 === 0 ? true : false,
+          };
+        }),
+      ),
     );
   } catch (err) {
     errorMsg(`quoteMatch mock 데이터 생성`, err);
@@ -265,16 +301,21 @@ const createMoverService = async () => {
   startMsg('moverService create');
   try {
     const mover = await moverFind({}, leanTime);
-    await create(
-      'moverService',
-      moverServiceMock.map((val, i: number): Prisma.MoverServiceCreateManyInput => {
-        const serviceTypes = Object.values(ServiceType);
-        return {
-          moverId: mover[Math.floor(i / serviceTypes.length)].id,
-          serviceType: val.serviceType as ServiceType,
-        };
-      }),
-    );
+    const serviceType = Object.values(ServiceType);
+    mover.forEach(async (v) => {
+      const { id: moverId } = v;
+      const ranIndex = random(serviceType);
+      await create(
+        'moverService',
+        Array.from({ length: ranIndex !== 0 ? ranIndex : 1 }).map(
+          (_, i2): Prisma.MoverServiceCreateManyInput => {
+            return { moverId, serviceType: serviceType[i2] };
+          },
+        ),
+        true,
+      );
+    });
+    passMsg('moverService 테이블 데이터 생성');
   } catch (err) {
     errorMsg(`moverService mock 데이터 생성`, err);
   }
@@ -363,14 +404,27 @@ const createQuoteStatusHistory = async () => {
 const createTargetedQuoteRequest = async () => {
   startMsg('targetedQuoteRequest create');
   try {
-    const mover = await moverFind({}, leanTime);
-    const quoteRequest: QuoteRequest[] = await find('quoteRequest', {});
+    const quoteRequest = await prismaClient.quoteRequest.findMany({
+      where: {
+        moverQuotes: {
+          some: {},
+        },
+      },
+      include: {
+        moverQuotes: {
+          select: {
+            moverId: true,
+          },
+        },
+      },
+    });
+    passMsg(`quoteRequest 테이블 조회`, `${quoteRequest.length}`);
     await create(
       'targetedQuoteRequest',
       Array.from({ length: quoteRequest.length / 2 }).map(
         (_, i: number): Prisma.TargetedQuoteRequestCreateManyInput => {
-          const { id: quoteRequestId } = quoteRequest[i];
-          const { id: moverId } = mover[i];
+          const { id: quoteRequestId, moverQuotes } = quoteRequest[i];
+          const { moverId } = moverQuotes[0];
           return {
             moverId,
             quoteRequestId,
@@ -385,9 +439,9 @@ const createTargetedQuoteRequest = async () => {
       const tqr: TargetedQuoteRequest[] = await find('targetedQuoteRequest', {});
       await Promise.all(
         tqr.map(async (v) => {
-          const { quoteRequestId, id } = v;
+          const { quoteRequestId, id, moverId } = v;
           const args: Prisma.MoverQuoteUpdateManyArgs = {
-            where: { quoteRequestId },
+            where: { quoteRequestId, moverId },
             data: { targetedQuoteRequestId: id },
           };
           await update('moverQuote', args);

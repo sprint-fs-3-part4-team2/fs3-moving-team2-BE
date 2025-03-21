@@ -21,6 +21,7 @@ type FindManyFn = (args?: FindArgs) => Promise<any>;
 const find = <T extends ModelWithFindMany>(
   model: T,
   args?: FindArgs,
+  noMsg?: boolean,
   leanTime?: number,
 ): Promise<any[]> => {
   return new Promise((resolve, reject) => {
@@ -28,7 +29,7 @@ const find = <T extends ModelWithFindMany>(
       try {
         const delegate = prismaClient[model] as unknown as { findMany: FindManyFn };
         const result = await delegate.findMany(args);
-        if (result) passMsg(`${model} 테이블 조회 //`, `조회 Length: ${result.length}`);
+        if (result && !noMsg) passMsg(`${model} 테이블 조회 //`, `조회 Length: ${result.length}`);
         resolve(result);
       } catch (err) {
         errorMsg(`${model} (find)`, err);
