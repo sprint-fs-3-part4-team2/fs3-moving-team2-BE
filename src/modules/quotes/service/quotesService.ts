@@ -127,4 +127,16 @@ export default class QuotesService {
       },
     };
   }
+
+  async getAllQuoteRequests(page: number, pageSize: number) {
+    const data = await this.quotesRepository.getAllQuoteRequests(page, pageSize);
+
+    return {
+      list: data.list.map((quote) => QuoteMapper.toQuoteForMoverListDto(quote)),
+      totalCount: data.totalCount,
+      page: data.page,
+      pageSize: data.pageSize,
+      totalPages: data.totalPages,
+    };
+  }
 }

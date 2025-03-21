@@ -16,10 +16,13 @@ const {
   getQuotesListByMover,
   createQuoteRequest,
   getLatestQuoteForCustomer,
+  getAllQuoteRequests,
 } = quoteController;
 
 router.route('/request').post(asyncRequestHandler(createQuoteRequest));
 router.route('/latest').get(asyncRequestHandler(getLatestQuoteForCustomer));
+router.route('/mover/quotes').get(asyncRequestHandler(getAllQuoteRequests));
+
 router.route('/:quoteId/customer').get(asyncRequestHandler(getQuoteByIdForCustomer));
 router.route('/:quoteId/mover').get(asyncRequestHandler(getQuoteByIdForMover));
 router.route('/:moverId/submitted').get(asyncRequestHandler(getQuotesListByMover));

@@ -188,4 +188,33 @@ export default class QuotesRepository {
       },
     });
   }
+
+  async getAllQuoteRequests(page: number, pageSize: number) {
+    const skip = (page - 1) * pageSize;
+    const totalCount = await this.prismaClient.quoteRequest.count();
+    const list = await this.prismaClient.quoteRequest.findMany({
+      skip,
+      take: pageSize,
+      orderBy: {
+        createdAt: 'desc',
+      },
+      include: {
+        quoteRequestAddresses: true,
+        quoteStatusHistories: {
+          orderBy: {
+            createdAt: 'desc',
+          },
+        },
+        ...this.CUSTOMER_INCLUDE_CLAUSE,
+      },
+    });
+
+    return {
+      list,
+      totalCount,
+      page,
+      pageSize,
+      totalPages: Math.ceil(totalCount / pageSize),
+    };
+  }
 }
