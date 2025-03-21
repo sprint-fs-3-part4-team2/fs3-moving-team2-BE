@@ -122,6 +122,7 @@ export default class QuoteRequestsService {
   ) {
     const whereClause: any = {};
 
+    // 검색어로 고객 이름을 검색
     if (searchQuery) {
       whereClause.customer = {
         user: {
@@ -131,6 +132,29 @@ export default class QuoteRequestsService {
           },
         },
       };
+    }
+
+    // moveType 필터 추가 (클라이언트가 한글로 전달한 경우 한글→영문 enum으로 변환)
+    // 여러 이사 유형이 콤마로 구분되어 전달될 수 있음
+    if (moveTypeQuery) {
+      // 콤마 단위로 split 후 앞뒤 공백 trim
+      const moveTypeValues = moveTypeQuery
+        .split(',')
+        .map((value) => value.trim())
+        .filter(Boolean);
+      const moveTypeEnums: Array<keyof typeof MOVE_TYPE_KOREAN> = [];
+      for (const typeValue of moveTypeValues) {
+        Object.entries(MOVE_TYPE_KOREAN).some(([key, koreanValue]) => {
+          if (koreanValue === typeValue) {
+            moveTypeEnums.push(key as keyof typeof MOVE_TYPE_KOREAN);
+            return true;
+          }
+          return false;
+        });
+      }
+      if (moveTypeEnums.length > 0) {
+        whereClause.moveType = { in: moveTypeEnums };
+      }
     }
 
     const data = await this.quoteRequestRepository.getAllQuoteRequests(
