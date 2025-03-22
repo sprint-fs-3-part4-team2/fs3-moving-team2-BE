@@ -15,6 +15,21 @@ export default class QuoteRequestsRepository {
     },
   };
 
+  private CANCEL_QUOTE_STATUS_HISTORY_CLAUSE = {
+    quoteStatusHistories: {
+      some: {
+        status: {
+          in: ['QUOTE_REQUESTED', 'MOVER_SUBMITTED'],
+        },
+      },
+      none: {
+        status: {
+          notIn: ['QUOTE_REQUESTED', 'MOVER_SUBMITTED'],
+        },
+      },
+    },
+  };
+
   async createQuoteRequest(data: {
     customerId: string;
     moveType: ServiceType;
@@ -92,5 +107,23 @@ export default class QuoteRequestsRepository {
       pageSize,
       totalPages: Math.ceil(totalCount / pageSize),
     };
+  }
+
+  async findQuoteRequestById(requestId: string) {
+    return await this.prismaClient.quoteRequest.findUnique({
+      where: {
+        id: requestId,
+        ...this.CANCEL_QUOTE_STATUS_HISTORY_CLAUSE,
+      },
+    });
+  }
+
+  async cancelQuoteRequest(requestId: string) {
+    return await this.prismaClient.quoteRequest.delete({
+      where: {
+        id: requestId,
+        ...this.CANCEL_QUOTE_STATUS_HISTORY_CLAUSE,
+      },
+    });
   }
 }

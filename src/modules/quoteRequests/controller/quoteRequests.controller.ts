@@ -32,4 +32,13 @@ export default class QuoteRequestsController {
     );
     res.status(200).json(data);
   };
+
+  cancelQuoteRequest = async (req: Request, res: Response) => {
+    const userId = req.user?.userId ?? '';
+    const { requestId } = req.params;
+
+    await this.quoteRequestsService.cancelQuoteRequest(userId, requestId);
+
+    res.status(204);
+  };
 }

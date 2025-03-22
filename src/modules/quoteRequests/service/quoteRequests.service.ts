@@ -1,9 +1,10 @@
-import { NotFoundException } from '@/core/errors';
+import { ForbiddenException, NotFoundException } from '@/core/errors';
 import QuoteRequestsRepository from '../repository/quoteRequests.repository';
 import { EXCEPTION_MESSAGES } from '@/constants/exceptionMessages';
 import { Region, ServiceType } from '@prisma/client';
 import QuoteMapper from '@/modules/moverQuotes/mapper/moverQuote.mapper';
 import { MOVE_TYPE_KOREAN } from '@/constants/serviceType';
+import { AUTH_MESSAGES } from '@/constants/authMessages';
 
 export default class QuoteRequestsService {
   constructor(private quoteRequestRepository: QuoteRequestsRepository) {}
@@ -121,5 +122,14 @@ export default class QuoteRequestsService {
       pageSize: data.pageSize,
       totalPages: data.totalPages,
     };
+  }
+
+  async cancelQuoteRequest(requestId: string, customerId: string) {
+    const existingQuoteRequest = await this.quoteRequestRepository.findQuoteRequestById(requestId);
+    if (!existingQuoteRequest) throw new NotFoundException(EXCEPTION_MESSAGES.requestNotFound);
+    if (existingQuoteRequest.customerId !== customerId)
+      throw new ForbiddenException(AUTH_MESSAGES.forbidden);
+
+    await this.quoteRequestRepository.cancelQuoteRequest(requestId);
   }
 }
