@@ -7,10 +7,13 @@ import { swaggerSpec } from './core/docs/swagger';
 import imageRouter from './modules/upload/routes';
 import userRouter from './modules/users/routes';
 import reviewRouter from './modules/reviews/routes';
-import quotesRouter from './modules/quotes/routes';
+import moverQuotesRouter from './modules/moverQuotes/routes';
+import quoteRequestRouter from './modules/quoteRequests/routes';
 import { extractUserMiddleware } from './core/middleware/auth/extractUser';
 import favoriteRouter from './modules/favorites/routes';
 import authRouter from './modules/auth/routes';
+import notificationRouter from './modules/notification/routes';
+import rejectionRouter from './modules/rejection/routes';
 import profileRouter from './modules/profile/routes';
 
 dotenv.config();
@@ -47,9 +50,12 @@ app.get('/', (req: Request, res: Response) => {
 app.use('/upload', imageRouter);
 app.use('/users', userRouter);
 app.use('/reviews', reviewRouter);
-app.use('/quotes', quotesRouter);
+app.use('/mover-quotes', moverQuotesRouter);
 app.use('/favorites', favoriteRouter);
 app.use('/auth', authRouter);
+app.use('/quote-requests', quoteRequestRouter);
+app.use('/notification', notificationRouter);
+app.use('/rejection', rejectionRouter);
 app.use('/profile', profileRouter);
 
 // 서버 실행

@@ -10,6 +10,6 @@ const authController = new AuthController(authService);
 
 const { fakeSignIn } = authController;
 
-router.route('/fakeSignIn').post(asyncRequestHandler(fakeSignIn));
+router.route('/fakeSignIn').get(asyncRequestHandler(fakeSignIn));
 
 export default router;
