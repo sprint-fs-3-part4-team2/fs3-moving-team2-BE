@@ -13,6 +13,7 @@ import { extractUserMiddleware } from './core/middleware/auth/extractUser';
 import favoriteRouter from './modules/favorites/routes';
 import authRouter from './modules/auth/routes';
 import notificationRouter from './modules/notification/routes';
+import rejectionRouter from './modules/rejection/routes';
 
 dotenv.config();
 
@@ -53,6 +54,7 @@ app.use('/favorites', favoriteRouter);
 app.use('/auth', authRouter);
 app.use('/quote-requests', quoteRequestRouter);
 app.use('/notification', notificationRouter);
+app.use('/rejection', rejectionRouter);
 
 // 서버 실행
 app.listen(port, () => {
