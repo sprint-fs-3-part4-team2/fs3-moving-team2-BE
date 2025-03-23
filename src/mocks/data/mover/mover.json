@@ -1,0 +1,113 @@
+[
+  {
+    "profile_image": "https://example.com/profiles/1.jpg",
+    "experience_years": 5,
+    "introduction": "안녕하세요, 5년 경력의 무버입니다.",
+    "description": "다양한 프로젝트 경험을 바탕으로 고객 만족 서비스를 제공합니다.",
+    "average_rating": 4.5,
+    "total_reviews": 20,
+    "total_customer_favorite": 12,
+    "total_confirmed_count": 18,
+    "created_at": "2025-03-17T12:00:00.000Z"
+  },
+  {
+    "profile_image": "https://example.com/profiles/2.jpg",
+    "experience_years": 3,
+    "introduction": "빠른 대응과 신뢰를 바탕으로 한 3년 경력의 무버입니다.",
+    "description": "작업의 신속함과 정확성을 자랑하며 고객 만족을 위해 노력합니다.",
+    "average_rating": 4.2,
+    "total_reviews": 15,
+    "total_customer_favorite": 10,
+    "total_confirmed_count": 14,
+    "created_at": "2025-03-16T10:30:00.000Z"
+  },
+  {
+    "profile_image": "https://example.com/profiles/3.jpg",
+    "experience_years": 7,
+    "introduction": "7년 경력의 전문 무버입니다.",
+    "description": "다양한 대형 프로젝트를 성공적으로 수행한 경험이 있습니다.",
+    "average_rating": 4.8,
+    "total_reviews": 30,
+    "total_customer_favorite": 20,
+    "total_confirmed_count": 25,
+    "created_at": "2025-03-15T09:45:00.000Z"
+  },
+  {
+    "profile_image": "https://example.com/profiles/4.jpg",
+    "experience_years": 2,
+    "introduction": "2년 차의 신선한 에너지를 가진 무버입니다.",
+    "description": "최신 기술과 도구를 사용하여 효율적인 작업을 진행합니다.",
+    "average_rating": 4.0,
+    "total_reviews": 10,
+    "total_customer_favorite": 5,
+    "total_confirmed_count": 8,
+    "created_at": "2025-03-14T08:20:00.000Z"
+  },
+  {
+    "profile_image": "https://example.com/profiles/5.jpg",
+    "experience_years": 10,
+    "introduction": "10년 경력의 베테랑 무버입니다.",
+    "description": "풍부한 경험을 바탕으로 어려운 작업도 무리 없이 처리합니다.",
+    "average_rating": 4.9,
+    "total_reviews": 50,
+    "total_customer_favorite": 35,
+    "total_confirmed_count": 40,
+    "created_at": "2025-03-13T14:10:00.000Z"
+  },
+  {
+    "profile_image": "https://example.com/profiles/6.jpg",
+    "experience_years": 4,
+    "introduction": "4년 경력의 열정적인 무버입니다.",
+    "description": "새로운 도전과 다양한 프로젝트를 통해 실력을 쌓았습니다.",
+    "average_rating": 4.3,
+    "total_reviews": 18,
+    "total_customer_favorite": 11,
+    "total_confirmed_count": 16,
+    "created_at": "2025-03-12T16:00:00.000Z"
+  },
+  {
+    "profile_image": "https://example.com/profiles/7.jpg",
+    "experience_years": 6,
+    "introduction": "6년 경력으로 믿음직한 서비스를 제공합니다.",
+    "description": "고객의 요구에 맞춘 맞춤형 서비스를 제공하며, 항상 최선을 다합니다.",
+    "average_rating": 4.6,
+    "total_reviews": 22,
+    "total_customer_favorite": 15,
+    "total_confirmed_count": 19,
+    "created_at": "2025-03-11T11:15:00.000Z"
+  },
+  {
+    "id": "cuid8",
+    "profile_image": "https://example.com/profiles/8.jpg",
+    "experience_years": 8,
+    "introduction": "8년 경력의 전문가 무버입니다.",
+    "description": "복잡한 이사도 문제없이 해결하며, 신뢰할 수 있는 서비스를 제공합니다.",
+    "average_rating": 4.7,
+    "total_reviews": 28,
+    "total_customer_favorite": 18,
+    "total_confirmed_count": 23,
+    "created_at": "2025-03-10T13:50:00.000Z"
+  },
+  {
+    "profile_image": "https://example.com/profiles/9.jpg",
+    "experience_years": 1,
+    "introduction": "신입 무버지만 열정과 책임감으로 일합니다.",
+    "description": "최선을 다해 작업에 임하며, 빠른 학습으로 실력을 쌓아가고 있습니다.",
+    "average_rating": 3.8,
+    "total_reviews": 8,
+    "total_customer_favorite": 3,
+    "total_confirmed_count": 5,
+    "created_at": "2025-03-09T07:30:00.000Z"
+  },
+  {
+    "profile_image": "https://example.com/profiles/10.jpg",
+    "experience_years": 9,
+    "introduction": "9년 경력의 실력파 무버입니다.",
+    "description": "다양한 상황에 맞춰 유연하게 대처하며, 높은 고객 만족도를 자랑합니다.",
+    "average_rating": 4.4,
+    "total_reviews": 26,
+    "total_customer_favorite": 17,
+    "total_confirmed_count": 21,
+    "created_at": "2025-03-08T12:45:00.000Z"
+  }
+]

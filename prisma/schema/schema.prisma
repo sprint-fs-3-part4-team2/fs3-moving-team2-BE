@@ -14,101 +14,112 @@ enum UserType {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  user_type UserType
-  email     String   @unique // 이메일
-  name      String  // 이름
-  phone_number String   // 전화번호
-  password  String  // 비밀번호
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  id            String         @id @default(cuid())
+  userType      UserType       @map("user_type")
+  email         String         @unique // 이메일
+  name          String // 이름
+  phoneNumber   String         @map("phone_number") // 전화번호
+  password      String // 비밀번호
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
   notifications Notification[] // 유저-알람 1:N
-  social_login SocialLogin? // 유저-소셜로그인 1:1
-  customer Customer? // 유저-고객 1:1
-  mover Mover? // 유저-이사업자 1:1
+  socialLogin   SocialLogin? // 유저-소셜로그인 1:1
+  customer      Customer? // 유저-고객 1:1
+  mover         Mover? // 유저-이사업자 1:1
 
-  @@unique([user_type, phone_number]) // 휴대폰 번호와 유저 타입이 중복되지 않도록 유니크 제약 추가
+  @@unique([userType, phoneNumber]) // 휴대폰 번호와 유저 타입이 중복되지 않도록 유니크 제약 추가
+  @@map("user")
 }
 
 // 알람
 model Notification {
   id        String   @id @default(cuid())
-  user_id   String
+  userId    String   @map("user_id")
   message   String // 알람 내용
-  is_read   Boolean @default(false) // 알람 읽음 여부
-  url      String? // 알람 클릭 시 이동할 url
-  created_at DateTime @default(now())
-  user  User     @relation(fields: [user_id], references: [id], onDelete: Cascade) // 알람-유저 1:N
+  isRead    Boolean  @default(false) @map("is_read") // 알람 읽음 여부
+  url       String? // 알람 클릭 시 이동할 url
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade) // 알람-유저 1:N
+
+  @@map("notification")
 }
 
 model SocialLogin {
-  id        String   @id @default(cuid())
-  user_id   String   @unique
-  provider  String   // google, kakao, naver
-  provider_id String
-  access_token String?
-  refresh_token String?
-  created_at DateTime @default(now())
-  user      User     @relation(fields: [user_id], references: [id],onDelete: Cascade) // 소셜로그인-유저 1:1
+  id           String   @id @default(cuid())
+  userId       String   @unique @map("user_id")
+  provider     String // google, kakao, naver
+  providerId   String   @map("provider_id")
+  accessToken  String?  @map("access_token")
+  refreshToken String?  @map("refresh_token")
+  createdAt    DateTime @default(now()) @map("created_at")
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade) // 소셜로그인-유저 1:1
 
-  @@unique([provider, provider_id]) // 소셜로그인 정보가 중복되지 않도록 유니크 제약 추가
+  @@unique([provider, providerId]) // 소셜로그인 정보가 중복되지 않도록 유니크 제약 추가
+  @@map("social_login")
 }
 
 // 고객
 model Customer {
-  id        String   @id @default(cuid())
-  user_id   String   @unique
-  profile_image String // 프로필 이미지
-  location Region // 거주 지역
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-  user      User     @relation(fields: [user_id], references: [id],onDelete: Cascade) // 고객-유저 1:1
-  customer_services CustomerService[] // 고객-고객이용서비스 1:N
-  customer_favorites CustomerFavorite[] // 고객-고객찜 1:N
-  quote_requests QuoteRequest[] // 고객-견적요청 1:Nß
+  id                String             @id @default(cuid())
+  userId            String             @unique @map("user_id")
+  profileImage      String             @map("profile_image") // 프로필 이미지
+  location          Region // 거주 지역
+  createdAt         DateTime           @default(now()) @map("created_at")
+  updatedAt         DateTime           @updatedAt @map("updated_at")
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade) // 고객-유저 1:1
+  customerServices  CustomerService[] // 고객-고객이용서비스 1:N
+  customerFavorites CustomerFavorite[] // 고객-고객찜 1:N
+  quoteRequests     QuoteRequest[] // 고객-견적요청 1:N
+
+  @@map("customer")
 }
 
 // 고객 이용 서비스
 model CustomerService {
-  id        String   @id @default(cuid())
-  customer_id String
-  service_type ServiceType // 이용 서비스
-  created_at DateTime @default(now())
-  customer  Customer @relation(fields: [customer_id], references: [id],onDelete: Cascade) // 고객-고객서비스 1:N
+  id          String      @id @default(cuid())
+  customerId  String      @map("customer_id")
+  serviceType ServiceType @map("service_type") // 이용 서비스
+  createdAt   DateTime    @default(now()) @map("created_at")
+  customer    Customer    @relation(fields: [customerId], references: [id], onDelete: Cascade) // 고객-고객서비스 1:N
+
+  @@map("customer_service")
 }
 
 // 이사업자
 model Mover {
-  id        String   @id @default(cuid())
-  user_id   String   @unique
-  profile_image String // 프로필 이미지
-  experience_years Int // 경력
-  introduction String // 한줄 소개
-  description String // 상세 설명
-  average_rating Float @default(0) // 평균 평점  
-  total_reviews Int @default(0) // 총 리뷰 수
-  total_customer_favorite Int  @default(0) // 총 고객 찜 수
-  total_confirmed_count Int @default(0) // 총 견적 확정 건 수
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-  user      User     @relation(fields: [user_id], references: [id],onDelete: Cascade) // 이사업자-유저 1:1
-  customer_favorites CustomerFavorite[] // 이사업자-고객찜 1:N
-  mover_services MoverService[] // 이사업자-이사서비스 1:N
-  mover_service_regions MoverServiceRegion[] // 이사업자-이사서비스지역 1:N
-  targeted_quote_requests TargetedQuoteRequest[] // 이사업자-지정견적요청 1:N
-  mover_quotes MoverQuote[] // 이사업자-이사업자견적 1:N
+  id                    String                 @id @default(cuid())
+  userId                String                 @unique @map("user_id")
+  profileImage          String                 @map("profile_image") // 프로필 이미지
+  experienceYears       Int                    @map("experience_years") // 경력
+  introduction          String // 한줄 소개
+  description           String // 상세 설명
+  averageRating         Float                  @default(0) @map("average_rating") // 평균 평점  
+  totalReviews          Int                    @default(0) @map("total_reviews") // 총 리뷰 수
+  totalCustomerFavorite Int                    @default(0) @map("total_customer_favorite") // 총 고객 찜 수
+  totalConfirmedCount   Int                    @default(0) @map("total_confirmed_count") // 총 견적 확정 건 수
+  createdAt             DateTime               @default(now()) @map("created_at")
+  updatedAt             DateTime               @updatedAt @map("updated_at")
+  user                  User                   @relation(fields: [userId], references: [id], onDelete: Cascade) // 이사업자-유저 1:1
+  customerFavorites     CustomerFavorite[] // 이사업자-고객찜 1:N
+  moverServices         MoverService[] // 이사업자-이사서비스 1:N
+  moverServiceRegions   MoverServiceRegion[] // 이사업자-이사서비스지역 1:N
+  targetedQuoteRequests TargetedQuoteRequest[] // 이사업자-지정견적요청 1:N
+  moverQuotes           MoverQuote[] // 이사업자-이사업자견적 1:N
+
+  @@map("mover")
 }
 
 // 고객님이 찜한 이사업자
 model CustomerFavorite {
-  id        String   @id @default(cuid())
-  customer_id String
-  mover_id    String
-  created_at DateTime @default(now())
-  customer  Customer @relation(fields: [customer_id], references: [id],onDelete: Cascade) // 고객-고객찜 1:N
-  mover     Mover    @relation(fields: [mover_id], references: [id],onDelete: Cascade) // 이사업자-고객찜 1:N
+  id         String   @id @default(cuid())
+  customerId String   @map("customer_id")
+  moverId    String   @map("mover_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade) // 고객-고객찜 1:N
+  mover      Mover    @relation(fields: [moverId], references: [id], onDelete: Cascade) // 이사업자-고객찜 1:N
 
-  @@unique([customer_id, mover_id]) // 특정 고객이 같은 이사업자를 중복해서 찜할 수 없도록 유니크 제약 추가
+  @@unique([customerId, moverId]) // 특정 고객이 같은 이사업자를 중복해서 찜할 수 없도록 유니크 제약 추가
+  @@map("customer_favorite")
 }
 
 enum ServiceType {
@@ -119,12 +130,14 @@ enum ServiceType {
 
 // 이사업자 제공 서비스
 model MoverService {
-  id        String   @id @default(cuid())
-  mover_id   String
-  service_type ServiceType // 제공 서비스
-  created_at DateTime @default(now())
-  mover     Mover    @relation(fields: [mover_id], references: [id],onDelete: Cascade) // 이사업자-이사서비스 1:N
-  @@unique([mover_id, service_type]) // 특정 이사업자가 같은 서비스를 중복해서 등록할 수 없도록 유니크 제약 추가
+  id          String      @id @default(cuid())
+  moverId     String      @map("mover_id")
+  serviceType ServiceType @map("service_type") // 제공 서비스
+  createdAt   DateTime    @default(now()) @map("created_at")
+  mover       Mover       @relation(fields: [moverId], references: [id], onDelete: Cascade) // 이사업자-이사서비스 1:N
+
+  @@unique([moverId, serviceType]) // 특정 이사업자가 같은 서비스를 중복해서 등록할 수 없도록 유니크 제약 추가
+  @@map("mover_service")
 }
 
 enum Region {
@@ -150,29 +163,32 @@ enum Region {
 // 이사업자 서비스 지역
 model MoverServiceRegion {
   id        String   @id @default(cuid())
-  mover_id   String
+  moverId   String   @map("mover_id")
   region    Region // 서비스 가능 지역
-  created_at DateTime @default(now())
-  mover     Mover    @relation(fields: [mover_id], references: [id],onDelete: Cascade) // 이사업자-이사서비스지역 1:N
+  createdAt DateTime @default(now()) @map("created_at")
+  mover     Mover    @relation(fields: [moverId], references: [id], onDelete: Cascade) // 이사업자-이사서비스지역 1:N
 
-  @@unique([mover_id, region]) // 특정 이사업자가 같은 지역을 중복해서 등록할 수 없도록 유니크 제약 추가
+  @@unique([moverId, region]) // 특정 이사업자가 같은 지역을 중복해서 등록할 수 없도록 유니크 제약 추가
+  @@map("mover_service_region")
 }
 
 // 견적 요청
 model QuoteRequest {
-  id        String   @id @default(cuid())
-  customer_id String
-  move_type ServiceType // 이사 종류
-  from_region Region // 출발지
-  to_region Region // 도착지
-  move_date DateTime // 이사 예정일 및 시간대
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-  customer  Customer @relation(fields: [customer_id], references: [id],onDelete: Cascade) // 고객-견적요청 1:N
-  quote_request_addresses QuoteRequestAddress[] // 견적요청-견적요청주소 1:N
-  quote_status_histories QuoteStatusHistory[] // 견적요청-견적상태이력 1:N
-  targeted_quote_requests TargetedQuoteRequest[] // 견적요청-지정견적요청 1:N
-  mover_quotes MoverQuote[] // 견적요청-이사업자견적 1:N
+  id                    String                 @id @default(cuid())
+  customerId            String                 @map("customer_id")
+  moveType              ServiceType            @map("move_type") // 이사 종류
+  fromRegion            Region                 @map("from_region") // 출발지
+  toRegion              Region                 @map("to_region") // 도착지
+  moveDate              DateTime               @map("move_date") // 이사 예정일 및 시간대
+  createdAt             DateTime               @default(now()) @map("created_at")
+  updatedAt             DateTime               @updatedAt @map("updated_at")
+  customer              Customer               @relation(fields: [customerId], references: [id], onDelete: Cascade) // 고객-견적요청 1:N
+  quoteRequestAddresses QuoteRequestAddress[] // 견적요청-견적요청주소 1:N
+  quoteStatusHistories  QuoteStatusHistory[] // 견적요청-견적상태이력 1:N
+  targetedQuoteRequests TargetedQuoteRequest[] // 견적요청-지정견적요청 1:N
+  moverQuotes           MoverQuote[] // 견적요청-이사업자견적 1:N
+
+  @@map("quote_request")
 }
 
 enum AddressType {
@@ -182,87 +198,103 @@ enum AddressType {
 
 // 견적 요청 주소
 model QuoteRequestAddress {
-  id        String   @id @default(cuid())
-  quote_request_id String
-  sido     String // 시도
-  sigungu  String // 시군구
-  street  String // 도로명
-  full_address String // 상세 주소
-  type      AddressType // 출발지/도착지
-  quote_request  QuoteRequest @relation(fields: [quote_request_id], references: [id],onDelete: Cascade) // 견적요청주소-견적요청 1:N
+  id             String       @id @default(cuid())
+  quoteRequestId String       @map("quote_request_id")
+  sido           String // 시도
+  sigungu        String // 시군구
+  street         String // 도로명
+  fullAddress    String       @map("full_address") // 상세 주소
+  type           AddressType // 출발지/도착지
+  quoteRequest   QuoteRequest @relation(fields: [quoteRequestId], references: [id], onDelete: Cascade) // 견적요청주소-견적요청 1:N
+
+  @@map("quote_request_address")
 }
 
 // 견적 상태 이력
 model QuoteStatusHistory {
-  id        String   @id @default(cuid())
-  quote_request_id String
-  status    String // 견적 상태
-  updated_at DateTime @updatedAt
-  quote_request  QuoteRequest @relation(fields: [quote_request_id], references: [id],onDelete: Cascade) // 견적상태이력-견적요청 1:N
+  id             String       @id @default(cuid())
+  quoteRequestId String       @map("quote_request_id")
+  status         String // 견적 상태
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+  quoteRequest   QuoteRequest @relation(fields: [quoteRequestId], references: [id], onDelete: Cascade) // 견적상태이력-견적요청 1:N
+
+  @@map("quote_status_history")
 }
 
-/** 견적 상태 종류
-  * QUOTE_REQUESTED: 견적 요청
-  * MOVER_SUBMITTED: 이사업자가 견적 제출
-  * QUOTE_CONFIRMED: 견적 확정
-  * QUOTE_CANCELED: 견적 취소
-  * REQUEST_EXPIRED: 요청 만료
-  * MOVE_COMPLETED: 이사 완료
-  */
+/**
+ * 견적 상태 종류
+ * QUOTE_REQUESTED: 견적 요청
+ * MOVER_SUBMITTED: 이사업자가 견적 제출
+ * QUOTE_CONFIRMED: 견적 확정
+ * QUOTE_CANCELED: 견적 취소
+ * REQUEST_EXPIRED: 요청 만료
+ * MOVE_COMPLETED: 이사 완료
+ */
 
 // 지정견적 요청
 model TargetedQuoteRequest {
-  id        String   @id @default(cuid())
-  mover_id   String
-  quote_request_id String
-  created_at DateTime @default(now())
-  mover     Mover    @relation(fields: [mover_id], references: [id],onDelete: Cascade) // 이사업자-지정견적요청 1:N
-  quote_request  QuoteRequest @relation(fields: [quote_request_id], references: [id],onDelete: Cascade) // 견적요청-지정견적요청 1:N
-  targeted_quote_rejections TargetedQuoteRejection? // 지정견적요청-지정견적거절 1:1
-  mover_quote MoverQuote?   // 지정견적요청-이사업자견적 1:1
+  id                     String                  @id @default(cuid())
+  moverId                String                  @map("mover_id")
+  quoteRequestId         String                  @map("quote_request_id")
+  createdAt              DateTime                @default(now()) @map("created_at")
+  mover                  Mover                   @relation(fields: [moverId], references: [id], onDelete: Cascade) // 이사업자-지정견적요청 1:N
+  quoteRequest           QuoteRequest            @relation(fields: [quoteRequestId], references: [id], onDelete: Cascade) // 견적요청-지정견적요청 1:N
+  targetedQuoteRejection TargetedQuoteRejection? // 지정견적요청-지정견적거절 1:1
+  moverQuote             MoverQuote? // 지정견적요청-이사업자견적 1:1
+
+  @@map("targeted_quote_request")
 }
 
 // 지정견적 거절
 model TargetedQuoteRejection {
-  id        String   @id @default(cuid())
-  targeted_quote_request_id String @unique
-  rejection_reason    String // 반려 사유
-  created_at DateTime @default(now())
-  targeted_quote_request  TargetedQuoteRequest @relation(fields: [targeted_quote_request_id], references: [id],onDelete: Cascade) // 지정견적요청-지정견적거절 1:N
+  id                     String               @id @default(cuid())
+  targetedQuoteRequestId String               @unique @map("targeted_quote_request_id")
+  rejectionReason        String               @map("rejection_reason") // 반려 사유
+  createdAt              DateTime             @default(now()) @map("created_at")
+  targetedQuoteRequest   TargetedQuoteRequest @relation(fields: [targetedQuoteRequestId], references: [id], onDelete: Cascade) // 지정견적요청-지정견적거절 1:N
+
+  @@map("targeted_quote_rejection")
 }
 
 // 이사업자 견적
 model MoverQuote {
-  id        String   @id @default(cuid())
-  targeted_quote_request_id String? @unique // 지정견적요청 없을 수 있음
-  mover_id   String
-  quote_request_id String
-  price     Int // 견적 가격
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-  targeted_quote_request  TargetedQuoteRequest? @relation(fields: [targeted_quote_request_id], references: [id],onDelete: Cascade) // 지정견적요청-이사업자견적 1:N
-  mover     Mover    @relation(fields: [mover_id], references: [id],onDelete: Cascade) // 이사업자-이사업자견적 1:N
-  quote_request  QuoteRequest @relation(fields: [quote_request_id], references: [id], onDelete: Cascade) // 견적요청-이사업자견적 1:N
-  quote_match QuoteMatch? // 이사업자견적-견적매칭 1:1
-} 
+  id                     String                @id @default(cuid())
+  targetedQuoteRequestId String?               @unique @map("targeted_quote_request_id") // 지정견적요청 없을 수 있음
+  moverId                String                @map("mover_id")
+  quoteRequestId         String                @map("quote_request_id")
+  price                  Int // 견적 가격
+  createdAt              DateTime              @default(now()) @map("created_at")
+  updatedAt              DateTime              @updatedAt @map("updated_at")
+  targetedQuoteRequest   TargetedQuoteRequest? @relation(fields: [targetedQuoteRequestId], references: [id], onDelete: Cascade) // 지정견적요청-이사업자견적 1:N
+  mover                  Mover                 @relation(fields: [moverId], references: [id], onDelete: Cascade) // 이사업자-이사업자견적 1:N
+  quoteRequest           QuoteRequest          @relation(fields: [quoteRequestId], references: [id], onDelete: Cascade) // 견적요청-이사업자견적 1:N
+  quoteMatch             QuoteMatch? // 이사업자견적-견적매칭 1:1
+
+  @@map("mover_quote")
+}
 
 // 확정된 견적, 견적 매칭
 model QuoteMatch {
-  id        String   @id @default(cuid())
-  mover_quote_id String @unique
-  is_completed Boolean @default(false) // 이사 완료 여부
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-  mover_quote  MoverQuote @relation(fields: [mover_quote_id], references: [id],onDelete: Cascade) // 이사업자견적-견적매칭 1:N
-  review Review? // 견적매칭-리뷰 1:1
+  id           String     @id @default(cuid())
+  moverQuoteId String     @unique @map("mover_quote_id")
+  isCompleted  Boolean    @default(false) @map("is_completed") // 이사 완료 여부
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+  moverQuote   MoverQuote @relation(fields: [moverQuoteId], references: [id], onDelete: Cascade) // 이사업자견적-견적매칭 1:N
+  review       Review? // 견적매칭-리뷰 1:1
+
+  @@map("quote_match")
 }
 
 // 리뷰
 model Review {
-  id        String   @id @default(cuid())
-  quote_match_id String @unique
-  rating    Int // 평점, 1~5점, 1점 단위
-  content   String // 리뷰 내용, 최소 10자 이상
-  created_at DateTime @default(now())
-  quote_match  QuoteMatch @relation(fields: [quote_match_id], references: [id],onDelete: Cascade) // 견적매칭-리뷰 1:N
+  id           String     @id @default(cuid())
+  quoteMatchId String     @unique @map("quote_match_id")
+  rating       Int // 평점, 1~5점, 1점 단위
+  content      String // 리뷰 내용, 최소 10자 이상
+  createdAt    DateTime   @default(now()) @map("created_at")
+  quoteMatch   QuoteMatch @relation(fields: [quoteMatchId], references: [id], onDelete: Cascade) // 견적매칭-리뷰 1:N
+
+  @@map("review")
 }
