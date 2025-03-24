@@ -100,4 +100,11 @@ export default class QuoteRequestsRepository {
       totalPages: Math.ceil(totalCount / pageSize),
     };
   }
+  async findCustomer(id: string) {
+    return await this.prismaClient.customer.findUnique({
+      where: {
+        id,
+      },
+    });
+  }
 }
