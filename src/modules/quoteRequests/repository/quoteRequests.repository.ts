@@ -1,4 +1,5 @@
 import { PrismaClient, Region, ServiceType } from '@prisma/client';
+import { CreateQuoteRequestData } from '../dto/createQuoteRequest.dto';
 
 export default class QuoteRequestsRepository {
   constructor(private prismaClient: PrismaClient) {}
@@ -34,22 +35,7 @@ export default class QuoteRequestsRepository {
     },
   };
 
-  async createQuoteRequest(data: {
-    customerId: string;
-    moveType: ServiceType;
-    fromRegion: Region;
-    toRegion: Region;
-    moveDate: Date;
-    quoteRequestAddresses: {
-      create: Array<{
-        type: 'DEPARTURE' | 'ARRIVAL';
-        sido: string;
-        sigungu: string;
-        street: string;
-        fullAddress: string;
-      }>;
-    };
-  }) {
+  async createQuoteRequest(data: CreateQuoteRequestData) {
     return await this.prismaClient.quoteRequest.create({
       data: {
         ...data,
