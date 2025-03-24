@@ -7,7 +7,8 @@ export default class QuoteRequestsController {
   createQuoteRequest = async (req: Request, res: Response) => {
     // 고객인지 확인하는 코드 필요
     // 데이터 유효성 검사 필요
-    const customerId = req.user?.userId ?? '';
+    const customerId = 'cm8h58x7b000uws8j7ivn6ihf';
+
     const quoteRequest = await this.quoteRequestsService.createQuoteRequest(customerId, req.body);
     return res.status(201).json(quoteRequest);
   };

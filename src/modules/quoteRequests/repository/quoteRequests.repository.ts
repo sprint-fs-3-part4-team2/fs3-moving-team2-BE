@@ -1,4 +1,4 @@
-import { PrismaClient, Region, ServiceType } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { CreateQuoteRequestData } from '../dto/createQuoteRequest.dto';
 
 export default class QuoteRequestsRepository {
@@ -99,12 +99,5 @@ export default class QuoteRequestsRepository {
       pageSize,
       totalPages: Math.ceil(totalCount / pageSize),
     };
-  }
-  async findCustomer(id: string) {
-    return await this.prismaClient.customer.findUnique({
-      where: {
-        id,
-      },
-    });
   }
 }
