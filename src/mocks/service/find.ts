@@ -71,7 +71,7 @@ const userCustomerFind = async () => {
 };
 
 const customerFind = async (
-  { where }: { where?: Prisma.CustomerWhereInput },
+  { where, include }: { where?: Prisma.CustomerWhereInput; include?: Prisma.CustomerInclude },
   leanTime: number,
 ): Promise<CustomerFind[]> => {
   return new Promise((resolve, reject) => {
