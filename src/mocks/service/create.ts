@@ -53,6 +53,23 @@ const create = async <T extends ModelWithCreateMany>(model: T, data: any[], noMs
     errorMsg(`${model} (create fn)`, err);
   }
 };
+const justCreate = async <T extends ModelWithCreateMany>(
+  model: T,
+  data: any[],
+  noMsg?: boolean,
+) => {
+  try {
+    const delegate = prismaClient[model] as unknown as {
+      createMany: CreateManyFn;
+    };
+    const createData = await delegate.createMany({
+      data: data,
+    });
+    if (createData && !noMsg) passMsg(`${model} 테이블 데이터 생성`);
+  } catch (err) {
+    errorMsg(`${model} (create fn)`, err);
+  }
+};
 
 const createUser = async () => {
   startMsg('user create');
@@ -87,8 +104,7 @@ const createCustomer = async () => {
       'customer',
       customer.map((user): Prisma.CustomerCreateManyInput => {
         const { id } = user;
-        const imgPath =
-          'd3h2ixicz4w2p.cloudfront.net/uploads/1742216810416-스크린샷 2025-01-03 131708.png';
+        const imgPath = `/img/sample-profile/sample-${random(Array.from({ length: 6 })) + 1}.svg`;
         return {
           userId: id,
           profileImage: imgPath,
@@ -111,8 +127,7 @@ const createMover = async () => {
         const randomMover = random(moverMock);
         const { id } = user;
         const { experience_years, introduction, description } = moverMock[randomMover];
-        const imgPath =
-          'd3h2ixicz4w2p.cloudfront.net/uploads/1742216810416-스크린샷 2025-01-03 131708.png';
+        const imgPath = `/img/sample-profile/sample-${random(Array.from({ length: 6 })) + 1}.svg`;
         return {
           userId: id,
           profileImage: imgPath,
@@ -182,7 +197,7 @@ const createCustomerFavorite = async () => {
   try {
     const customer = await customerFind({}, leanTime);
     const mover = await moverFind({}, leanTime);
-    customer.forEach(async (v, i) => {
+    customer.forEach(async (v) => {
       const { id: customerId } = v;
       const moverLength = random(mover);
       await create(
@@ -210,16 +225,16 @@ const createQuoteRequest = async () => {
       customer.map((val): Prisma.QuoteRequestCreateManyInput => {
         const qrmIndex = random(quotesRequestMock);
         const { moveDate } = quotesRequestMock[qrmIndex];
-        const { id } = val;
-        const region = Object.values(Region);
+        const { id, location } = val;
+        const region = Object.values(Region).filter((x) => x !== location);
         const regionIndex = random(region);
         const serviceType = Object.values(ServiceType);
         const serviceTypeIndex = random(serviceType);
         return {
           customerId: id,
           moveType: serviceType[serviceTypeIndex],
-          fromRegion: region[regionIndex],
-          toRegion: region[regionIndex + 1 >= region.length ? 0 : regionIndex + 1],
+          fromRegion: location,
+          toRegion: region[regionIndex],
           moveDate: moveDate,
         };
       }),
@@ -278,10 +293,10 @@ const createQuoteMatch = async () => {
           );
 
           const ranIndex = random(moverQuote);
-          return moverQuote[ranIndex]; // moverQuote가 비어 있으면 undefined 가능
+          return moverQuote[ranIndex];
         }),
       )
-    ).filter(Boolean); // <-- 여기에서 필터링 적용
+    ).filter(Boolean);
 
     await create(
       'quoteMatch',
@@ -357,25 +372,50 @@ const createQuoteRequestAddress = async () => {
       return [to, from];
     });
 
+    // 출발지
     await create(
       'quoteRequestAddress',
       toFrom.map((val, i: number): Prisma.QuoteRequestAddressCreateManyInput => {
-        const { sido, sigungu, street } = val[i % 2 === 0 ? 0 : 1] ?? {
+        const { sido, sigungu, street } = val[1] ?? {
           sido: '',
           sigungu: '',
           street: '',
         };
 
         return {
-          quoteRequestId: quoteRequest[Math.floor(i / 2)].id,
-          type: i % 2 === 0 ? 'DEPARTURE' : 'ARRIVAL',
+          quoteRequestId: quoteRequest[i].id,
+          type: 'DEPARTURE',
           sido,
           sigungu,
           street,
           fullAddress: `${sido} ${sigungu} ${street}`,
         };
       }),
+      true,
     );
+
+    // 도착지
+    await justCreate(
+      'quoteRequestAddress',
+      toFrom.map((val, i: number): Prisma.QuoteRequestAddressCreateManyInput => {
+        const { sido, sigungu, street } = val[0] ?? {
+          sido: '',
+          sigungu: '',
+          street: '',
+        };
+
+        return {
+          quoteRequestId: quoteRequest[i].id,
+          type: 'ARRIVAL',
+          sido,
+          sigungu,
+          street,
+          fullAddress: `${sido} ${sigungu} ${street}`,
+        };
+      }),
+      true,
+    );
+    passMsg('quoteRequestAddress 테이블 데이터 생성', `Length ${toFrom.length * 2}`);
   } catch (err) {
     errorMsg(`quoteRequestAddress mock 데이터 생성`, err);
   }
@@ -449,7 +489,7 @@ const createTargetedQuoteRequest = async () => {
           await update('moverQuote', args);
         }),
       );
-      passMsg('moverQuote update', `Length ${tqr.length}`);
+      passMsg('moverQuote 업데이트', `Length ${tqr.length}`);
     } catch (error) {
       errorMsg('moverQuote update ', error);
     }
@@ -522,5 +562,6 @@ export {
   createTargetedQuoteRequest,
   createTargetedQuoteReject,
   createReview,
+  justCreate,
 };
 export default create;
