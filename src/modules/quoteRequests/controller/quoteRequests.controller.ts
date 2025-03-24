@@ -10,7 +10,7 @@ export default class QuoteRequestsController {
     const customerId = 'cm8h58x7b000uws8j7ivn6ihf';
 
     const quoteRequest = await this.quoteRequestsService.createQuoteRequest(customerId, req.body);
-    return res.status(201).json(quoteRequest);
+    res.status(201).json(quoteRequest);
   };
 
   getLatestQuoteRequestForCustomer = async (req: Request, res: Response) => {
