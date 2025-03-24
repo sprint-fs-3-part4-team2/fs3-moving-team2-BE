@@ -1,9 +1,11 @@
 import { Request, Response } from 'express';
-import * as completedService from '../service/completedService';
+import getReviewsByUserId from '../service/completedService';
 
 export async function getSubmittedReviews(req: Request, res: Response) {
+  const { id } = req.params;
+
   try {
-    const submittedReviews = await completedService.getSubmittedReviews();
+    const submittedReviews = await getReviewsByUserId(id);
     res.status(200).json(submittedReviews);
   } catch (error) {
     console.error(error);

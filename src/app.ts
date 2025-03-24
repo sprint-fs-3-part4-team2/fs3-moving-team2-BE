@@ -10,15 +10,14 @@ import reviewRouter from './modules/reviews/routes';
 import moverQuotesRouter from './modules/moverQuotes/routes';
 import quoteRequestRouter from './modules/quoteRequests/routes';
 import { extractUserMiddleware } from './core/middleware/auth/extractUser';
-import favoriteRouter from './modules/favorites/routes';
 import authRouter from './modules/auth/routes';
 import notificationRouter from './modules/notification/routes';
-import rejectionRouter from './modules/rejection/routes';
+import favoriteRouter from './modules/favorites/routes';
 
 dotenv.config();
 
 // 환경 변수 설정
-const port = process.env.PORT || 8080;
+const port = process.env.PORT || 8000;
 const allowedOrigins: string[] = [
   process.env.DEPLOYED_URL ?? '',
   process.env.LOCALHOST_URL ?? '',
@@ -38,7 +37,7 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(extractUserMiddleware);
 app.use(express.urlencoded({ extended: true })); // 필요한거야?  // body-parser 대체
-app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec)); // swagger 설정
+app.use('/api', swaggerUi.serve, swaggerUi.setup(swaggerSpec)); // swagger 설정
 
 // 기본 라우터 설정
 app.get('/', (req: Request, res: Response) => {
@@ -54,7 +53,6 @@ app.use('/favorites', favoriteRouter);
 app.use('/auth', authRouter);
 app.use('/quote-requests', quoteRequestRouter);
 app.use('/notification', notificationRouter);
-app.use('/rejection', rejectionRouter);
 
 // 서버 실행
 app.listen(port, () => {
