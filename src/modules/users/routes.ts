@@ -1,15 +1,13 @@
-import { NextFunction, Request, Response, Router } from 'express';
+import { Router } from 'express';
 import userControlelr from './controller/controller';
+import { createAuthMiddleware } from '@/core/middleware/auth/auth';
 
 const userRouter = Router();
 
 // 기사 - 기본 정보 수정
 userRouter.post(
   '/mover/baiscinfo/edit',
-  (req: Request, res: Response, next: NextFunction) => {
-    // auth 미들웨어
-    next();
-  },
+  createAuthMiddleware('mover'),
   userControlelr.MoverBaiscInfoEdit,
 );
 
