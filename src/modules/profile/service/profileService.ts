@@ -9,24 +9,46 @@ export async function createUserProfile(profileData: {
   serviceTypes: string[];
   locations: string[];
 }) {
-  const { userId, profileImage, serviceTypes, locations } = profileData;
+  try {
+    const { userId, profileImage, serviceTypes, locations } = profileData;
 
-  // 프로필이 이미 있으면 return
+    // 기존 유저 중복 체크
+    const existingCustomer = await prisma.customer.findUnique({
+      where: { userId },
+    });
 
-  // 유저 프로필 등록
-  const customerProfile = await prisma.customer.create({
-    data: {
-      userId: userId,
-      profileImage: profileImage,
-      location: locations[0] as Region,
-      customerServices: {
-        create: serviceTypes.map((serviceType) => ({
-          serviceType: serviceType as ServiceType,
-        })),
+    if (existingCustomer) {
+      throw new Error('프로필이 이미 등록되어 있습니다');
+    }
+
+    // 유저 프로필 등록
+    const customerProfile = await prisma.customer.create({
+      data: {
+        userId: userId,
+        profileImage: profileImage,
+        location: locations[0] as Region, // 고객 지역은 하나만
+        customerServices: {
+          create: serviceTypes.map((serviceType) => ({
+            serviceType: serviceType as ServiceType,
+          })),
+        },
       },
+    });
+    return customerProfile;
+  } catch (err) {
+    console.log('error : ', err);
+    return;
+  }
+}
+
+// 고객 프로필 유무 확인
+export async function findCustomerProfile(userId: string) {
+  const findProfile = await prisma.customer.findFirst({
+    where: {
+      userId: userId,
     },
   });
-  return customerProfile;
+  return findProfile;
 }
 
 // 고객 프로필 수정 (이름, 이메일, 전화번호새 비밀번호, 이미지, 이용 서비스, 지역)
@@ -40,15 +62,24 @@ export async function patchUserProfile(patchData: {
   serviceTypes: string[];
   locations: string[];
 }) {
-  const { userId, passwordNew, profileImage, serviceTypes, locations } = patchData;
+  const { userId, phoneAddress, passwordNew, profileImage, serviceTypes, locations } = patchData;
 
-  const customer = await prisma.customer.findFirst({
+  // 고객 확인
+  const customer = await prisma.customer.findUnique({
     where: { userId: userId },
     select: { id: true },
   });
 
   if (!customer) {
-    throw new Error('해당 userId에 해당하는 고객을 찾을 수 없습니다.');
+    throw new Error('해당 userId에 해당하는 고객을 찾을 수 없습니다');
+  }
+  //전화번호 중복 확인
+  const existingPhone = await prisma.user.findFirst({
+    where: { phoneNumber: phoneAddress, userType: 'CUSTOMER' }, // 기사 계정이 있을 수 있으니 타입 추가
+  });
+
+  if (existingPhone && existingPhone.id !== userId) {
+    throw new Error('이미 사용 중인 전화번호입니다');
   }
 
   const updatedCustomerProfile = await prisma.$transaction([
@@ -83,7 +114,6 @@ export async function patchUserProfile(patchData: {
 // 기사 프로필 등록 (이미지, 별명, 경력, 한 줄 소개, 상세설명, 제공 서비스, 지역)
 export async function createMoverProfile(profileData: {
   userId: string;
-  nickname: string;
   experience: number;
   shortIntro: string;
   description: string;
@@ -91,16 +121,8 @@ export async function createMoverProfile(profileData: {
   serviceTypes: string[];
   locations: string[];
 }) {
-  const {
-    userId,
-    nickname,
-    experience,
-    shortIntro,
-    description,
-    profileImage,
-    serviceTypes,
-    locations,
-  } = profileData;
+  const { userId, experience, shortIntro, description, profileImage, serviceTypes, locations } =
+    profileData;
 
   // 유저 프로필 등록
   const moverProfile = await prisma.$transaction(async (prisma) => {
@@ -110,7 +132,7 @@ export async function createMoverProfile(profileData: {
     });
 
     if (existingMover) {
-      throw new Error('이미 등록된 기사 프로필이 있습니다.');
+      throw new Error('프로필이 이미 등록되어 있습니다');
     }
 
     // mover 생성
@@ -152,7 +174,6 @@ export async function createMoverProfile(profileData: {
 // 기사 프로필 수정 (이미지, 별명, 경력, 한 줄 소개, 상세설명, 제공 서비스, 지역)
 export async function patchMoverProfile(patchData: {
   userId: string;
-  nickname: string;
   experience: number;
   shortIntro: string;
   description: string;
@@ -160,16 +181,8 @@ export async function patchMoverProfile(patchData: {
   serviceTypes: string[];
   locations: string[];
 }) {
-  const {
-    userId,
-    // nickname,
-    experience,
-    shortIntro,
-    description,
-    profileImage,
-    serviceTypes,
-    locations,
-  } = patchData;
+  const { userId, experience, shortIntro, description, profileImage, serviceTypes, locations } =
+    patchData;
 
   const mover = await prisma.mover.findFirst({
     where: { userId: userId },
@@ -177,7 +190,7 @@ export async function patchMoverProfile(patchData: {
   });
 
   if (!mover) {
-    throw new Error('해당 userId에 해당하는 기사를 찾을 수 없습니다.');
+    throw new Error('해당 userId에 해당하는 기사를 찾을 수 없습니다');
   }
 
   const updatedMoverProfile = await prisma.$transaction([
