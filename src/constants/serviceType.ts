@@ -1,3 +1,5 @@
+import { Region } from '@prisma/client';
+
 export const MOVE_TYPE = {
   HOME_MOVE: 'home',
   SMALL_MOVE: 'small',
@@ -30,3 +32,24 @@ export function getEnglishMoveType(
 ): keyof typeof MOVE_TYPE_KOREAN {
   return MOVE_TYPE_ENGLISH[koreanType] || '알 수 없음';
 }
+
+// 서울, SEOUL
+export const REGION_MAP: Record<string, keyof typeof Region> = {
+  서울: 'SEOUL',
+  부산: 'BUSAN',
+  대구: 'DAEGU',
+  인천: 'INCHEON',
+  광주: 'GWANGJU',
+  대전: 'DAEJEON',
+  울산: 'ULSAN',
+  세종: 'SEJONG',
+  경기: 'GYEONGGI',
+  강원: 'GANGWON',
+  충북: 'CHUNGBUK',
+  충남: 'CHUNGNAM',
+  전북: 'JEONBUK',
+  전남: 'JEONNAM',
+  경북: 'GYEONGBUK',
+  경남: 'GYEONGNAM',
+  제주: 'JEJU',
+};
