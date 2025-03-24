@@ -1,57 +1,67 @@
-// import prismaClient from '@/prismaClient';
-// import { Request } from 'express';
-// import { InfoEditType } from '../types/repo.type';
-// import userRepository from './userRepository';
+import prismaClient from '@/prismaClient';
+import UserRepository from './userRepository'; // 경로는 실제 파일 위치에 맞게 조정
+import { InfoEditType } from '../types/repo.type';
+import { UserType } from '@prisma/client';
 
-// jest.mock('@/prismaClient', () => ({
-//   user: {
-//     update: jest.fn(),
-//   },
-// }));
+// prismaClient를 모킹합니다.
+jest.mock('@/prismaClient', () => ({
+  user: {
+    update: jest.fn(),
+  },
+}));
 
-// describe('userRepository.userEdit', () => {
-//   let repository: userRepository;
+describe('UserRepository', () => {
+  const mockUser = {
+    userId: '123',
+    type: 'customer' as 'customer' | 'mover',
+  };
 
-//   beforeEach(() => {
-//     const mockUser: Request['user'] = { userId: '123', type: 'mover' };
-//     repository = new userRepository(mockUser);
-//   });
+  const validInfoEdit: InfoEditType = {
+    data: {
+      name: 'Test User',
+      password: 'newPassword',
+      phoneNumber: '010-1234-5678',
+    },
+    where: {
+      currentPassword: 'currentPassword',
+    },
+  };
 
-//   afterEach(() => {
-//     jest.clearAllMocks();
-//   });
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
-//   const testInfo: InfoEditType = {
-//     where: { id: '123' },
-//     data: {
-//       name: 'new name',
-//       password: 'newPassword', // hash 필요
-//       phoneNumber: '01012345678', // 010-0000-0000 ?
-//     },
-//   };
+  it('성공', async () => {
+    // prismaClient.user.update가 성공적으로 업데이트된 결과를 반환하는 경우
+    (prismaClient.user.update as jest.Mock).mockResolvedValue({
+      id: mockUser.userId,
+      ...validInfoEdit.data,
+    });
 
-//   it('successful', async () => {
-//     (prismaClient.user.update as jest.Mock).mockResolvedValue(testInfo.data);
+    const userRepository = new UserRepository(mockUser);
+    const result = await userRepository.userEdit(validInfoEdit);
 
-//     const result = await repository.userEdit(testInfo);
+    expect(result).toBe(true);
+    expect(prismaClient.user.update).toHaveBeenCalledWith({
+      where: {
+        id: mockUser.userId,
+        userType: mockUser.type.toUpperCase(),
+        password: validInfoEdit.where.currentPassword,
+      },
+      data: {
+        name: validInfoEdit.data.name,
+        password: validInfoEdit.data.password,
+        phoneNumber: validInfoEdit.data.phoneNumber,
+      },
+    });
+  });
 
-//     expect(prismaClient.user.update).toHaveBeenCalledWith({
-//       where: { id: testInfo.where.id },
-//       data: {
-//         name: testInfo.data.name,
-//         password: testInfo.data.password,
-//         phoneNumber: testInfo.data.phoneNumber,
-//       },
-//     });
-//     expect(result).toBe(true);
-//   });
+  it('에러', async () => {
+    (prismaClient.user.update as jest.Mock).mockRejectedValue(new Error('Update error'));
 
-//   it('fails', async () => {
-//     (prismaClient.user.update as jest.Mock).mockRejectedValue(new Error('update failed'));
-
-//     const result = await repository.userEdit(testInfo);
-
-//     expect(prismaClient.user.update).toHaveBeenCalled();
-//     expect(result).toBe(false);
-//   });
-// });
+    const userRepository = new UserRepository(mockUser);
+    const result = await userRepository.userEdit(validInfoEdit);
+    expect(result).toBe(false);
+    expect(prismaClient.user.update).toHaveBeenCalled();
+  });
+});
