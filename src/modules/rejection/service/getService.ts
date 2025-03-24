@@ -9,7 +9,10 @@ export async function getRejectedTargetedQuoteRequestsByMover(moverId: string) {
       targetedQuoteRequest: {
         include: {
           quoteRequest: {
-            include: { customer: { include: { user: true } } },
+            include: {
+              customer: { include: { user: true } },
+              quoteRequestAddresses: true,
+            },
           },
         },
       },
@@ -17,12 +20,25 @@ export async function getRejectedTargetedQuoteRequestsByMover(moverId: string) {
     orderBy: { createdAt: 'desc' },
   });
 
-  return rejectedQuoteRequests.map((rejection) => ({
-    moveType: rejection.targetedQuoteRequest.quoteRequest.moveType,
-    isTargeted: true,
-    customerName: rejection.targetedQuoteRequest.quoteRequest.customer.user.name,
-    serviceDate: rejection.targetedQuoteRequest.quoteRequest.moveDate.toISOString().split('T')[0],
-    fromRegion: rejection.targetedQuoteRequest.quoteRequest.fromRegion,
-    toRegion: rejection.targetedQuoteRequest.quoteRequest.toRegion,
-  }));
+  return rejectedQuoteRequests.map((rejection) => {
+    const departureAddress = rejection.targetedQuoteRequest.quoteRequest.quoteRequestAddresses.find(
+      (addr) => addr.type === 'DEPARTURE',
+    );
+    const arrivalAddress = rejection.targetedQuoteRequest.quoteRequest.quoteRequestAddresses.find(
+      (addr) => addr.type === 'ARRIVAL',
+    );
+
+    return {
+      moveType: rejection.targetedQuoteRequest.quoteRequest.moveType,
+      isTargeted: true,
+      customerName: rejection.targetedQuoteRequest.quoteRequest.customer.user.name,
+      serviceDate: rejection.targetedQuoteRequest.quoteRequest.moveDate.toISOString().split('T')[0],
+      fromRegion: departureAddress
+        ? `${departureAddress.sido} ${departureAddress.sigungu}`
+        : rejection.targetedQuoteRequest.quoteRequest.fromRegion,
+      toRegion: arrivalAddress
+        ? `${arrivalAddress.sido} ${arrivalAddress.sigungu}`
+        : rejection.targetedQuoteRequest.quoteRequest.toRegion,
+    };
+  });
 }
