@@ -1,78 +1,39 @@
-import { NotFoundException } from '@/core/errors';
 import QuoteRequestsRepository from '../repository/quoteRequests.repository';
-import { EXCEPTION_MESSAGES } from '@/constants/exceptionMessages';
-import { Region, ServiceType } from '@prisma/client';
 import QuoteMapper from '@/modules/moverQuotes/mapper/moverQuote.mapper';
-import { MOVE_TYPE_KOREAN } from '@/constants/serviceType';
+import { getEnglishMoveType, MOVE_TYPE_KOREAN, REGION_MAP } from '@/constants/serviceType';
+import { createQuoteRequestDto } from '../dto/createQuoteRequest.dto';
 
 export default class QuoteRequestsService {
   constructor(private quoteRequestRepository: QuoteRequestsRepository) {}
 
-  async createQuoteRequest(customerId: string, data: any) {
-    const parseRegion = (address: string): Region => {
-      const regionMap: Record<string, Region> = {
-        서울: 'SEOUL',
-        부산: 'BUSAN',
-        대구: 'DAEGU',
-        울산: 'ULSAN',
-        인천: 'INCHEON',
-        광주: 'GWANGJU',
-        대전: 'DAEJEON',
-        세종: 'SEJONG',
-        경기: 'GYEONGGI',
-        강원: 'GANGWON',
-        충북: 'CHUNGBUK',
-        충남: 'CHUNGNAM',
-        경북: 'GYEONGBUK',
-        경남: 'GYEONGNAM',
-        전북: 'JEONBUK',
-        전남: 'JEONNAM',
-        제주: 'JEJU',
-      };
-      const firstWord = address.split(' ')[0];
-      return regionMap[firstWord] || 'SEOUL'; // 기본값 처리
-    };
-
-    const fromRegion = parseRegion(data.moveFrom);
-    const toRegion = parseRegion(data.moveTo);
-
-    // 두 번째 단어 이후의 문자열을 추출합니다.
-    const fromSecondWord = data.moveFrom.split(' ')[1];
-    const toSecondWord = data.moveTo.split(' ')[1];
-
-    // 세 번째 단어 이후의 문자열을 추출합니다.
-    const fromRest = data.moveFrom.split(' ').slice(2).join(' ');
-    const toRest = data.moveTo.split(' ').slice(2).join(' ');
-
-    // 견적 요청과 함께 두 주소를 같이 생성하도록 Repository에 전달합니다.
-    await this.quoteRequestRepository.createQuoteRequest({
+  async createQuoteRequest(customerId: string, data: createQuoteRequestDto) {
+    const quoteRequest = await this.quoteRequestRepository.createQuoteRequest({
       customerId,
-      moveType: data.moveType as ServiceType, // enum 값을 맞게 변환
-      fromRegion,
-      toRegion,
+      moveType: getEnglishMoveType(data.moveType),
       moveDate: new Date(data.moveDate),
-      // 관계를 같이 생성하는 nested create 사용
+      fromRegion: REGION_MAP[data.departure.sido],
+      toRegion: REGION_MAP[data.arrival.sido],
       quoteRequestAddresses: {
         create: [
           {
             type: 'DEPARTURE',
-            sido: fromRegion, // 간단히 지역 값 저장
-            sigungu: fromSecondWord,
-            street: fromRest,
-            fullAddress: data.moveFrom,
+            sido: data.departure.sido,
+            sigungu: data.departure.sigungu,
+            street: data.departure.street,
+            fullAddress: data.departure.fullAddress,
           },
           {
             type: 'ARRIVAL',
-            sido: toRegion,
-            sigungu: toSecondWord,
-            street: toRest,
-            fullAddress: data.moveTo,
+            sido: data.arrival.sido,
+            sigungu: data.arrival.sigungu,
+            street: data.arrival.street,
+            fullAddress: data.arrival.fullAddress,
           },
         ],
       },
     });
 
-    return { message: '견적 요청이 성공적으로 생성되었습니다.' };
+    return { data: quoteRequest, message: '견적 요청이 성공적으로 생성되었습니다.' };
   }
 
   async getLatestQuoteRequestForCustomer(customerId: string) {
