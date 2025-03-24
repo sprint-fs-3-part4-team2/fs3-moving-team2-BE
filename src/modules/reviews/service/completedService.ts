@@ -1,6 +1,5 @@
-import { MOVE_TYPE } from '@/constants/serviceType';
 import { PrismaClient } from '@prisma/client';
-import { getKoreanMoveType } from '@/constants/serviceType';
+import { MOVE_TYPE } from '@/constants/serviceType';
 const prisma = new PrismaClient();
 
 export default async function getReviewsByUserId(userId: string) {
@@ -50,7 +49,9 @@ export default async function getReviewsByUserId(userId: string) {
     moverName: review.quoteMatch.moverQuote.mover.user.name,
     imageUrl: review.quoteMatch.moverQuote.mover.profileImage,
     movingDate: review.quoteMatch.moverQuote.quoteRequest.moveDate.toISOString().split('T')[0],
-    movingType: [getKoreanMoveType(review.quoteMatch.moverQuote.quoteRequest.moveType)],
+    movingType: [MOVE_TYPE[review.quoteMatch.moverQuote.quoteRequest.moveType]],
+    // review.quoteMatch.moverQuote.quoteRequest.moveType,
+    // [getKoreanMoveType(review.quoteMatch.moverQuote.quoteRequest.moveType)],
     price: review.quoteMatch.moverQuote.price,
     rating: review.rating,
     reviewContent: review.content,
