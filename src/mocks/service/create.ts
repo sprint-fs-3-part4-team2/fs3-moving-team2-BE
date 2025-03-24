@@ -134,6 +134,8 @@ const createMover = async () => {
           experienceYears: experience_years || 0,
           introduction: introduction || '',
           description: description || '',
+          averageRating: 0,
+          totalReviews: 0,
         };
       }),
     );
@@ -540,6 +542,65 @@ const createReview = async () => {
         };
       }),
     );
+    const mover = await prismaClient.mover.findMany({
+      where: {
+        moverQuotes: {
+          some: {
+            quoteMatch: {
+              isNot: null,
+            },
+          },
+        },
+      },
+      include: {
+        customerFavorites: true,
+        moverQuotes: {
+          where: {
+            quoteMatch: {
+              review: { isNot: null },
+            },
+          },
+          include: {
+            quoteMatch: {
+              include: {
+                review: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    mover
+      .filter((x) => x.moverQuotes.some((mq) => mq.quoteMatch))
+      .forEach(async (v) => {
+        const { moverQuotes, id, customerFavorites } = v;
+        const rating =
+          Math.floor(
+            (moverQuotes.reduce((a: number, c) => {
+              const { quoteMatch } = c;
+              const rev = quoteMatch!.review!;
+              a += rev.rating;
+
+              return a;
+            }, 0) /
+              moverQuotes.length) *
+              10 +
+              0.5,
+          ) / 10;
+
+        await prismaClient.mover.updateMany({
+          where: {
+            id,
+          },
+          data: {
+            averageRating: rating,
+            totalReviews: moverQuotes.length,
+            totalConfirmedCount: moverQuotes.length,
+            totalCustomerFavorite: customerFavorites.length,
+          },
+        });
+      });
   } catch (err) {
     errorMsg(`createReview mock 데이터 생성`, err);
   }
