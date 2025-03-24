@@ -75,40 +75,29 @@ export default class QuoteRequestsService {
     return { message: '견적 요청이 성공적으로 생성되었습니다.' };
   }
 
-  async getLatestQuoteForCustomer(customerId: string) {
-    const quote = await this.quoteRequestRepository.getLatestQuoteRequestByCustomer(customerId);
+  async getLatestQuoteRequestForCustomer(customerId: string) {
+    // 최근 고객의 견적 요청을 조회
+    const quote = await this.quoteRequestRepository.getLatestQuoteRequestForCustomer(customerId);
 
-    if (!quote) throw new NotFoundException(EXCEPTION_MESSAGES.quoteNotFound);
-    const latestStatus = quote.quoteStatusHistories[0];
-
-    // 견적 요청 상태가 견적 요청, 견적 제출, 견적 확정 중 하나이면 true를 반환
-
-    // 견적 확정하면 새로운 견적 요청을 할 수 있도록 구현됨 -> 확장시 수정 필요
-    const activeStatuses = ['QUOTE_REQUESTED', 'MOVER_SUBMITTED'];
-
-    // 견적 요청 상태가 이사 완료이면 새로운 견적 요청을 할 수 있도록 구현됨 -> 확장시 수정 필요
-    // const activeStatuses = ['QUOTE_REQUESTED', 'MOVER_SUBMITTED', 'QUOTE_CONFIRMED'];
-    const isRequested = activeStatuses.includes(latestStatus.status);
-
-    if (isRequested) {
-      // active 상태일 때 필요한 정보 매핑
-      return {
-        isRequested: true,
-        quote: {
-          movingDate: quote.moveDate,
-          // 내부에 저장된 enum값(예: "HOME_MOVE")을 한글로 변환
-          movingType: MOVE_TYPE_KOREAN[quote.moveType],
-          requestedDate: quote.createdAt,
-          arrival: quote.quoteRequestAddresses.find((address) => address.type === 'ARRIVAL')
-            ?.fullAddress,
-          departure: quote.quoteRequestAddresses.find((address) => address.type === 'DEPARTURE')
-            ?.fullAddress,
-        },
-      };
-    } else {
-      // active 상태가 아니라면
+    if (!quote) {
       return { isRequested: false };
     }
+
+    // active 상태일 때 필요한 정보 매핑
+    return {
+      isRequested: true,
+      quote: {
+        id: quote.id,
+        movingDate: quote.moveDate,
+        // 내부에 저장된 enum값(예: "HOME_MOVE")을 한글로 변환
+        movingType: MOVE_TYPE_KOREAN[quote.moveType],
+        requestedDate: quote.createdAt,
+        arrival: quote.quoteRequestAddresses.find((address) => address.type === 'ARRIVAL')
+          ?.fullAddress,
+        departure: quote.quoteRequestAddresses.find((address) => address.type === 'DEPARTURE')
+          ?.fullAddress,
+      },
+    };
   }
 
   async getAllQuoteRequests(page: number, pageSize: number) {
