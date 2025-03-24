@@ -11,7 +11,7 @@ const router = express.Router();
 const quoteRequestsRepository = new QuoteRequestsRepository(prismaClient);
 const quoteRequestsService = new QuoteRequestsService(quoteRequestsRepository);
 const quoteRequestsController = new QuoteRequestsController(quoteRequestsService);
-const { getLatestQuoteForCustomer, createQuoteRequest, getAllQuoteRequests } =
+const { createQuoteRequest, getAllQuoteRequests, getLatestQuoteRequestForCustomer } =
   quoteRequestsController;
 
 // 고객 견적 요청
@@ -21,6 +21,6 @@ router.route('/').post(createAuthMiddleware('customer'), asyncRequestHandler(cre
 router.route('/').get(createAuthMiddleware('mover'), asyncRequestHandler(getAllQuoteRequests));
 
 // 고객 신청한 견적 조회
-router.route('/latest').get(asyncRequestHandler(getLatestQuoteForCustomer));
+router.route('/latest').get(asyncRequestHandler(getLatestQuoteRequestForCustomer));
 
 export default router;
