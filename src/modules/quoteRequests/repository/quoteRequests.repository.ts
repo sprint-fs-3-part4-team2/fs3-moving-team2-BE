@@ -1,4 +1,5 @@
 import { PrismaClient, Region, ServiceType } from '@prisma/client';
+import { CreateQuoteRequestData } from '../dto/createQuoteRequest.dto';
 
 export default class QuoteRequestsRepository {
   constructor(private prismaClient: PrismaClient) {}
@@ -15,22 +16,26 @@ export default class QuoteRequestsRepository {
     },
   };
 
-  async createQuoteRequest(data: {
-    customerId: string;
-    moveType: ServiceType;
-    fromRegion: Region;
-    toRegion: Region;
-    moveDate: Date;
-    quoteRequestAddresses: {
-      create: Array<{
-        type: 'DEPARTURE' | 'ARRIVAL';
-        sido: string;
-        sigungu: string;
-        street: string;
-        fullAddress: string;
-      }>;
-    };
-  }) {
+  // 견적 요청 상태 기록 중 active 상태를 갖는 경우만 필터링
+
+  // 견적 요청 상태가 이사 완료이면 새로운 견적 요청을 할 수 있도록 구현됨 -> 확장시 수정 필요
+  // const activeStatuses = ['QUOTE_REQUESTED', 'MOVER_SUBMITTED', 'QUOTE_CONFIRMED'];
+  private CANCEL_QUOTE_STATUS_HISTORY_CLAUSE = {
+    quoteStatusHistories: {
+      some: {
+        status: {
+          in: ['QUOTE_REQUESTED', 'MOVER_SUBMITTED'], // active 상태(견적 요청, 견적 제출)인 경우
+        },
+      },
+      none: {
+        status: {
+          notIn: ['QUOTE_REQUESTED', 'MOVER_SUBMITTED'], // active 상태가 아닌 경우(견적 확정, 이사 완료)
+        },
+      },
+    },
+  };
+
+  async createQuoteRequest(data: CreateQuoteRequestData) {
     return await this.prismaClient.quoteRequest.create({
       data: {
         ...data,
@@ -46,10 +51,12 @@ export default class QuoteRequestsRepository {
     });
   }
 
-  async getLatestQuoteRequestByCustomer(customerId: string) {
+  async getLatestQuoteRequestForCustomer(customerId: string) {
     return await this.prismaClient.quoteRequest.findFirst({
       where: {
         customerId,
+        // 견적 상태 기록 중 active 상태를 갖는 경우만 필터링
+        ...this.CANCEL_QUOTE_STATUS_HISTORY_CLAUSE,
       },
       orderBy: {
         createdAt: 'desc',

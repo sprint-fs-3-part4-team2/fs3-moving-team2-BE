@@ -13,9 +13,9 @@ export default class QuoteRequestsController {
     res.status(201).json(quoteRequest);
   };
 
-  getLatestQuoteForCustomer = async (req: Request, res: Response) => {
+  getLatestQuoteRequestForCustomer = async (req: Request, res: Response) => {
     const customerId = 'cm8h58x7b000uws8j7ivn6ihf';
-    const quote = await this.quoteRequestsService.getLatestQuoteForCustomer(customerId);
+    const quote = await this.quoteRequestsService.getLatestQuoteRequestForCustomer(customerId);
 
     res.status(200).json(quote);
   };
