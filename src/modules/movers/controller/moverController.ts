@@ -20,7 +20,8 @@ export class MoverController {
     try {
       const { keyword } = req.query;
       if (!keyword) {
-        return res.status(400).json({ error: '검색어를 입력하세요.' });
+        res.status(400).json({ error: '검색어를 입력하세요.' });
+        return;
       }
 
       const movers = await moverService.searchMovers(keyword as string);
