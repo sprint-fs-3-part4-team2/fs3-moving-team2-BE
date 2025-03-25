@@ -1,4 +1,9 @@
-import { QuoteRequest, QuoteRequestAddress, QuoteStatusHistory, ServiceType } from '@prisma/client';
+import {
+  QuoteRequest,
+  QuoteRequestAddress,
+  QuoteStatusHistory,
+  TargetedQuoteRequest,
+} from '@prisma/client';
 
 export interface QuoteForMoverListDtoRequest {
   quoteId: string;
@@ -10,6 +15,9 @@ export interface QuoteForMoverListDtoRequest {
   arrival: string;
   variant: 'requested';
   requestedAt: Date;
+  moverId?: string | null;
+  quoteStatus?: string | null;
+  targetedMoverId?: string | null;
 }
 
 export interface QuoteForMoverListDto extends QuoteRequest {
@@ -17,9 +25,11 @@ export interface QuoteForMoverListDto extends QuoteRequest {
   // customer가 없는 경우도 고려하여 옵셔널로 처리 (실제 데이터 구조에 맞게 수정)
   quoteRequestAddresses: QuoteRequestAddress[];
   quoteStatusHistories: QuoteStatusHistory[];
+  targetedQuoteRequests?: TargetedQuoteRequest[];
   customer?: {
     user: {
       name: string;
     };
   };
+  targetedMoverId?: string | null;
 }

@@ -1,10 +1,14 @@
 import QuoteRequestsRepository from '../repository/quoteRequests.repository';
-import QuoteMapper from '@/modules/moverQuotes/mapper/moverQuote.mapper';
 import { getEnglishMoveType, MOVE_TYPE_KOREAN, REGION_MAP } from '@/constants/serviceType';
 import { createQuoteRequestDto } from '../dto/createQuoteRequest.dto';
+import QuoteRequestsMapper from '../mapper/quoteRequests.mapper';
+import MoverQuotesRepository from '@/modules/moverQuotes/repository/moverQuotesRepository';
 
 export default class QuoteRequestsService {
-  constructor(private quoteRequestRepository: QuoteRequestsRepository) {}
+  constructor(
+    private quoteRequestRepository: QuoteRequestsRepository,
+    private moverQuotesRepository: MoverQuotesRepository,
+  ) {}
 
   async createQuoteRequest(customerId: string, data: createQuoteRequestDto) {
     const quoteRequest = await this.quoteRequestRepository.createQuoteRequest({
@@ -69,6 +73,7 @@ export default class QuoteRequestsService {
     isServiceRegionMatchQuery: boolean,
     isTargetedQuoteQuery: boolean,
     sortByQuery: string,
+    moverId: string,
   ) {
     const whereClause: any = {};
 
@@ -107,16 +112,42 @@ export default class QuoteRequestsService {
       }
     }
 
+    // 기본 정렬: 이사빠른순 (moveDate 오름차순) / sortByQuery가 요청일빠른순인 경우만 조건 변경
+    let orderBy;
+    if (sortByQuery === '요청일빠른순') {
+      orderBy = { createdAt: 'asc' };
+    } else {
+      // sortByQuery가 없거나 '이사빠른순'인 경우 기본적으로 moveDate asc 정렬
+      orderBy = { moveDate: 'asc' };
+    }
+
+    // isServiceRegionMatchQuery가 true이면,
+    // 로그인한 기사님의 moverId를 기반으로 서비스 가능 지역을 조회하여 필터 적용
+    if (isServiceRegionMatchQuery) {
+      // 실제 사용 시에는 moverService나 moverRepository를 통해 기사님의 서비스 가능 지역을 조회
+      const moverRegionsObjects =
+        await this.moverQuotesRepository.getServiceRegionsForMover(moverId);
+      const moverRegions: Array<keyof typeof REGION_MAP> = moverRegionsObjects.map((m) => m.region);
+      whereClause.AND = [{ fromRegion: { in: moverRegions } }, { toRegion: { in: moverRegions } }];
+    }
+
+    // isTargetedQuoteQuery가 true이면,
+    if (isTargetedQuoteQuery) {
+      whereClause.targetedQuoteRequests = {
+        some: { moverId: { equals: moverId } },
+      };
+    }
+
     const data = await this.quoteRequestRepository.getAllQuoteRequests(
       page,
       pageSize,
       whereClause,
-      // sortBy = 'moveDate', moveDate를 기준으로 정렬 + requestDate를 기준으로 정렬
+      orderBy,
     );
 
     return {
-      list: data.list.map((quote) => QuoteRequestsMapper.toQuoteForMoverListDto(quote)),
       totalCount: data.totalCount,
+      list: data.list.map((quote) => QuoteRequestsMapper.toQuoteForMoverListDto(quote, moverId)),
       page: data.page,
       pageSize: data.pageSize,
       totalPages: data.totalPages,
