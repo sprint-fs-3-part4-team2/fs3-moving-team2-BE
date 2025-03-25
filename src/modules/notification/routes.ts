@@ -9,7 +9,7 @@ router.get('/', notificationController.getNotifications);
 // 알람 읽음 업데이트
 router.patch('/:id', notificationController.updateToRead);
 
-// 오늘 알림만 조회
-// router.get('/today');
+// // 알람 보내기(알람 목록 추가)
+// router.post('/:userId', notificationController.createNotification);
 
 export default router;
