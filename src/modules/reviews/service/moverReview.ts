@@ -54,8 +54,6 @@ export async function getMoverReviews(userId: string) {
 
   const averageRating = averageResult._avg.rating ?? 0;
 
-  console.log(reviews);
-  console.log(averageRating);
   return {
     averageRating,
     reviews: reviews.map((review) => ({
