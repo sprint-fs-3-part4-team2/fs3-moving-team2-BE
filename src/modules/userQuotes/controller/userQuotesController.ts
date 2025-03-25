@@ -13,36 +13,14 @@ function handleError(error: unknown, res: Response) {
   return res.status(500).json({ error: '요청을 처리하는 데 실패했습니다.' });
 }
 
-// // 대기 중인 견적 목록 조회
-// export async function getPendingQuotes(req: Request, res: Response): Promise<Response> {
-//   try {
-//     const { customerId } = req.query;
-//     if (!customerId) {
-//       return res.status(400).json({ error: AUTH_MESSAGES.needLogin });
-//     }
-//     const pendingQuotes = await quoteService.getPendingQuotes(customerId as string);
-//     console.log('대기 중인 견적 목록:', pendingQuotes);
-//     return res.status(200).json({ data: pendingQuotes });
-//   } catch (error) {
-//     return handleError(error, res);
-//   }
-// }
-
 // 대기 중인 견적 목록 조회
 export async function getPendingQuotes(req: Request, res: Response): Promise<Response> {
   try {
     const { customerId } = req.query;
-
-    console.log('받은 customerId:', customerId); // customerId 로그
-    console.log('req.user.userId:', req.user?.userId); // req.user.userId 로그 출력
-
     if (!customerId || req.user?.userId !== customerId) {
       return res.status(400).json({ error: AUTH_MESSAGES.needLogin });
     }
     const pendingQuotes = await quoteService.getPendingQuotes(customerId as string);
-
-    console.log('대기 중인 견적 목록:', pendingQuotes); // pendingQuotes 로그
-
     return res.status(200).json({ data: pendingQuotes });
   } catch (error) {
     return handleError(error, res);
