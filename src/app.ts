@@ -15,6 +15,7 @@ import authRouter from './modules/auth/routes';
 import notificationRouter from './modules/notification/routes';
 import rejectionRouter from './modules/rejection/routes';
 import profileRouter from './modules/profile/routes';
+import quoteRouter from './modules/userQuotes/routes';
 
 dotenv.config();
 
@@ -57,6 +58,7 @@ app.use('/quote-requests', quoteRequestRouter);
 app.use('/notification', notificationRouter);
 app.use('/rejection', rejectionRouter);
 app.use('/profile', profileRouter);
+app.use('/quote', quoteRouter);
 
 // 서버 실행
 app.listen(port, () => {
