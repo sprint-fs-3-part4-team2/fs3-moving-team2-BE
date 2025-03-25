@@ -12,6 +12,7 @@ class UserController {
     // 로그인 로직이 생기면 수정 필요함
     const service = new userService({
       userId: 'cm8ib1a9g0000iu5zu6t5d6ug',
+      roleId: '',
       type: userType,
       // userId: req.user?.userId || '1234',
       // type: req.user?.type || 'mover',
