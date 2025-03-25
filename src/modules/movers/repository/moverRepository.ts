@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -17,7 +17,7 @@ export class MoverRepository {
   }
 
   // 정렬 옵션 설정
-  private getOrderBy(sortBy: string) {
+  private getOrderBy(sortBy: string): Prisma.MoverOrderByWithRelationInput {
     switch (sortBy) {
       case 'reviews':
         return { totalReviews: 'desc' };
@@ -30,5 +30,17 @@ export class MoverRepository {
       default:
         return {};
     }
+  }
+
+  // 검색 기능 (이름, 소개에서 검색)
+  async searchMovers(keyword: string) {
+    return await prisma.mover.findMany({
+      where: {
+        OR: [
+          { introduction: { contains: keyword, mode: 'insensitive' } },
+          { description: { contains: keyword, mode: 'insensitive' } },
+        ],
+      },
+    });
   }
 }
