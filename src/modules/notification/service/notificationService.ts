@@ -58,26 +58,39 @@ export async function updateRead(notificationId: string) {
 }
 
 export async function createNotification(postData: {
-  userId: string;
-  messageType: string; // 아래 MESSAGE_MAP을 참고해주세용
+  userId: string; // 알림 보여줄 유저
+  messageType: string; // MESSAGE_MAP 에서 선택해주세용
+  moverName?: string; // 기사 이름
+  moveType?: string; // 견적
+  fromRegion?: string; // 출발지
+  toRegion?: string; // 도착지
   url?: string;
 }) {
-  const { userId, messageType, url } = postData;
+  const { userId, messageType, moverName, moveType, fromRegion, toRegion, url } = postData;
 
   const MESSAGE_MAP: Record<string, string> = {
-    quoteRequest: '지정 견적 요청이 도착했습니다',
-    quoteConfirm: '견적이 확정되었습니다',
-    quoteRefuse: '지정 견적 요청이 거절되었습니다',
-    dayBefore: '내일은 이사하는 날입니다',
+    quoteArrive: `${moverName} 기사님의 ${moveType} 견적이 도착했어요!`,
+    quoteRequest: '지정 견적 요청이 도착했어요!',
+    quoteConfirm: `${moverName} 기사님의 견적이 확정되었어요!!`,
+    quoteRefuse: '${moverName} 기사님이 견적 요청을 거절했어요..',
+    dayBefore: `내일은 ${fromRegion} -> ${toRegion} 이사 예정일이에요!`,
+    newReview: '새로운 리뷰가 등록되었습니다! 어서 확인해보세요!',
   };
-  const message = MESSAGE_MAP[messageType];
+
+  const HIGHLIGHT_WORDS: Record<string, string[]> = {
+    quoteArrive: [moveType ?? '', '견적'],
+    quoteRequest: ['지정 견적 요청', '도착'],
+    quoteConfirm: [moveType ?? '', '확정'],
+    quoteRefuse: ['지정 견적 요청', '도착'],
+    dayBefore: [`${fromRegion} -> ${toRegion} 이사 예정일`],
+    newReview: ['새로운 리뷰'],
+  };
+
+  const message = MESSAGE_MAP[messageType] || '';
+  const highlight = HIGHLIGHT_WORDS[messageType] || [];
+
   if (!message) {
     throw new Error(`유효하지 않은 messageType: ${messageType}`);
-  }
-
-  // 필수 데이터 검증 (userId만 체크)
-  if (!userId) {
-    throw new Error('userId는 필수 입력값입니다.');
   }
 
   try {
@@ -86,6 +99,7 @@ export async function createNotification(postData: {
       data: {
         userId,
         message,
+        // highlight,
         url,
       },
     });
@@ -95,3 +109,4 @@ export async function createNotification(postData: {
     throw new Error('알림 생성 중 오류가 발생했습니다.');
   }
 }
+//highlight String[] // 하이라이트 단어들 저장할 곳
