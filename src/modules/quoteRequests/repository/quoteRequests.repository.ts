@@ -1,4 +1,4 @@
-import { PrismaClient, Region, ServiceType } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { CreateQuoteRequestData } from '../dto/createQuoteRequest.dto';
 
 export default class QuoteRequestsRepository {
@@ -30,6 +30,17 @@ export default class QuoteRequestsRepository {
       none: {
         status: {
           notIn: ['QUOTE_REQUESTED', 'MOVER_SUBMITTED'], // active 상태가 아닌 경우(견적 확정, 이사 완료)
+        },
+      },
+    },
+  };
+
+  // 견적 요청 목록에서 QUOTE_REQUESTED 상태만 필터링
+  private QUOTE_REQUESTED_STATUS_CLAUSE = {
+    quoteStatusHistories: {
+      some: {
+        status: {
+          in: ['QUOTE_REQUESTED'],
         },
       },
     },
@@ -72,15 +83,22 @@ export default class QuoteRequestsRepository {
     });
   }
 
-  async getAllQuoteRequests(page: number, pageSize: number) {
+  async getAllQuoteRequests(page: number, pageSize: number, whereClause?: any, orderBy?: any) {
     const skip = (page - 1) * pageSize;
-    const totalCount = await this.prismaClient.quoteRequest.count();
+
+    const filteredWhere = {
+      AND: [whereClause || {}, this.QUOTE_REQUESTED_STATUS_CLAUSE],
+    };
+
+    const totalCount = await this.prismaClient.quoteRequest.count({
+      where: filteredWhere,
+    });
+
     const list = await this.prismaClient.quoteRequest.findMany({
       skip,
       take: pageSize,
-      orderBy: {
-        createdAt: 'desc',
-      },
+      orderBy,
+      where: filteredWhere,
       include: {
         quoteRequestAddresses: true,
         quoteStatusHistories: {
@@ -88,6 +106,7 @@ export default class QuoteRequestsRepository {
             createdAt: 'desc',
           },
         },
+        targetedQuoteRequests: true,
         ...this.CUSTOMER_INCLUDE_CLAUSE,
       },
     });

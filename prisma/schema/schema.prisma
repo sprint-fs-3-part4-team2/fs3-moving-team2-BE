@@ -200,9 +200,9 @@ enum AddressType {
 model QuoteRequestAddress {
   id             String       @id @default(cuid())
   quoteRequestId String       @map("quote_request_id")
-  sido           String // 시도
-  sigungu        String // 시군구
-  street         String // 도로명
+  sido           String  // 시도
+  sigungu        String? // 시군구
+  street         String  // 도로명 (시도, 시군구 제외)
   fullAddress    String       @map("full_address") // 상세 주소
   type           AddressType // 출발지/도착지
   quoteRequest   QuoteRequest @relation(fields: [quoteRequestId], references: [id], onDelete: Cascade) // 견적요청주소-견적요청 1:N
