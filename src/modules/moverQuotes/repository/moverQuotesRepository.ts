@@ -141,4 +141,12 @@ export default class QuotesRepository {
       totalPages: Math.ceil(totalCount / pageSize),
     };
   }
+
+  getServiceRegionsForMover(moverId: string) {
+    return this.prismaClient.moverServiceRegion.findMany({
+      where: {
+        moverId,
+      },
+    });
+  }
 }
