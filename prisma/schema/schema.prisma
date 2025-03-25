@@ -263,7 +263,8 @@ model MoverQuote {
   targetedQuoteRequestId String?               @unique @map("targeted_quote_request_id") // 지정견적요청 없을 수 있음
   moverId                String                @map("mover_id")
   quoteRequestId         String                @map("quote_request_id")
-  price                  Int // 견적 가격
+  price                  Int                   @default(0) // 견적 가격     
+  comment                String                @default("") // 이사업자 코멘트
   createdAt              DateTime              @default(now()) @map("created_at")
   updatedAt              DateTime              @updatedAt @map("updated_at")
   targetedQuoteRequest   TargetedQuoteRequest? @relation(fields: [targetedQuoteRequestId], references: [id], onDelete: Cascade) // 지정견적요청-이사업자견적 1:N

@@ -34,4 +34,15 @@ export default class QuotesController {
 
     res.status(200).json(data);
   };
+
+  submitQuoteByMover = async (req: Request, res: Response) => {
+    const moverId = 'cm8o1uuc9005lwstst7rfd35s';
+    const quoteId = req.body.quoteId;
+    const price = req.body.price;
+    const comment = req.body.comment;
+
+    const quote = await this.quoteService.submitQuoteByMover(quoteId, moverId, price, comment);
+
+    res.status(201).json(quote);
+  };
 }
