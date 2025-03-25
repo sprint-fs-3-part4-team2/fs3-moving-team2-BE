@@ -33,4 +33,10 @@ export default class QuotesService {
       list: mappedList,
     };
   }
+
+  async submitQuoteByMover(quoteId: string, moverId: string, price: number, comment: string) {
+    const quote = await this.quotesRepository.submitQuoteByMover(quoteId, moverId, price, comment);
+
+    return quote;
+  }
 }
