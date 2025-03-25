@@ -35,6 +35,17 @@ export default class QuoteRequestsRepository {
     },
   };
 
+  // 견적 요청 목록에서 QUOTE_REQUESTED 상태만 필터링
+  private QUOTE_REQUESTED_STATUS_CLAUSE = {
+    quoteStatusHistories: {
+      some: {
+        status: {
+          in: ['QUOTE_REQUESTED'],
+        },
+      },
+    },
+  };
+
   async createQuoteRequest(data: CreateQuoteRequestData) {
     return await this.prismaClient.quoteRequest.create({
       data: {
@@ -72,15 +83,22 @@ export default class QuoteRequestsRepository {
     });
   }
 
-  async getAllQuoteRequests(page: number, pageSize: number) {
+  async getAllQuoteRequests(page: number, pageSize: number, whereClause?: any, orderBy?: any) {
     const skip = (page - 1) * pageSize;
-    const totalCount = await this.prismaClient.quoteRequest.count();
+
+    const filteredWhere = {
+      AND: [whereClause || {}, this.QUOTE_REQUESTED_STATUS_CLAUSE],
+    };
+
+    const totalCount = await this.prismaClient.quoteRequest.count({
+      where: filteredWhere,
+    });
+
     const list = await this.prismaClient.quoteRequest.findMany({
       skip,
       take: pageSize,
-      orderBy: {
-        createdAt: 'desc',
-      },
+      orderBy,
+      where: filteredWhere,
       include: {
         quoteRequestAddresses: true,
         quoteStatusHistories: {
@@ -88,6 +106,7 @@ export default class QuoteRequestsRepository {
             createdAt: 'desc',
           },
         },
+        targetedQuoteRequests: true,
         ...this.CUSTOMER_INCLUDE_CLAUSE,
       },
     });
