@@ -1,7 +1,6 @@
 import prismaClient from '@/prismaClient';
 import UserRepository from './userRepository'; // 경로는 실제 파일 위치에 맞게 조정
 import { InfoEditType } from '../types/repo.type';
-import { UserType } from '@prisma/client';
 
 // prismaClient를 모킹합니다.
 jest.mock('@/prismaClient', () => ({
