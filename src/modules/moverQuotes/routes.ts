@@ -11,7 +11,8 @@ const router = express.Router();
 const quotesRepository = new QuotesRepository(prismaClient);
 const quoteService = new QuotesService(quotesRepository);
 const quoteController = new QuotesController(quoteService);
-const { getQuoteByIdForCustomer, getQuoteByIdForMover, getQuotesListByMover } = quoteController;
+const { getQuoteByIdForCustomer, getQuoteByIdForMover, getQuotesListByMover, submitQuoteByMover } =
+  quoteController;
 
 router
   .route('/:quoteId/customer')
@@ -22,5 +23,7 @@ router
 router
   .route('/submitted')
   .get(createAuthMiddleware('mover'), asyncRequestHandler(getQuotesListByMover));
+
+router.route('/submit').post(asyncRequestHandler(submitQuoteByMover));
 
 export default router;
