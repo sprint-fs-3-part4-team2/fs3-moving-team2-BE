@@ -1,135 +1,14 @@
-/*
-  Warnings:
+-- CreateEnum
+CREATE TYPE "UserType" AS ENUM ('CUSTOMER', 'MOVER');
 
-  - You are about to drop the `Customer` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `CustomerFavorite` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `CustomerService` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `Mover` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `MoverQuote` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `MoverService` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `MoverServiceRegion` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `Notification` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `QuoteMatch` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `QuoteRequest` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `QuoteRequestAddress` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `QuoteStatusHistory` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `Review` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `SocialLogin` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `TargetedQuoteRejection` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `TargetedQuoteRequest` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `User` table. If the table is not empty, all the data it contains will be lost.
+-- CreateEnum
+CREATE TYPE "ServiceType" AS ENUM ('SMALL_MOVE', 'HOME_MOVE', 'OFFICE_MOVE');
 
-*/
--- DropForeignKey
-ALTER TABLE "Customer" DROP CONSTRAINT "Customer_user_id_fkey";
+-- CreateEnum
+CREATE TYPE "Region" AS ENUM ('SEOUL', 'BUSAN', 'DAEGU', 'INCHEON', 'GWANGJU', 'DAEJEON', 'ULSAN', 'SEJONG', 'GYEONGGI', 'GANGWON', 'CHUNGBUK', 'CHUNGNAM', 'JEONBUK', 'JEONNAM', 'GYEONGBUK', 'GYEONGNAM', 'JEJU');
 
--- DropForeignKey
-ALTER TABLE "CustomerFavorite" DROP CONSTRAINT "CustomerFavorite_customer_id_fkey";
-
--- DropForeignKey
-ALTER TABLE "CustomerFavorite" DROP CONSTRAINT "CustomerFavorite_mover_id_fkey";
-
--- DropForeignKey
-ALTER TABLE "CustomerService" DROP CONSTRAINT "CustomerService_customer_id_fkey";
-
--- DropForeignKey
-ALTER TABLE "Mover" DROP CONSTRAINT "Mover_user_id_fkey";
-
--- DropForeignKey
-ALTER TABLE "MoverQuote" DROP CONSTRAINT "MoverQuote_mover_id_fkey";
-
--- DropForeignKey
-ALTER TABLE "MoverQuote" DROP CONSTRAINT "MoverQuote_quote_request_id_fkey";
-
--- DropForeignKey
-ALTER TABLE "MoverQuote" DROP CONSTRAINT "MoverQuote_targeted_quote_request_id_fkey";
-
--- DropForeignKey
-ALTER TABLE "MoverService" DROP CONSTRAINT "MoverService_mover_id_fkey";
-
--- DropForeignKey
-ALTER TABLE "MoverServiceRegion" DROP CONSTRAINT "MoverServiceRegion_mover_id_fkey";
-
--- DropForeignKey
-ALTER TABLE "Notification" DROP CONSTRAINT "Notification_user_id_fkey";
-
--- DropForeignKey
-ALTER TABLE "QuoteMatch" DROP CONSTRAINT "QuoteMatch_mover_quote_id_fkey";
-
--- DropForeignKey
-ALTER TABLE "QuoteRequest" DROP CONSTRAINT "QuoteRequest_customer_id_fkey";
-
--- DropForeignKey
-ALTER TABLE "QuoteRequestAddress" DROP CONSTRAINT "QuoteRequestAddress_quote_request_id_fkey";
-
--- DropForeignKey
-ALTER TABLE "QuoteStatusHistory" DROP CONSTRAINT "QuoteStatusHistory_quote_request_id_fkey";
-
--- DropForeignKey
-ALTER TABLE "Review" DROP CONSTRAINT "Review_quote_match_id_fkey";
-
--- DropForeignKey
-ALTER TABLE "SocialLogin" DROP CONSTRAINT "SocialLogin_user_id_fkey";
-
--- DropForeignKey
-ALTER TABLE "TargetedQuoteRejection" DROP CONSTRAINT "TargetedQuoteRejection_targeted_quote_request_id_fkey";
-
--- DropForeignKey
-ALTER TABLE "TargetedQuoteRequest" DROP CONSTRAINT "TargetedQuoteRequest_mover_id_fkey";
-
--- DropForeignKey
-ALTER TABLE "TargetedQuoteRequest" DROP CONSTRAINT "TargetedQuoteRequest_quote_request_id_fkey";
-
--- DropTable
-DROP TABLE "Customer";
-
--- DropTable
-DROP TABLE "CustomerFavorite";
-
--- DropTable
-DROP TABLE "CustomerService";
-
--- DropTable
-DROP TABLE "Mover";
-
--- DropTable
-DROP TABLE "MoverQuote";
-
--- DropTable
-DROP TABLE "MoverService";
-
--- DropTable
-DROP TABLE "MoverServiceRegion";
-
--- DropTable
-DROP TABLE "Notification";
-
--- DropTable
-DROP TABLE "QuoteMatch";
-
--- DropTable
-DROP TABLE "QuoteRequest";
-
--- DropTable
-DROP TABLE "QuoteRequestAddress";
-
--- DropTable
-DROP TABLE "QuoteStatusHistory";
-
--- DropTable
-DROP TABLE "Review";
-
--- DropTable
-DROP TABLE "SocialLogin";
-
--- DropTable
-DROP TABLE "TargetedQuoteRejection";
-
--- DropTable
-DROP TABLE "TargetedQuoteRequest";
-
--- DropTable
-DROP TABLE "User";
+-- CreateEnum
+CREATE TYPE "AddressType" AS ENUM ('DEPARTURE', 'ARRIVAL');
 
 -- CreateTable
 CREATE TABLE "user" (
@@ -259,7 +138,7 @@ CREATE TABLE "quote_request_address" (
     "id" TEXT NOT NULL,
     "quote_request_id" TEXT NOT NULL,
     "sido" TEXT NOT NULL,
-    "sigungu" TEXT NOT NULL,
+    "sigungu" TEXT,
     "street" TEXT NOT NULL,
     "full_address" TEXT NOT NULL,
     "type" "AddressType" NOT NULL,
@@ -272,6 +151,7 @@ CREATE TABLE "quote_status_history" (
     "id" TEXT NOT NULL,
     "quote_request_id" TEXT NOT NULL,
     "status" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "quote_status_history_pkey" PRIMARY KEY ("id")
