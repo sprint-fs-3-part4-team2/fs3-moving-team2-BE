@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from 'express';
+import { Request, Response } from 'express';
 import { MoverService } from '../service/moverService';
 
 const moverService = new MoverService();
@@ -16,7 +16,7 @@ export class MoverController {
   }
 
   // 검색 API
-  async searchMovers(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async searchMovers(req: Request, res: Response): Promise<void> {
     try {
       const keyword = req.query.keyword as string;
 
