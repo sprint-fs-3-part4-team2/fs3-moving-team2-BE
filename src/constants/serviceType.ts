@@ -56,6 +56,7 @@ export const REGION_MAP: Record<string, keyof typeof Region> = {
   강원: 'GANGWON',
   강원도: 'GANGWON',
   강원특별자치도: 'GANGWON',
+  충북: 'CHUNGBUK',
   충청북도: 'CHUNGBUK',
   충남: 'CHUNGNAM',
   충청남도: 'CHUNGNAM',
