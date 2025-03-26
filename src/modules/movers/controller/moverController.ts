@@ -35,11 +35,12 @@ export class MoverController {
   // 서비스 목록 조회
   async getServices(req: Request, res: Response) {
     try {
-      const services = await prisma.moverService.findMany({
-        select: { serviceType: true },
-      });
-      res.json(services.map((s) => s.serviceType));
+      console.log('📌 서비스 목록 API 호출됨');
+      const services = await prisma.moverService.findMany();
+      console.log('✅ 조회된 서비스 목록:', services);
+      res.json(services);
     } catch (error) {
+      console.error('❌ 서비스 목록 조회 실패:', error);
       res.status(500).json({ error: '서버 오류 발생' });
     }
   }
