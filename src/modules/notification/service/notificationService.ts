@@ -56,6 +56,7 @@ export async function updateRead(notificationId: string) {
     throw new Error('알림을 업데이트하는 중 오류가 발생했습니다.');
   }
 }
+
 type messageType =
   | 'quoteArrive'
   | 'quoteRequest'
@@ -63,6 +64,7 @@ type messageType =
   | 'quoteRefuse'
   | 'dayBefore'
   | 'newReview';
+
 export async function createNotification(postData: {
   userId: string; // 알림 보여줄 유저
   messageType: messageType; // MESSAGE_MAP 에서 선택해주세용
