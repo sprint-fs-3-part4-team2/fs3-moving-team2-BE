@@ -1,17 +1,16 @@
 import prismaClient from '@/prismaClient';
+import { Prisma } from '@prisma/client';
 
-const test2 = 'cm8o9235h0001iucy99xuiqzu';
 class ChatService {
   constructor() {}
-  async createRoom({ userId }: { userId: string }): Promise<any> {
+  async createRoom({ userId }: { userId: string[] }): Promise<any> {
     const result = { message: '' };
     try {
       const myChatingRoom = await prismaClient.chatRoom.findMany({
         where: {
-          AND: [
-            { user: { some: { id: userId } } }, // user1이 포함된 채팅방
-            { user: { some: { id: test2 } } }, // user2도 포함된 채팅방
-          ],
+          AND: userId.map((v): Prisma.ChatRoomWhereInput => {
+            return { user: { some: { id: v } } };
+          }),
         },
       });
       console.log(myChatingRoom);

@@ -12,7 +12,7 @@ enum UserType {
   CUSTOMER
   MOVER
 }
-  
+
 model User {
   id            String         @id @default(cuid())
   userType      UserType       @map("user_type")

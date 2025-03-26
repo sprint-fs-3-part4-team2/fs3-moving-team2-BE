@@ -16,6 +16,8 @@ import notificationRouter from './modules/notification/routes';
 import rejectionRouter from './modules/rejection/routes';
 import profileRouter from './modules/profile/routes';
 import chatRouter from './modules/chat/routes';
+import { createServer } from 'http';
+import { setupChatSocket } from './chatSocket';
 
 dotenv.config();
 
@@ -27,6 +29,9 @@ const allowedOrigins: string[] = [
 ].filter((origin) => origin.trim() !== '');
 
 const app = express();
+// 채팅 기능용 소켓
+const server = createServer(app);
+setupChatSocket(server);
 
 // 미들웨어 설정
 app.use(
@@ -61,7 +66,7 @@ app.use('/profile', profileRouter);
 app.use('/chat', chatRouter);
 
 // 서버 실행
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`Server listening on port ${port}`);
 });
 
