@@ -45,4 +45,18 @@ export default class QuotesController {
 
     res.status(201).json(quote);
   };
+
+  rejectQuoteByMover = async (req: Request, res: Response) => {
+    const moverId = 'cm8p9c6sa005iwsm9fikr4asm';
+    const quoteId = req.params.quoteId;
+    const rejectionReason = req.body.rejectionReason;
+
+    const rejectQuote = await this.quoteService.rejectQuoteByMover(
+      quoteId,
+      moverId,
+      rejectionReason,
+    );
+
+    res.status(201).json(rejectQuote);
+  };
 }
