@@ -99,7 +99,7 @@ export async function createNotification(postData: {
       data: {
         userId,
         message,
-        // highlight,
+        highlight,
         url,
       },
     });
