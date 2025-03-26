@@ -57,9 +57,17 @@ export async function updateRead(notificationId: string) {
   }
 }
 
+type messageType =
+  | 'quoteArrive'
+  | 'quoteRequest'
+  | 'quoteConfirm'
+  | 'quoteRefuse'
+  | 'dayBefore'
+  | 'newReview';
+
 export async function createNotification(postData: {
   userId: string; // 알림 보여줄 유저
-  messageType: string; // MESSAGE_MAP 에서 선택해주세용
+  messageType: messageType; // MESSAGE_MAP 에서 선택해주세용
   moverName?: string; // 기사 이름
   moveType?: string; // 견적
   fromRegion?: string; // 출발지
