@@ -230,6 +230,7 @@ model QuoteStatusHistory {
  * QUOTE_CANCELED: 견적 취소
  * REQUEST_EXPIRED: 요청 만료
  * MOVE_COMPLETED: 이사 완료
+ * TARGETED_QUOTE_REJECTED: 지정견적 거절
  */
 
 // 지정견적 요청
