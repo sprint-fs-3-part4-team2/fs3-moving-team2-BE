@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { CreateQuoteRequestData } from '../dto/createQuoteRequest.dto';
 
 export default class QuoteRequestsRepository {
@@ -118,5 +118,19 @@ export default class QuoteRequestsRepository {
       pageSize,
       totalPages: Math.ceil(totalCount / pageSize),
     };
+  }
+
+  // findUniqueQuoteWithStatus: 특정 견적 요청을 id로 조회하며, 상태 내역 등 관련 정보를 포함함
+  async findUniqueQuoteWithStatus(quoteId: string, tx?: Prisma.TransactionClient) {
+    const client = tx || this.prismaClient;
+    return await client.quoteRequest.findUnique({
+      where: { id: quoteId },
+      include: {
+        // 상태 내역을 최신순으로 정렬하여 포함
+        quoteStatusHistories: {
+          orderBy: { createdAt: 'desc' },
+        },
+      },
+    });
   }
 }

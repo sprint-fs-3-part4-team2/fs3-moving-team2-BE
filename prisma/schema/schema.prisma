@@ -12,7 +12,7 @@ enum UserType {
   CUSTOMER
   MOVER
 }
-
+  
 model User {
   id            String         @id @default(cuid())
   userType      UserType       @map("user_type")
@@ -36,6 +36,7 @@ model Notification {
   id        String   @id @default(cuid())
   userId    String   @map("user_id")
   message   String // 알람 내용
+  highlight String[] // 하이라이트 단어들 저장할 곳
   isRead    Boolean  @default(false) @map("is_read") // 알람 읽음 여부
   url       String? // 알람 클릭 시 이동할 url
   createdAt DateTime @default(now()) @map("created_at")
@@ -230,6 +231,7 @@ model QuoteStatusHistory {
  * QUOTE_CANCELED: 견적 취소
  * REQUEST_EXPIRED: 요청 만료
  * MOVE_COMPLETED: 이사 완료
+ * TARGETED_QUOTE_REJECTED: 지정견적 거절
  */
 
 // 지정견적 요청

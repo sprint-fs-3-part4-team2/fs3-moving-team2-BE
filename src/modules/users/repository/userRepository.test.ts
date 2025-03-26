@@ -12,6 +12,7 @@ jest.mock('@/prismaClient', () => ({
 describe('UserRepository', () => {
   const mockUser = {
     userId: '123',
+    roleId: '123',
     type: 'customer' as 'customer' | 'mover',
   };
 

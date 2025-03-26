@@ -1,3 +1,5 @@
+import { LowercaseUserType } from './userType.types';
+
 interface PageBaseQuery {
   page: number;
   pageSize: number;
@@ -5,7 +7,7 @@ interface PageBaseQuery {
 }
 
 // 유효 검증된 쿼리
-type ValidatedQuery = PageBaseQuery;
+export type ValidatedQuery = PageBaseQuery;
 
 declare global {
   namespace Express {
@@ -13,7 +15,8 @@ declare global {
       validatedQuery: ValidatedQuery;
       user?: {
         userId: string;
-        type: 'customer' | 'mover';
+        roleId: string;
+        type: LowercaseUserType;
       };
     }
   }
