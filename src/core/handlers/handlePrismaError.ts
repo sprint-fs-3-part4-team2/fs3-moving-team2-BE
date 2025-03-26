@@ -7,10 +7,13 @@ import {
 export const handlePrismaError = (e: unknown, res: Response) => {
   if (e instanceof PrismaClientKnownRequestError) {
     switch (e.code) {
-      case 'P2002':
+      case 'P2002': {
+        const match = e.message.match(/Unique constraint failed on the fields: \(`(.+?)`\)/);
+        const field = match ? match[1] : '';
         return res.status(409).json({
-          message: '중복된 데이터가 존재합니다.',
+          message: `중복된 데이터가 존재합니다. : ${field}`,
         });
+      }
       case 'P2003':
         return res.status(400).json({
           message: '관련된 데이터가 존재하지 않습니다.',
