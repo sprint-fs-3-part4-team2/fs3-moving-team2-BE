@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import AuthService from '../service/service';
 
+type OauthTypes = 'kakao' | 'naver' | 'google';
+
 export default class AuthController {
   private COOKIE_OPTIONS = {
     httpOnly: true,
@@ -17,6 +19,18 @@ export default class AuthController {
 
   private setRefreshToken = (res: Response, token: string) => {
     res.cookie('refreshToken', token, { ...this.COOKIE_OPTIONS, maxAge: 24 * 60 * 60 * 1000 });
+  };
+
+  snsLogin = async (req: Request, res: Response) => {
+    const { provider } = req.params; // 로그인 제공자 (google, kakao, naver)
+
+    try {
+      const loginUrl = this.authService.getSnsLoginUrl(provider as OauthTypes);
+      return res.redirect(loginUrl);
+    } catch (error) {
+      console.error(error);
+      return res.status(400).json({ message: '잘못된 로그인 요청입니다.' });
+    }
   };
 
   fakeSignIn = async (req: Request, res: Response) => {
