@@ -1,12 +1,15 @@
 import { Request, Response } from 'express';
-import * as moverService from '../service/moverService';
+import { getMoverProfileDetail } from '../service/moverService';
 
-export async function getMovers(req: Request, res: Response) {
+export async function getMoverProfile(req: Request, res: Response) {
+  const userId = req?.user?.userId ?? '';
+  console.log(userId);
   try {
-    const movers = await moverService.getMovers();
-    res.status(200).json(movers);
+    const profile = await getMoverProfileDetail(userId);
+    res.status(200).json(profile);
+    return;
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: '기사님 정보 조회에 실패했습니다.' });
+    res.status(500).json({ message: '기사 정보를 불러오는 중 오류가 발생했습니다.' });
   }
 }

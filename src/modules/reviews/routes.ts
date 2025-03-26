@@ -7,8 +7,8 @@ import { createAuthMiddleware } from '@/core/middleware/auth/auth';
 const router = Router();
 
 router.get('/pending', reviewController.getPendingReviews);
-router.get('/completed/:id', getSubmittedReviews);
-router.get('/mover/profile/:id', createAuthMiddleware('mover'), getMoverSubmittedReviews);
+router.get('/completed/:id', createAuthMiddleware('mover'), getSubmittedReviews);
+router.get('/mover/review/:id', createAuthMiddleware('mover'), getMoverSubmittedReviews);
 router.post('/', reviewController.submitReview);
 
 export default router;
