@@ -11,4 +11,6 @@ export const AUTH_MESSAGES = {
   forbidden: '접근 권한이 없습니다.',
   onlyForMover: '기사님만 접근할 수 있습니다.',
   OnlyForCustomer: '일반 사용자만 접근할 수 있습니다.',
+  emailNotExist: '존재하지 않는 이메일입니다.',
+  invalidRole: '고객/기사님 유형을 확인해주세요.',
 };
