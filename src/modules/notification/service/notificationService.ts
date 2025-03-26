@@ -109,4 +109,3 @@ export async function createNotification(postData: {
     throw new Error('알림 생성 중 오류가 발생했습니다.');
   }
 }
-//highlight String[] // 하이라이트 단어들 저장할 곳
