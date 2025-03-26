@@ -39,14 +39,4 @@ export default class QuotesService {
 
     return quote;
   }
-
-  async rejectQuoteByMover(quoteId: string, moverId: string, rejectionReason: string) {
-    const rejectQuote = await this.quotesRepository.rejectQuoteByMover(
-      quoteId,
-      moverId,
-      rejectionReason,
-    );
-
-    return { rejectQuote, message: '지정 견적 거절 완료' };
-  }
 }

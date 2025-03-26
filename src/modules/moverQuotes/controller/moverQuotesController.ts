@@ -36,27 +36,15 @@ export default class QuotesController {
   };
 
   submitQuoteByMover = async (req: Request, res: Response) => {
-    const moverId = 'cm8o1uuc9005lwstst7rfd35s';
-    const quoteId = req.body.quoteId;
+    const moverId = 'cm8p9c6sa005iwsm9fikr4asm';
+    const quoteId = req.params.quoteId;
     const price = req.body.price;
     const comment = req.body.comment;
+
+    console.log('test', quoteId, price, comment);
 
     const quote = await this.quoteService.submitQuoteByMover(quoteId, moverId, price, comment);
 
     res.status(201).json(quote);
-  };
-
-  rejectQuoteByMover = async (req: Request, res: Response) => {
-    const moverId = 'cm8p9c6sa005iwsm9fikr4asm';
-    const quoteId = req.params.quoteId;
-    const rejectionReason = req.body.rejectionReason;
-
-    const rejectQuote = await this.quoteService.rejectQuoteByMover(
-      quoteId,
-      moverId,
-      rejectionReason,
-    );
-
-    res.status(201).json(rejectQuote);
   };
 }
