@@ -1,6 +1,15 @@
+import { MOVE_TYPE, regionMap } from '@/constants/serviceType';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
+
+export const reverseRegionMap: Record<string, string> = Object.entries(regionMap).reduce(
+  (acc, [kor, eng]) => {
+    acc[eng] = kor;
+    return acc;
+  },
+  {} as Record<string, string>,
+);
 
 export async function getMoverProfileDetail(userId: string) {
   const user = await prisma.user.findUnique({
@@ -56,7 +65,7 @@ export async function getMoverProfileDetail(userId: string) {
       },
     },
   });
-  console.log(user);
+  console.log(user.mover.moverServices);
   console.log(average);
   console.log(total);
   return {
@@ -67,7 +76,7 @@ export async function getMoverProfileDetail(userId: string) {
     totalReviews: total,
     experienceYears: user.mover.experienceYears,
     totalConfirmedCount: user.mover.totalConfirmedCount,
-    services: user.mover.moverServices.map((s) => s.serviceType),
-    regions: user.mover.moverServiceRegions.map((r) => r.region),
+    movingType: user.mover.moverServices.map((s) => MOVE_TYPE[s.serviceType]), //이사종류  moveType
+    regions: user.mover.moverServiceRegions.map((r) => reverseRegionMap[r.region]), // 서비스 가능 지역
   };
 }

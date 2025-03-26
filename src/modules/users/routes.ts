@@ -10,6 +10,6 @@ userRouter.post(
   createAuthMiddleware('mover'),
   userControlelr.MoverBaiscInfoEdit,
 );
-userRouter.get('/mover/profile/:id', createAuthMiddleware('mover'), getMoverProfile);
+userRouter.get('/mover/profile', createAuthMiddleware('mover'), getMoverProfile);
 
 export default userRouter;
