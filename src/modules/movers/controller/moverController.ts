@@ -20,14 +20,11 @@ export class MoverController {
   // 지역 목록 조회
   async getRegions(req: Request, res: Response) {
     try {
-      console.log('📌 지역 목록 API 호출됨');
       const regions = await prisma.moverServiceRegion.findMany({
         select: { region: true },
       });
-      console.log('✅ 조회된 지역 목록:', regions);
       res.json(regions.map((r) => r.region));
     } catch (error) {
-      console.error('❌ 지역 목록 조회 실패:', error);
       res.status(500).json({ error: '서버 오류 발생' });
     }
   }
@@ -35,12 +32,9 @@ export class MoverController {
   // 서비스 목록 조회
   async getServices(req: Request, res: Response) {
     try {
-      console.log('📌 서비스 목록 API 호출됨');
       const services = await prisma.moverService.findMany();
-      console.log('✅ 조회된 서비스 목록:', services);
       res.json(services);
     } catch (error) {
-      console.error('❌ 서비스 목록 조회 실패:', error);
       res.status(500).json({ error: '서버 오류 발생' });
     }
   }
