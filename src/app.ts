@@ -16,6 +16,7 @@ import notificationRouter from './modules/notification/routes';
 import rejectionRouter from './modules/rejection/routes';
 import profileRouter from './modules/profile/routes';
 import targetedQuoteRequestRouter from './modules/targetedQuoteRequest/routes';
+import moverRouter from './modules/movers/routes';
 
 dotenv.config();
 
