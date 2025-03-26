@@ -6,8 +6,8 @@ const userRouter = Router();
 
 // 기사 - 기본 정보 수정
 userRouter.post(
-  '/mover/baiscinfo/edit',
-  createAuthMiddleware('mover'),
+  '/mover/info/edit',
+  // createAuthMiddleware('mover'),
   userControlelr.MoverBaiscInfoEdit,
 );
 
