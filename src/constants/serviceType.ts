@@ -72,3 +72,24 @@ export const REGION_MAP: Record<string, keyof typeof Region> = {
   제주: 'JEJU',
   제주특별자치도: 'JEJU',
 };
+
+//지역명 한글>>영어(간소화)
+export const regionMap: Record<string, string> = {
+  서울: 'SEOUL',
+  부산: 'BUSAN',
+  대구: 'DAEGU',
+  인천: 'INCHEON',
+  광주: 'GWANGJU',
+  대전: 'DAEJEON',
+  울산: 'ULSAN',
+  세종: 'SEJONG',
+  경기: 'GYEONGGI',
+  강원: 'GANGWON',
+  충북: 'CHUNGBUK',
+  충남: 'CHUNGNAM',
+  전북: 'JEONBUK',
+  전남: 'JEONNAM',
+  경북: 'GYEONGBUK',
+  경남: 'GYEONGNAM',
+  제주: 'JEJU',
+};
