@@ -28,8 +28,13 @@ export async function getPendingQuotes(customerId: string) {
       },
     },
     include: {
-      quoteStatusHistories: true,
+      quoteStatusHistories: {
+        orderBy: { createdAt: 'desc' },
+      },
       quoteRequestAddresses: true,
+    },
+    orderBy: {
+      createdAt: 'desc',
     },
   });
   if (!pendingQuotes || pendingQuotes.length === 0) {
