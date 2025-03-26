@@ -8,6 +8,15 @@ export class MoverService {
     return await moverRepository.getMovers(sortBy);
   }
 
+  // 지역 목록 조회
+  async getRegions(): Promise<string[]> {
+    return moverRepository.getRegions();
+  }
+  // 서비스 목록 조회
+  async getServices(): Promise<string[]> {
+    return moverRepository.getServices();
+  }
+
   // 검색 기능 추가
   async searchMovers(keyword: string) {
     return await moverRepository.searchMovers(keyword);

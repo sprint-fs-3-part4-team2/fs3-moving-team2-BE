@@ -1,7 +1,9 @@
 import { Request, Response } from 'express';
 import { MoverService } from '../service/moverService';
+import { PrismaClient } from '@prisma/client';
 
 const moverService = new MoverService();
+const prisma = new PrismaClient();
 
 export class MoverController {
   // 기사님 목록 조회 API
@@ -10,6 +12,33 @@ export class MoverController {
       const { sortBy } = req.query;
       const movers = await moverService.getMovers(sortBy as string);
       res.json(movers);
+    } catch (error) {
+      res.status(500).json({ error: '서버 오류 발생' });
+    }
+  }
+
+  // 지역 목록 조회
+  async getRegions(req: Request, res: Response) {
+    try {
+      console.log('📌 지역 목록 API 호출됨');
+      const regions = await prisma.moverServiceRegion.findMany({
+        select: { region: true },
+      });
+      console.log('✅ 조회된 지역 목록:', regions);
+      res.json(regions.map((r) => r.region));
+    } catch (error) {
+      console.error('❌ 지역 목록 조회 실패:', error);
+      res.status(500).json({ error: '서버 오류 발생' });
+    }
+  }
+
+  // 서비스 목록 조회
+  async getServices(req: Request, res: Response) {
+    try {
+      const services = await prisma.moverService.findMany({
+        select: { serviceType: true },
+      });
+      res.json(services.map((s) => s.serviceType));
     } catch (error) {
       res.status(500).json({ error: '서버 오류 발생' });
     }
