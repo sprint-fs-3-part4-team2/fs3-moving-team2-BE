@@ -1,43 +1,82 @@
-import { MOVE_TYPE } from '@/constants/serviceType';
+import { MOVE_TYPE, regionMap } from '@/constants/serviceType';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export async function getMovers() {
-  const movers = await prisma.mover.findMany({
-    include: {
-      moverServices: true,
-      user: { select: { name: true } }, // 사용자 정보 포함
+export const reverseRegionMap: Record<string, string> = Object.entries(regionMap).reduce(
+  (acc, [kor, eng]) => {
+    acc[eng] = kor;
+    return acc;
+  },
+  {} as Record<string, string>,
+);
+
+export async function getMoverProfileDetail(userId: string) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      name: true,
+      mover: {
+        select: {
+          profileImage: true,
+          experienceYears: true,
+          introduction: true,
+          totalConfirmedCount: true,
+          moverServices: {
+            select: {
+              serviceType: true,
+            },
+          },
+          moverServiceRegions: {
+            select: {
+              region: true,
+            },
+          },
+        },
+      },
     },
   });
 
-  //findeuniqe으로 한명의 기사님 정보만 가져오기
+  if (!user || !user.mover) return null;
 
-  console.log(movers);
-  return movers.map((mover) => ({
-    // id: mover.id,
-    // userId: mover.userId,
-    // moverName: mover.user.name,
-    // profileImage: mover.profileImage,
-    // experienceYears: mover.experienceYears,
-    // introduction: mover.introduction,
-    // description: mover.description,
-    // averageRating: mover.averageRating,
-    // totalReviews: mover.totalReviews,
-    // totalCustomerFavorite: mover.totalCustomerFavorite,
-    // totalConfirmedCount: mover.totalConfirmedCount,
-    // createdAt: mover.createdAt.toISOString().split('T')[0], // YYYY-MM-DD 형식
-    // movingType: mover.moverServices.map((service) => MOVE_TYPE[service.serviceType]),
-  }));
+  const average = await prisma.review.aggregate({
+    _avg: {
+      rating: true,
+    },
+    where: {
+      quoteMatch: {
+        moverQuote: {
+          mover: {
+            userId: userId,
+          },
+        },
+      },
+    },
+  });
+
+  const total = await prisma.review.count({
+    where: {
+      quoteMatch: {
+        moverQuote: {
+          mover: {
+            userId: userId,
+          },
+        },
+      },
+    },
+  });
+  console.log(user.mover.moverServices);
+  console.log(average);
+  console.log(total);
+  return {
+    name: user.name,
+    introduction: user.mover.introduction,
+    profileImage: user.mover.profileImage,
+    averageRating: parseFloat((average._avg.rating ?? 0).toFixed(1)),
+    totalReviews: total,
+    experienceYears: user.mover.experienceYears,
+    totalConfirmedCount: user.mover.totalConfirmedCount,
+    movingType: user.mover.moverServices.map((s) => MOVE_TYPE[s.serviceType]), //이사종류  moveType
+    regions: user.mover.moverServiceRegions.map((r) => reverseRegionMap[r.region]), // 서비스 가능 지역
+  };
 }
-
-//   id: string;
-//   driverName: string;
-//   movingType: (keyof typeof MOVING_TYPES)[]; //
-//   isCustomQuote: boolean;
-//   movingDate: Date;
-//   price: number;
-//   reviewContent: string;
-//   rating: number;
-//   writtenAt: Date;
-//   imageUrl: ; //유니온타입 string or null
