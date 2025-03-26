@@ -1,3 +1,5 @@
+import { LowercaseUserType } from './userType.types';
+
 interface PageBaseQuery {
   page: number;
   pageSize: number;
@@ -13,7 +15,8 @@ declare global {
       validatedQuery: ValidatedQuery;
       user?: {
         userId: string;
-        type: 'customer' | 'mover';
+        roleId: string;
+        type: LowercaseUserType;
       };
     }
   }
