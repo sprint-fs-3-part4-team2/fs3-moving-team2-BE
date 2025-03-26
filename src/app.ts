@@ -15,6 +15,7 @@ import authRouter from './modules/auth/routes';
 import notificationRouter from './modules/notification/routes';
 import rejectionRouter from './modules/rejection/routes';
 import profileRouter from './modules/profile/routes';
+import targetedQuoteRequestRouter from './modules/targetedQuoteRequest/routes';
 import quoteRouter from './modules/userQuotes/routes';
 
 dotenv.config();
@@ -55,6 +56,7 @@ app.use('/mover-quotes', moverQuotesRouter);
 app.use('/favorites', favoriteRouter);
 app.use('/auth', authRouter);
 app.use('/quote-requests', quoteRequestRouter);
+app.use('/targeted-quote-requests', targetedQuoteRequestRouter);
 app.use('/notification', notificationRouter);
 app.use('/rejection', rejectionRouter);
 app.use('/profile', profileRouter);
