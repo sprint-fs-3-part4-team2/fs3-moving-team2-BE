@@ -23,47 +23,32 @@ export async function getPendingQuotes(userId: string, roleId: string) {
     where: { id: roleId },
     include: { user: true },
   });
-  // const mover = await prisma.mover.findUnique({
-  //   where: { id: roleId },
-  //   include: { user: true },
-  // });
-  if (
-    !customer
-    //  && !mover
-  ) {
+  if (!customer) {
     throw new NotFoundException(AUTH_MESSAGES.needLogin);
   }
-  let pendingQuotes;
-  if (customer) {
-    pendingQuotes = await prisma.quoteRequest.findMany({
-      where: { customerId: roleId },
-      include: {
-        quoteStatusHistories: { orderBy: { createdAt: 'desc' } },
-        quoteRequestAddresses: true,
+  const pendingQuotes = await prisma.quoteRequest.findMany({
+    where: {
+      customerId: roleId,
+      quoteStatusHistories: {
+        some: { status: 'QUOTE_REQUESTED' },
       },
-      orderBy: {
-        createdAt: 'desc',
+    },
+    include: {
+      quoteStatusHistories: { orderBy: { createdAt: 'desc' }, take: 1 },
+      quoteRequestAddresses: true,
+      moverQuotes: {
+        include: {
+          mover: true,
+        },
       },
-    });
-  }
-  // else if (mover) {
-  //   pendingQuotes = await prisma.targetedQuoteRequest.findMany({
-  //     where: { moverId: roleId },
-  //     include: {
-  //       quoteRequest: {
-  //         include: {
-  //           quoteStatusHistories: { orderBy: { createdAt: 'desc' } },
-  //           quoteRequestAddresses: true,
-  //         },
-  //       },
-  //     },
-  //     orderBy: {
-  //       createdAt: 'desc',
-  //     },
-  //   });
-  // }
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+    take: 1,
+  });
   if (!pendingQuotes || pendingQuotes.length === 0) {
-    throw new NotFoundException('대기 중인 견적이 없습니다.');
+    throw new NotFoundException(EXCEPTION_MESSAGES.quoteNotFound);
   }
   return pendingQuotes;
 }
