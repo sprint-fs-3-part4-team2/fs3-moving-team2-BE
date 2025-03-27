@@ -1,5 +1,6 @@
 import { Prisma, PrismaClient } from '@prisma/client';
 import { CreateQuoteRequestData } from '../dto/createQuoteRequest.dto';
+import { QuoteStatus } from '@/types/quoteStatus.types';
 
 export default class QuoteRequestsRepository {
   constructor(private prismaClient: PrismaClient) {}
@@ -47,6 +48,23 @@ export default class QuoteRequestsRepository {
       include: {
         quoteRequestAddresses: true,
         quoteStatusHistories: true,
+      },
+    });
+  }
+
+  async updateQuoteRequestStatus(
+    quoteId: string,
+    status: QuoteStatus,
+    tx?: Prisma.TransactionClient,
+  ) {
+    const client = tx || this.prismaClient;
+    return await client.quoteRequest.update({
+      where: { id: quoteId },
+      data: {
+        currentStatus: status,
+        quoteStatusHistories: {
+          create: [{ status }],
+        },
       },
     });
   }

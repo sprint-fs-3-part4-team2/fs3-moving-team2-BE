@@ -16,6 +16,7 @@ export interface QuoteForMoverListDtoRequest {
   variant: 'requested';
   requestedAt: Date;
   moverId?: string | null;
+  currentQuoteStatus?: string;
   quoteStatus?: string | null;
   targetedMoverId?: string | null;
 }

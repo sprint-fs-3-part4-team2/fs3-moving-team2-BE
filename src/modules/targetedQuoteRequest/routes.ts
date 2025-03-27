@@ -6,7 +6,6 @@ import TargetedQuoteRequestRepository from './repository/targetedQuoteRequest.re
 import TargetedQuoteRejectionRepository from './repository/targetedQuoteRejection.repository';
 import TargetedQuoteRequestController from './controller/targetedQuoteRequest.controller';
 import QuoteRequestsRepository from '../quoteRequests/repository/quoteRequests.repository';
-import QuoteStatusHistoryRepository from '../quoteRequests/repository/quoteStatusHistory.repository';
 
 const router = express.Router();
 
@@ -16,14 +15,12 @@ const targetedQuoteRequestRepository = new TargetedQuoteRequestRepository(
   targetedQuoteRejectionRepository,
 );
 const quoteRequestsRepository = new QuoteRequestsRepository(prismaClient);
-const quoteStatusHistory = new QuoteStatusHistoryRepository(prismaClient);
 
 const targetedQuoteRequestService = new TargetedQuoteRequestService(
   prismaClient,
   targetedQuoteRequestRepository,
   targetedQuoteRejectionRepository,
   quoteRequestsRepository,
-  quoteStatusHistory,
 );
 
 const targetedQuoteRequestController = new TargetedQuoteRequestController(
