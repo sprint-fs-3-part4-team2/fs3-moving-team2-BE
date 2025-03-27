@@ -173,6 +173,14 @@ export default class QuotesRepository {
       }
 
       // 2. 견적 상태 MOVER_SUBMITTED 생성
+
+      await tx.quoteRequest.update({
+        where: { id: quoteId },
+        data: {
+          currentStatus: 'MOVER_SUBMITTED',
+        },
+      });
+
       await tx.quoteStatusHistory.create({
         data: {
           quoteRequestId: quoteId,
