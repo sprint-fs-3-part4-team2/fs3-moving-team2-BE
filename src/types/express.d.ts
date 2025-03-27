@@ -7,7 +7,7 @@ interface PageBaseQuery {
 }
 
 // 유효 검증된 쿼리
-type ValidatedQuery = PageBaseQuery;
+export type ValidatedQuery = PageBaseQuery;
 
 declare global {
   namespace Express {
