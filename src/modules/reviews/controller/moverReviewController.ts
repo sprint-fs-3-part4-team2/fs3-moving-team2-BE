@@ -2,11 +2,10 @@ import { Request, Response } from 'express';
 import { getMoverReviews } from '../service/moverReview';
 
 export async function getMoverSubmittedReviews(req: Request, res: Response) {
-  const userId = req?.user?.userId ?? '';
+  const roleId = req?.user?.roleId ?? '';
 
-  console.log(userId);
   try {
-    const submittedMoverReviews = await getMoverReviews(userId);
+    const submittedMoverReviews = await getMoverReviews(roleId);
     res.status(200).json(submittedMoverReviews);
   } catch (error) {
     console.error(error);

@@ -42,7 +42,7 @@ export default async function getReviewsByUserId(userId: string) {
       },
     },
   });
-  console.log(reviews);
+
   return reviews.map((review) => ({
     id: review.id,
     writtenAt: review.createdAt.toISOString().split('T')[0],
@@ -50,8 +50,6 @@ export default async function getReviewsByUserId(userId: string) {
     imageUrl: review.quoteMatch.moverQuote.mover.profileImage,
     movingDate: review.quoteMatch.moverQuote.quoteRequest.moveDate.toISOString().split('T')[0],
     movingType: [MOVE_TYPE[review.quoteMatch.moverQuote.quoteRequest.moveType]],
-    // review.quoteMatch.moverQuote.quoteRequest.moveType,
-    // [getKoreanMoveType(review.quoteMatch.moverQuote.quoteRequest.moveType)],
     price: review.quoteMatch.moverQuote.price,
     rating: review.rating,
     reviewContent: review.content,
