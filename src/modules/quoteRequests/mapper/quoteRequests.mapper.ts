@@ -35,7 +35,7 @@ export default class QuoteRequestsMapper {
     return {
       quoteId: quote.id, // quote 엔티티의 id 사용
       movingType: [quote.moveType.toLowerCase().split('_')[0]] as ['small'] | ['home'] | ['office'],
-      isCustomQuote: Boolean(quote.targetedQuoteRequestId),
+      isCustomQuote: targetedMoverId !== null,
       customerName: quote.customer?.user?.name || '',
       movingDate: quote.moveDate,
       departure: departureAddress ? `${departureAddress.sido} ${departureAddress.sigungu}` : '',
@@ -43,6 +43,7 @@ export default class QuoteRequestsMapper {
       variant: 'requested',
       requestedAt: quote.createdAt,
       moverId,
+      currentQuoteStatus: quote.currentStatus,
       quoteStatus,
       targetedMoverId,
     };

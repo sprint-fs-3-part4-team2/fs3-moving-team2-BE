@@ -80,7 +80,7 @@ export async function createNotification(postData: {
     quoteArrive: `${moverName} 기사님의 ${moveType} 견적이 도착했어요!`,
     quoteRequest: '지정 견적 요청이 도착했어요!',
     quoteConfirm: `${moverName} 기사님의 견적이 확정되었어요!!`,
-    quoteRefuse: '${moverName} 기사님이 견적 요청을 거절했어요..',
+    quoteRefuse: `${moverName} 기사님이 견적 요청을 거절했어요..`,
     dayBefore: `내일은 ${fromRegion} -> ${toRegion} 이사 예정일이에요!`,
     newReview: '새로운 리뷰가 등록되었습니다! 어서 확인해보세요!',
   };
@@ -111,6 +111,18 @@ export async function createNotification(postData: {
         url,
       },
     });
+
+    await prisma.$executeRawUnsafe(`
+      NOTIFY new_notification, '${JSON.stringify({
+        id: newAlarm.id,
+        userId: newAlarm.userId,
+        message: newAlarm.message,
+        highlight: newAlarm.highlight,
+        url: newAlarm.url,
+        createdAt: newAlarm.createdAt,
+      })}'
+    `);
+
     return newAlarm;
   } catch (error) {
     console.error('알림 생성 실패:', error);

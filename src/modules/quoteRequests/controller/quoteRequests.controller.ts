@@ -21,7 +21,7 @@ export default class QuoteRequestsController {
   };
 
   getAllQuoteRequests = async (req: Request, res: Response) => {
-    const moverId = 'cm8mvje98005iwsug136kevvd';
+    const moverId = 'cm8p9c6sa005iwsm9fikr4asm';
 
     // query 파라미터로부터 페이지와 페이지 크기 추출, 기본값 설정
     const { page, pageSize, search, moveType, isServiceRegionMatch, isTargetedQuote, sortBy } =
