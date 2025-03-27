@@ -17,9 +17,9 @@ export default class UserRepository {
         data,
       });
       console.table(result ?? {});
-      return result;
+      return { ok: true, data: result };
     } catch (err: any) {
-      return { code: err.code, message: 'repository {userEdit} error' };
+      return { ok: false, code: err.code, message: 'repository {userEdit} error' };
     }
   }
 

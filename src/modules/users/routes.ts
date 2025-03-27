@@ -5,7 +5,6 @@ import prismaClient from '@/prismaClient';
 import UserService from './service/user.service';
 import UserRepository from './repository/user.repository';
 import UserController from './controller/user.controller';
-import asyncRequestHandler from '@/core/handlers/asyncRequestHandler';
 
 const userRouter = Router();
 

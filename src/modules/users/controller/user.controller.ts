@@ -22,7 +22,16 @@ export default class UserController {
       },
       user,
     );
+
+    if (!data.ok) {
+      res.status(204).json({ ok: false });
+      return;
+    }
+
     await createNotification({ userId: user!.userId, messageType: 'newReview' });
-    res.status(200).json(data);
+    res.status(200).json({
+      ok: true,
+      data,
+    });
   };
 }
