@@ -16,11 +16,15 @@ function handleError(error: unknown, res: Response) {
 // 대기 중인 견적 목록 조회
 export async function getPendingQuotes(req: Request, res: Response): Promise<Response> {
   try {
-    const { customerId } = req.query;
-    if (!customerId || req.user?.userId !== customerId) {
+    const userId = req?.user?.userId ?? '';
+    const roleId = req?.user?.roleId ?? '';
+    if (!userId || !roleId) {
       return res.status(400).json({ error: AUTH_MESSAGES.needLogin });
     }
-    const pendingQuotes = await quoteService.getPendingQuotes(customerId as string);
+    if (req.user?.userId !== userId || req.user?.roleId !== roleId) {
+      return res.status(400).json({ error: AUTH_MESSAGES.needLogin });
+    }
+    const pendingQuotes = await quoteService.getPendingQuotes(userId as string, roleId as string);
     return res.status(200).json({ data: pendingQuotes });
   } catch (error) {
     return handleError(error, res);

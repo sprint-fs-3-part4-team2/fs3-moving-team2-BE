@@ -15,7 +15,7 @@ router.get(
 // 견적 확정 API
 router.post(
   '/confirm-quote',
-  createAuthMiddleware('mover'),
+  createAuthMiddleware('customer'),
   asyncRequestHandler(quoteController.confirmQuote),
 );
 

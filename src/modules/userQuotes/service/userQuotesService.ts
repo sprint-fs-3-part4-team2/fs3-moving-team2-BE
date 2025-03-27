@@ -18,32 +18,87 @@ export async function checkCustomerExistence(customerId: string) {
 }
 
 // 대기 중인 견적 목록 조회
-export async function getPendingQuotes(customerId: string) {
-  await checkCustomerExistence(customerId);
-  const pendingQuotes = await prisma.quoteRequest.findMany({
-    where: {
-      customerId,
-      quoteStatusHistories: {
-        some: { status: 'QUOTE_REQUESTED' },
-      },
-    },
-    include: {
-      quoteStatusHistories: {
-        orderBy: { createdAt: 'desc' },
-      },
-      quoteRequestAddresses: true,
-    },
-    orderBy: {
-      createdAt: 'desc',
-    },
+export async function getPendingQuotes(userId: string, roleId: string) {
+  const customer = await prisma.customer.findUnique({
+    where: { id: roleId },
+    include: { user: true },
   });
+  // const mover = await prisma.mover.findUnique({
+  //   where: { id: roleId },
+  //   include: { user: true },
+  // });
+  if (
+    !customer
+    //  && !mover
+  ) {
+    throw new NotFoundException(AUTH_MESSAGES.needLogin);
+  }
+  let pendingQuotes;
+  if (customer) {
+    pendingQuotes = await prisma.quoteRequest.findMany({
+      where: { customerId: roleId },
+      include: {
+        quoteStatusHistories: { orderBy: { createdAt: 'desc' } },
+        quoteRequestAddresses: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+  // else if (mover) {
+  //   pendingQuotes = await prisma.targetedQuoteRequest.findMany({
+  //     where: { moverId: roleId },
+  //     include: {
+  //       quoteRequest: {
+  //         include: {
+  //           quoteStatusHistories: { orderBy: { createdAt: 'desc' } },
+  //           quoteRequestAddresses: true,
+  //         },
+  //       },
+  //     },
+  //     orderBy: {
+  //       createdAt: 'desc',
+  //     },
+  //   });
+  // }
   if (!pendingQuotes || pendingQuotes.length === 0) {
-    throw new NotFoundException(EXCEPTION_MESSAGES.quoteNotFound);
+    throw new NotFoundException('대기 중인 견적이 없습니다.');
   }
   return pendingQuotes;
 }
 
-// 견적 확정
+// // 견적 확정
+// export async function confirmQuote(quoteRequestId: string, moverQuoteId: string) {
+//   const quoteRequest = await prisma.quoteRequest.findUnique({
+//     where: { id: quoteRequestId },
+//   });
+//   if (!quoteRequest) {
+//     throw new NotFoundException(EXCEPTION_MESSAGES.quoteNotFound);
+//   }
+//   await prisma.quoteRequest.update({
+//     where: { id: quoteRequestId },
+//     data: {
+//       quoteStatusHistories: {
+//         create: {
+//           status: 'QUOTE_CONFIRMED',
+//           updatedAt: new Date(),
+//         },
+//       },
+//     },
+//   });
+//   await prisma.moverQuote.update({
+//     where: { id: moverQuoteId },
+//     data: {
+//       quoteMatch: {
+//         create: {
+//           isCompleted: false,
+//         },
+//       },
+//     },
+//   });
+// }
+
 export async function confirmQuote(quoteRequestId: string, moverQuoteId: string) {
   const quoteRequest = await prisma.quoteRequest.findUnique({
     where: { id: quoteRequestId },
@@ -51,25 +106,35 @@ export async function confirmQuote(quoteRequestId: string, moverQuoteId: string)
   if (!quoteRequest) {
     throw new NotFoundException(EXCEPTION_MESSAGES.quoteNotFound);
   }
+  // 견적 상태를 "QUOTE_CONFIRMED"로 업데이트
   await prisma.quoteRequest.update({
     where: { id: quoteRequestId },
     data: {
       quoteStatusHistories: {
         create: {
-          status: 'QUOTE_CONFIRMED',
+          status: 'QUOTE_CONFIRMED', // 견적 확정 상태로 변경
           updatedAt: new Date(),
         },
       },
     },
   });
+  // 선택된 견적에 대해 moverQuote 상태를 업데이트
+  const moverQuote = await prisma.moverQuote.findUnique({
+    where: { id: moverQuoteId },
+  });
+  if (!moverQuote) {
+    throw new NotFoundException(EXCEPTION_MESSAGES.quoteNotFound);
+  }
+  // 기사님에게 견적을 보내는 상태로 업데이트
   await prisma.moverQuote.update({
     where: { id: moverQuoteId },
     data: {
       quoteMatch: {
         create: {
-          isCompleted: false,
+          isCompleted: false, // 견적이 확정되었으므로 기사님에게 수락을 요청하는 상태로 변경
         },
       },
     },
   });
+  return { message: '견적이 확정되었습니다.' };
 }
