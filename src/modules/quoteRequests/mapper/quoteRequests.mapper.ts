@@ -43,6 +43,7 @@ export default class QuoteRequestsMapper {
       variant: 'requested',
       requestedAt: quote.createdAt,
       moverId,
+      currentQuoteStatus: quote.currentStatus,
       quoteStatus,
       targetedMoverId,
     };
