@@ -63,7 +63,7 @@ export default class QuoteRequestsRepository {
       data: {
         currentStatus: status,
         quoteStatusHistories: {
-          createMany: { data: [{ status }] }, // 새로운 상태 기록 추가
+          create: [{ status }],
         },
       },
     });
