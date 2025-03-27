@@ -26,7 +26,7 @@ export async function getPendingQuotes(userId: string, roleId: string) {
   if (!customer) {
     throw new NotFoundException(AUTH_MESSAGES.needLogin);
   }
-  const pendingQuotes = await prisma.quoteRequest.findMany({
+  const pendingQuotes = await prisma.quoteRequest.findFirst({
     where: {
       customerId: roleId,
       quoteStatusHistories: {
@@ -47,7 +47,7 @@ export async function getPendingQuotes(userId: string, roleId: string) {
     },
     take: 1,
   });
-  if (!pendingQuotes || pendingQuotes.length === 0) {
+  if (!pendingQuotes) {
     throw new NotFoundException(EXCEPTION_MESSAGES.quoteNotFound);
   }
   return pendingQuotes;
