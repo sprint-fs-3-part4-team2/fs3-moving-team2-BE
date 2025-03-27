@@ -167,24 +167,22 @@ export default class QuotesRepository {
       // (필요하다면 quote.moverId와 moverId 일치 여부 등 추가 검증)
 
       // 1-1. 최근 견적 상태가 QUOTE_REQUESTED 인지 검증
+      if (quote.currentStatus !== 'QUOTE_REQUESTED') {
+        throw new Error('견적 요청 테이블의 현재 상태에서, Quote status is not QUOTE_REQUESTED');
+      }
       const latestStatus = quote.quoteStatusHistories[0]?.status;
       if (latestStatus !== 'QUOTE_REQUESTED') {
-        throw new Error('Quote status is not QUOTE_REQUESTED');
+        throw new Error('견적 상태 테이블, Quote status is not QUOTE_REQUESTED');
       }
 
       // 2. 견적 상태 MOVER_SUBMITTED 생성
-
       await tx.quoteRequest.update({
         where: { id: quoteId },
         data: {
           currentStatus: 'MOVER_SUBMITTED',
-        },
-      });
-
-      await tx.quoteStatusHistory.create({
-        data: {
-          quoteRequestId: quoteId,
-          status: 'MOVER_SUBMITTED',
+          quoteStatusHistories: {
+            create: { status: 'MOVER_SUBMITTED' },
+          },
         },
       });
 
