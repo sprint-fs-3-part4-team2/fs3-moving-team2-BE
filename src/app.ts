@@ -17,6 +17,10 @@ import rejectionRouter from './modules/rejection/routes';
 import profileRouter from './modules/profile/routes';
 import targetedQuoteRequestRouter from './modules/targetedQuoteRequest/routes';
 import moverRouter from './modules/movers/routes';
+import chatRouter from './modules/chat/routes';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
+import ChatIo from './chatSocket';
 
 dotenv.config();
 
@@ -28,6 +32,16 @@ const allowedOrigins: string[] = [
 ].filter((origin) => origin.trim() !== '');
 
 const app = express();
+// 채팅 기능용 소켓
+const server = createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: allowedOrigins.length > 0 ? allowedOrigins : '*', // 빈 배열 방지
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    credentials: true, // 쿠키 전달 가능하도록 설정 (필요하면 추가)
+  },
+});
+ChatIo(io);
 
 // 미들웨어 설정
 app.use(
@@ -61,9 +75,10 @@ app.use('/notification', notificationRouter);
 app.use('/rejection', rejectionRouter);
 app.use('/profile', profileRouter);
 app.use('/movers', moverRouter);
+app.use('/chat', chatRouter);
 
 // 서버 실행
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`Server listening on port ${port}`);
 });
 
