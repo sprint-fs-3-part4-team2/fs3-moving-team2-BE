@@ -1,5 +1,14 @@
+import { AUTH_MESSAGES } from '@/constants/authMessages';
+import { EXCEPTION_MESSAGES } from '@/constants/exceptionMessages';
+import { ConflictException } from '@/core/errors';
+import { UnauthorizedException } from '@/core/errors/unauthorizedException';
 import { generateTokens } from '@/core/security/jwt';
+import UserRepository from '@/modules/users/repository/user.repository';
+import { SignInRequest, SignUpRequest } from '@/structs/authStruct';
+import { LowercaseUserType } from '@/types/userType.types';
+import { UserType } from '@prisma/client';
 import axios from 'axios';
+import bcrypt from 'bcrypt';
 
 export default class AuthService {
   private SNS_AUTH_URLS = {
@@ -8,12 +17,64 @@ export default class AuthService {
     naver: `https://nid.naver.com/oauth2.0/authorize?client_id=${process.env.NAVER_CLIENT_ID}&redirect_uri=${process.env.NAVER_REDIRECT_URI}&response_type=code&state=RANDOM_STATE_VALUE`,
   };
 
-  fakeSignIn(userId: string, type: 'customer' | 'mover') {
-    const tokens = generateTokens(userId, type);
+  private SALT_ROUNDS = 10;
 
+  constructor(private userRepository: UserRepository) {}
+
+  async signIn({ email, password }: SignInRequest, type: LowercaseUserType) {
+    const uppercaseType = type.toUpperCase() as UserType;
+    const userEntity = await this.userRepository.findByEmail(email);
+    if (!userEntity) throw new UnauthorizedException(AUTH_MESSAGES.emailNotExist);
+    if (userEntity.userType !== uppercaseType)
+      throw new ConflictException(AUTH_MESSAGES.invalidRole);
+
+    const isPasswordValid = await bcrypt.compare(password, userEntity?.password);
+    if (!isPasswordValid) throw new UnauthorizedException(AUTH_MESSAGES.invalidPassword);
+
+    const roleId =
+      type === 'mover' ? (userEntity.mover?.id ?? '') : (userEntity.customer?.id ?? '');
+    const tokens = generateTokens(userEntity.id, roleId, type);
+
+    return {
+      tokens,
+      user: {
+        email: userEntity.email,
+        name: userEntity.name,
+        phoneNumber: userEntity.phoneNumber,
+      },
+    };
+  }
+
+  async signUp(signUpDto: SignUpRequest, type: LowercaseUserType) {
+    const uppercaseType = type.toUpperCase() as UserType;
+    const existingUserByEmail = await this.userRepository.findByEmail(signUpDto.email);
+    if (existingUserByEmail) throw new ConflictException(EXCEPTION_MESSAGES.duplicatedEmail);
+
+    const encryptedPassword = await bcrypt.hash(signUpDto.password, this.SALT_ROUNDS);
+    const userEntity = await this.userRepository.create(
+      { ...signUpDto, password: encryptedPassword },
+      uppercaseType,
+    );
+
+    const roleId = '';
+    const tokens = generateTokens(userEntity.id, roleId, type);
+
+    return {
+      tokens,
+      user: {
+        email: userEntity.email,
+        name: userEntity.name,
+        phoneNumber: userEntity.phoneNumber,
+      },
+    };
+  }
+
+  fakeSignIn(userId: string, roleId: string, type: LowercaseUserType) {
+    const tokens = generateTokens(userId, roleId, type);
     return tokens;
   }
 
+  // 작업 진행 중
   getSnsLoginUrl = (provider: keyof typeof this.SNS_AUTH_URLS) => {
     if (!this.SNS_AUTH_URLS[provider]) {
       throw new Error('지원하지 않는 로그인 제공자입니다.');

@@ -1,5 +1,5 @@
 import { QuoteRequestAddress } from '@prisma/client';
-import { QuoteForMoverListDto, QuoteForMoverListDtoRequest } from '../dto/quoteForMoverListDto';
+import { QuoteForMoverListDto, QuoteForMoverListDtoRequest } from '../dto/quoteForMoverList.dto';
 
 export default class QuoteRequestsMapper {
   static toQuoteForMoverListDto(

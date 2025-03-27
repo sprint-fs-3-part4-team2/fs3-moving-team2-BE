@@ -24,6 +24,6 @@ router
   .route('/submitted')
   .get(createAuthMiddleware('mover'), asyncRequestHandler(getQuotesListByMover));
 
-router.route('/submit').post(asyncRequestHandler(submitQuoteByMover));
+router.route('/submit/:quoteId').post(asyncRequestHandler(submitQuoteByMover));
 
 export default router;

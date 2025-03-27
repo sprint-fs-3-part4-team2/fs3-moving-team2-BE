@@ -15,6 +15,8 @@ import authRouter from './modules/auth/routes';
 import notificationRouter from './modules/notification/routes';
 import rejectionRouter from './modules/rejection/routes';
 import profileRouter from './modules/profile/routes';
+import targetedQuoteRequestRouter from './modules/targetedQuoteRequest/routes';
+import moverRouter from './modules/movers/routes';
 import chatRouter from './modules/chat/routes';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
@@ -68,9 +70,11 @@ app.use('/mover-quotes', moverQuotesRouter);
 app.use('/favorites', favoriteRouter);
 app.use('/auth', authRouter);
 app.use('/quote-requests', quoteRequestRouter);
+app.use('/targeted-quote-requests', targetedQuoteRequestRouter);
 app.use('/notification', notificationRouter);
 app.use('/rejection', rejectionRouter);
 app.use('/profile', profileRouter);
+app.use('/movers', moverRouter);
 app.use('/chat', chatRouter);
 
 // 서버 실행
