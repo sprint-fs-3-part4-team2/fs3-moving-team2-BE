@@ -45,26 +45,3 @@ export async function updateToRead(req: Request, res: Response) {
     res.status(500).json({ message: '수정 실패!' });
   }
 }
-
-// export async function createNotification(req: Request, res: Response) {
-//   // userId, message, url,
-//   try {
-//     const { userId } = req.params;
-
-// const MESSAGE_MAP: Record<string, string> = {
-//   quoteRequest: "견적 요청이 도착했습니다.",
-//   quoteConfirm: "견적이 확정되었습니다.",
-// }
-
-//     if (!userId) {
-//       res.status(400).json({ message: '알림 보낼 유저를 찾을 수 없습니다.' });
-//       return;
-//     }
-//     const { message, url, type } = req.body;
-//     const newAlarm = await notificationService.createNotification({ userId, message, url });
-//     res.status(201).json({ message: '알림 등록 성공', data: newAlarm });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ message: '알림 등록 실패' });
-//   }
-// }
