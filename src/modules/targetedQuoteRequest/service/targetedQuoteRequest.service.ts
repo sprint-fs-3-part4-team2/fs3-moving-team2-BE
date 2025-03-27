@@ -2,7 +2,6 @@ import QuoteRequestsRepository from '@/modules/quoteRequests/repository/quoteReq
 import TargetedQuoteRejectionRepository from '../repository/targetedQuoteRejection.repository';
 import TargetedQuoteRequestRepository from '../repository/targetedQuoteRequest.repository';
 import { PrismaClient } from '@prisma/client';
-import QuoteStatusHistoryRepository from '@/modules/quoteRequests/repository/quoteStatusHistory.repository';
 
 export default class TargetedQuoteRequestService {
   constructor(
@@ -10,24 +9,29 @@ export default class TargetedQuoteRequestService {
     private targetedQuoteRequestRepository: TargetedQuoteRequestRepository,
     private targetedQuoteRejectionRepository: TargetedQuoteRejectionRepository,
     private quoteRequestsRepository: QuoteRequestsRepository,
-    private quoteStatusHistory: QuoteStatusHistoryRepository,
   ) {}
 
   async rejectQuoteByMover(quoteId: string, moverId: string, rejectionReason: string) {
+    console.log('log', quoteId, moverId, rejectionReason);
     await this.prismaClient.$transaction(async (tx) => {
       // 1. 견적 요청(QuoteRequest) 조회 및 검증
       const quote = await this.quoteRequestsRepository.findUniqueQuoteWithStatus(quoteId, tx);
       if (!quote) throw new Error('Quote not found');
 
+      if (quote.currentStatus !== 'QUOTE_REQUESTED') {
+        throw new Error('견적 요청 현재 상태 필드의 Quote status is not QUOTE_REQUESTED');
+      }
+
       // 1-1. 해당 견적의 최근 견적 상태가 QUOTE_REQUEST 요청인지 검증
       const latestStatus = quote.quoteStatusHistories[0]?.status;
       if (latestStatus !== 'QUOTE_REQUESTED') {
-        throw new Error('Quote status is not QUOTE_REQUESTED');
+        throw new Error('견적 상태 테이블의 Quote status is not QUOTE_REQUESTED');
       }
 
       // 2. 견적 상태 TARGETED_QUOTE_REJECTED: 생성
-      await this.quoteStatusHistory.createQuoteStatusHistory(
-        { quoteRequestId: quoteId, status: 'TARGETED_QUOTE_REJECTED' },
+      await this.quoteRequestsRepository.updateQuoteRequestStatus(
+        quoteId,
+        'TARGETED_QUOTE_REJECTED',
         tx,
       );
 

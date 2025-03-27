@@ -112,16 +112,16 @@ export async function createNotification(postData: {
       },
     });
 
-    await prisma.$queryRaw`
-      NOTIFY new_notification, ${JSON.stringify({
+    await prisma.$executeRawUnsafe(`
+      NOTIFY new_notification, '${JSON.stringify({
         id: newAlarm.id,
         userId: newAlarm.userId,
         message: newAlarm.message,
         highlight: newAlarm.highlight,
         url: newAlarm.url,
         createdAt: newAlarm.createdAt,
-      })}
-    `;
+      })}'
+    `);
 
     return newAlarm;
   } catch (error) {
