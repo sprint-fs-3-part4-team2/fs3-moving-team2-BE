@@ -2,12 +2,12 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export async function getMoverReviews(userId: string) {
+export async function getMoverReviews(moverId: string) {
   const reviews = await prisma.review.findMany({
     where: {
       quoteMatch: {
         moverQuote: {
-          moverId: userId,
+          moverId: moverId,
         },
       },
     },
@@ -43,7 +43,7 @@ export async function getMoverReviews(userId: string) {
     where: {
       quoteMatch: {
         moverQuote: {
-          moverId: userId,
+          moverId: moverId,
         },
       },
     },

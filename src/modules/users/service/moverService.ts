@@ -39,44 +39,64 @@ export async function getMoverProfileDetail(userId: string) {
 
   if (!user || !user.mover) return null;
 
-  const average = await prisma.review.aggregate({
-    _avg: {
-      rating: true,
-    },
-    where: {
-      quoteMatch: {
-        moverQuote: {
-          mover: {
-            userId: userId,
+  const [average, total, favoriteCount] = await Promise.all([
+    prisma.review.aggregate({
+      _avg: {
+        rating: true,
+      },
+      where: {
+        quoteMatch: {
+          moverQuote: {
+            mover: {
+              userId: userId,
+            },
           },
         },
       },
-    },
-  });
+    }),
+    prisma.review.count({
+      where: {
+        quoteMatch: {
+          moverQuote: {
+            mover: {
+              userId: userId,
+            },
+          },
+        },
+      },
+    }),
+    prisma.customerFavorite.count({
+      where: {
+        mover: {
+          userId: userId,
+        },
+      },
+    }),
+  ]);
 
-  const total = await prisma.review.count({
-    where: {
-      quoteMatch: {
-        moverQuote: {
-          mover: {
-            userId: userId,
-          },
-        },
-      },
-    },
-  });
-  console.log(user.mover.moverServices);
-  console.log(average);
-  console.log(total);
   return {
-    name: user.name,
+    moverName: user.name,
     introduction: user.mover.introduction,
-    profileImage: user.mover.profileImage,
+    imageUrl: user.mover.profileImage,
     averageRating: parseFloat((average._avg.rating ?? 0).toFixed(1)),
     totalReviews: total,
+    ratingCount: total,
     experienceYears: user.mover.experienceYears,
-    totalConfirmedCount: user.mover.totalConfirmedCount,
-    movingType: user.mover.moverServices.map((s) => MOVE_TYPE[s.serviceType]), //이사종류  moveType
-    regions: user.mover.moverServiceRegions.map((r) => reverseRegionMap[r.region]), // 서비스 가능 지역
+    quoteCount: user.mover.totalConfirmedCount,
+    favoriteCount,
+    movingType: user.mover.moverServices.map((s) => MOVE_TYPE[s.serviceType]),
+    regions: user.mover.moverServiceRegions.map((r) => reverseRegionMap[r.region]),
   };
 }
+
+// imageUrl, //프로필사진  555
+// rating, // 평점  중복 555
+// ratingCount, //평점 수 555
+// experienceYears, //경력 555
+// moverName = '김코드', //기사이름    555
+// favoriteCount, //찜 개수  추가해야함
+// quoteCount, //견적확정 수  555
+// isFavoriteMoverList,  기사님 찾기 페이지에서 찜한 기사님 목록에 사용할 경우 true
+// introduction, //기사소개 555
+// movingType, // 이사종류 555
+// regions, //지역 555
