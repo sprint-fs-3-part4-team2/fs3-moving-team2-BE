@@ -9,20 +9,17 @@ export default class UserService {
     const { newPassword, phoneNumber, name, currentPassword } = body;
     const userId = user?.userId ?? '';
 
-    const updatedProfile = await this.userRepository.userEdit(
-      {
-        where: {
-          id: userId,
-          currentPassword,
-        },
-        data: {
-          password: newPassword,
-          phoneNumber,
-          name,
-        },
+    const updatedProfile = await this.userRepository.userEdit({
+      where: {
+        id: userId,
+        password: currentPassword,
       },
-      user!,
-    );
+      data: {
+        password: newPassword,
+        phoneNumber,
+        name,
+      },
+    });
 
     return updatedProfile;
   }

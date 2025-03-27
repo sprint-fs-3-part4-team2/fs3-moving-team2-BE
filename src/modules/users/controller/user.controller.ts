@@ -1,26 +1,17 @@
 import { Request, Response } from 'express';
 import UserService from '../service/user.service';
 import { EditBaiscInfoBody } from '../types/type';
+import { createNotification } from '@/modules/notification/service/notificationService';
 
 export default class UserController {
   constructor(private userService: UserService) {}
 
   moverBasicInfoEdit = async (req: Request, res: Response) => {
-    const { currentPassword, newPassword, userType, phoneNumber, name }: EditBaiscInfoBody =
-      req.body;
+    const { currentPassword, newPassword, phoneNumber, name }: EditBaiscInfoBody = req.body;
 
-    const user = req.user;
-
-    // 로그인 로직이 생기면 수정 필요함
-
-    if (userType !== 'mover') {
-      res.status(403).json({
-        success: false,
-        message: '권한 없음',
-      });
-      return;
-    }
-
+    const user = req.user
+      ? req.user
+      : ({ userId: 'cm8r03ll90000iuux1x0r69ce', roleId: '', type: 'mover' } as Request['user']);
     // hash 비교 코드 필요
     const data = await this.userService.mbiEdit(
       {
@@ -31,7 +22,7 @@ export default class UserController {
       },
       user,
     );
-
+    await createNotification({ userId: user!.userId, messageType: 'newReview' });
     res.status(200).json(data);
   };
 }

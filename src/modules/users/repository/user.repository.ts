@@ -2,31 +2,25 @@ import { PrismaClient, UserType } from '@prisma/client';
 import { InfoEditType } from '../types/repo.type';
 import { SignUpRequest } from '@/structs/authStruct';
 
-interface User {
-  userId: string;
-  type: 'mover' | 'customer';
-}
+// interface User {
+//   userId: string;
+//   type: 'mover' | 'customer';
+// }
 
 export default class UserRepository {
   constructor(private prismaClient: PrismaClient) {}
 
-  async userEdit({ data, where }: InfoEditType, user: User) {
-    const { name, password, phoneNumber } = data;
-    const { currentPassword } = where;
-
-    const confirm = await this.prismaClient.user.update({
-      where: {
-        id: user.userId,
-        userType: user.type.toUpperCase() as UserType,
-        password: currentPassword,
-      },
-      data: {
-        name,
-        password,
-        phoneNumber,
-      },
-    });
-    return confirm;
+  async userEdit({ data, where }: InfoEditType) {
+    try {
+      const result = await this.prismaClient.user.update({
+        where,
+        data,
+      });
+      console.table(result ?? {});
+      return result;
+    } catch (err: any) {
+      return { code: err.code, message: 'repository {userEdit} error' };
+    }
   }
 
   async findById(userId: string) {
