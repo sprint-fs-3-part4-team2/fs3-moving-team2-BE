@@ -36,12 +36,13 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: allowedOrigins.length > 0 ? allowedOrigins : '*', // 빈 배열 방지
+    origin: allowedOrigins.length > 0 ? allowedOrigins : '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-    credentials: true, // 쿠키 전달 가능하도록 설정 (필요하면 추가)
+    credentials: true,
   },
 });
-ChatIo(io);
+const chatNamespace = io.of('/chat');
+ChatIo(chatNamespace);
 
 // 미들웨어 설정
 app.use(
@@ -75,7 +76,13 @@ app.use('/notification', notificationRouter);
 app.use('/rejection', rejectionRouter);
 app.use('/profile', profileRouter);
 app.use('/movers', moverRouter);
-app.use('/chat', chatRouter);
+app.use('/chat', (req, res, next) => {
+  if (req.headers.upgrade && req.headers.upgrade.toLowerCase() === 'websocket') {
+    next();
+  } else {
+    res.status(400).send('웹소켓 요청만 허용됩니다.');
+  }
+});
 
 // 서버 실행
 server.listen(port, () => {

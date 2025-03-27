@@ -26,8 +26,8 @@ model User {
   socialLogin   SocialLogin? // 유저-소셜로그인 1:1
   customer      Customer? // 유저-고객 1:1
   mover         Mover? // 유저-이사업자 1:1
-  ChatRoom      ChatRoom[]     @relation("UserChatRoom")
   ChatMessage   ChatMessage[]
+  UserChatRoom  UserChatRoom[]
 
   @@unique([userType, phoneNumber]) // 휴대폰 번호와 유저 타입이 중복되지 않도록 유니크 제약 추가
   @@map("user")
@@ -306,13 +306,26 @@ model Review {
 
 // 채팅 user-user/ user-mover/ mover-user/ mover-mover
 model ChatRoom {
-  id          String        @id @default(cuid())
-  user        User[]        @relation("UserChatRoom")
-  createdAt   DateTime      @default(now()) @map("created_at")
-  updatedAt   DateTime      @updatedAt @map("updated_at")
+  id          String         @id @default(cuid())
+  users       UserChatRoom[]
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @updatedAt @map("updated_at")
   ChatMessage ChatMessage[]
 
   @@map("chat_room")
+}
+
+model UserChatRoom {
+  userId     String
+  chatRoomId String
+  joinedAt   DateTime @default(now()) // 추가 필드 가능
+  role       String   @default("member") // 역할 필드 추가 가능
+
+  user     User     @relation(fields: [userId], references: [id])
+  chatRoom ChatRoom @relation(fields: [chatRoomId], references: [id])
+
+  @@id([userId, chatRoomId]) // 복합 키 설정 (중복 방지)
+  @@map("user_chat_room")
 }
 
 // 채팅 메세지
