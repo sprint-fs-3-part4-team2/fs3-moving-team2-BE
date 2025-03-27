@@ -17,7 +17,8 @@ import rejectionRouter from './modules/rejection/routes';
 import profileRouter from './modules/profile/routes';
 import chatRouter from './modules/chat/routes';
 import { createServer } from 'http';
-import { setupChatSocket } from './chatSocket';
+import { Server } from 'socket.io';
+import ChatIo from './chatSocket';
 
 dotenv.config();
 
@@ -31,7 +32,14 @@ const allowedOrigins: string[] = [
 const app = express();
 // 채팅 기능용 소켓
 const server = createServer(app);
-setupChatSocket(server);
+const io = new Server(server, {
+  cors: {
+    origin: allowedOrigins.length > 0 ? allowedOrigins : '*', // 빈 배열 방지
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    credentials: true, // 쿠키 전달 가능하도록 설정 (필요하면 추가)
+  },
+});
+ChatIo(io);
 
 // 미들웨어 설정
 app.use(
