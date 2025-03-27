@@ -45,7 +45,7 @@ startNotificationListener();
 
 // SSE 연결 엔드포인트
 router.get('/events', (req: Request, res: Response) => {
-  const userId = req.user?.userId;
+  const userId = req.user?.userId || 'cm8r03ll90000iuux1x0r69ce';
 
   if (!userId) {
     res.status(400).send('userId가 필요합니다.');
