@@ -79,8 +79,7 @@ export async function getMoverProfileDetail(userId: string) {
     introduction: user.mover.introduction,
     imageUrl: user.mover.profileImage,
     averageRating: parseFloat((average._avg.rating ?? 0).toFixed(1)),
-    totalReviews: total,
-    ratingCount: total,
+    ratingCount: total, //총리뷰수
     experienceYears: user.mover.experienceYears,
     quoteCount: user.mover.totalConfirmedCount,
     favoriteCount,
@@ -88,15 +87,3 @@ export async function getMoverProfileDetail(userId: string) {
     regions: user.mover.moverServiceRegions.map((r) => reverseRegionMap[r.region]),
   };
 }
-
-// imageUrl, //프로필사진  555
-// rating, // 평점  중복 555
-// ratingCount, //평점 수 555
-// experienceYears, //경력 555
-// moverName = '김코드', //기사이름    555
-// favoriteCount, //찜 개수  추가해야함
-// quoteCount, //견적확정 수  555
-// isFavoriteMoverList,  기사님 찾기 페이지에서 찜한 기사님 목록에 사용할 경우 true
-// introduction, //기사소개 555
-// movingType, // 이사종류 555
-// regions, //지역 555

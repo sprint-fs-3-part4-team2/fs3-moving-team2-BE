@@ -7,7 +7,7 @@ export async function getMoverReviews(moverId: string) {
     where: {
       quoteMatch: {
         moverQuote: {
-          moverId: moverId,
+          moverId,
         },
       },
     },
@@ -23,7 +23,7 @@ export async function getMoverReviews(moverId: string) {
                 select: {
                   user: {
                     select: {
-                      id: true, // 유저 닉네임
+                      id: true,
                     },
                   },
                 },
@@ -38,24 +38,46 @@ export async function getMoverReviews(moverId: string) {
     },
   });
 
-  // 별점 평균계산
-  const averageResult = await prisma.review.aggregate({
+  // 별점 평균 + 리뷰 수
+  const aggregateResult = await prisma.review.aggregate({
     where: {
       quoteMatch: {
         moverQuote: {
-          moverId: moverId,
+          moverId,
         },
       },
     },
     _avg: {
       rating: true,
     },
+    _count: {
+      rating: true,
+    },
   });
 
-  const averageRating = averageResult._avg.rating ?? 0;
+  // ⭐️ 별점 분포 계산 (1~5점)
+  const ratingCounts: Record<number, number> = {
+    1: 0,
+    2: 0,
+    3: 0,
+    4: 0,
+    5: 0,
+  };
+
+  for (const review of reviews) {
+    const rating = review.rating;
+    if (rating >= 1 && rating <= 5) {
+      ratingCounts[rating] += 1;
+    }
+  }
+
+  const averageRating = aggregateResult._avg.rating ?? 0;
+  const ratingCount = aggregateResult._count.rating ?? 0;
 
   return {
     averageRating,
+    ratingCount,
+    ratingCounts,
     reviews: reviews.map((review) => ({
       rating: review.rating,
       content: review.content,
@@ -64,9 +86,3 @@ export async function getMoverReviews(moverId: string) {
     })),
   };
 }
-
-//별점평균
-//유저이름
-//작성일
-//별점
-//리뷰내용
