@@ -17,6 +17,7 @@ import rejectionRouter from './modules/rejection/routes';
 import profileRouter from './modules/profile/routes';
 import targetedQuoteRequestRouter from './modules/targetedQuoteRequest/routes';
 import moverRouter from './modules/movers/routes';
+import userQuoteRouter from './modules/userQuotes/routes';
 import chatRouter from './modules/chat/routes';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
@@ -76,6 +77,7 @@ app.use('/notification', notificationRouter);
 app.use('/rejection', rejectionRouter);
 app.use('/profile', profileRouter);
 app.use('/movers', moverRouter);
+app.use('/quote', userQuoteRouter);
 app.use('/chat', (req, res, next) => {
   if (req.headers.upgrade && req.headers.upgrade.toLowerCase() === 'websocket') {
     next();
