@@ -17,7 +17,6 @@ export default class QuoteRequestsService {
       moveDate: new Date(data.moveDate),
       fromRegion: REGION_MAP[data.departure.sido],
       toRegion: REGION_MAP[data.arrival.sido],
-      currentStatus: 'QUOTE_REQUESTED',
       quoteRequestAddresses: {
         create: [
           {

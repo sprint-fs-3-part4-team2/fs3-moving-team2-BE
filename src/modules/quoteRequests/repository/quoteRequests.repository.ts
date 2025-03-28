@@ -40,6 +40,7 @@ export default class QuoteRequestsRepository {
     return await this.prismaClient.quoteRequest.create({
       data: {
         ...data,
+        currentStatus: 'QUOTE_REQUESTED',
         quoteStatusHistories: {
           // 견적 요청 상태 기록도 함께 생성
           create: [{ status: 'QUOTE_REQUESTED' }],
