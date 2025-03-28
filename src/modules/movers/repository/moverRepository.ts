@@ -16,19 +16,6 @@ export class MoverRepository {
     });
   }
 
-  // 지역 목록 조회
-  async getRegions(): Promise<string[]> {
-    return prisma.moverServiceRegion
-      .findMany({ select: { region: true } })
-      .then((regions) => regions.map((r) => r.region));
-  }
-
-  async getServices(): Promise<string[]> {
-    return prisma.moverService
-      .findMany({ select: { serviceType: true } })
-      .then((services) => services.map((s) => s.serviceType));
-  }
-
   // 정렬 옵션 설정
   private getOrderBy(sortBy: string): Prisma.MoverOrderByWithRelationInput {
     switch (sortBy) {
