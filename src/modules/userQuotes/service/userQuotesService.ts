@@ -40,7 +40,11 @@ export async function getPendingQuotes(userId: string, roleId: string) {
       quoteRequestAddresses: true,
       moverQuotes: {
         include: {
-          mover: true,
+          mover: {
+            include: {
+              moverServices: true,
+            },
+          },
         },
       },
     },
