@@ -104,7 +104,7 @@ const createCustomer = async () => {
       'customer',
       customer.map((user): Prisma.CustomerCreateManyInput => {
         const { id } = user;
-        const imgPath = `/img/sample-profile/sample-${random(Array.from({ length: 6 })) + 1}.svg`;
+        const imgPath = `/img/sample-profile/sample-${random(Array.from({ length: 5 })) + 1}.svg`;
         return {
           userId: id,
           profileImage: imgPath,
@@ -127,7 +127,7 @@ const createMover = async () => {
         const randomMover = random(moverMock);
         const { id } = user;
         const { experience_years, introduction, description } = moverMock[randomMover];
-        const imgPath = `/img/sample-profile/sample-${random(Array.from({ length: 6 })) + 1}.svg`;
+        const imgPath = `/img/sample-profile/sample-${random(Array.from({ length: 5 })) + 1}.svg`;
         return {
           userId: id,
           profileImage: imgPath,
@@ -428,18 +428,34 @@ const createQuoteStatusHistory = async () => {
   try {
     const quoteRequest: QuoteRequest[] = await find('quoteRequest', {});
 
-    await create(
-      'quoteStatusHistory',
-      quoteRequest.map((val): Prisma.QuoteStatusHistoryCreateManyInput => {
-        const index = random(quoteStatusHistoryMock);
-        const { status } = quoteStatusHistoryMock[index];
-        const { id: quoteRequestId } = val;
-        return {
+    quoteRequest.forEach(async (v) => {
+      const index = random(quoteStatusHistoryMock);
+      const { status } = quoteStatusHistoryMock[index];
+      const { id: quoteRequestId } = v;
+      await prismaClient.quoteStatusHistory.create({
+        data: {
           quoteRequestId,
           status,
-        };
-      }),
-    );
+        },
+      });
+      await prismaClient.quoteRequest.update({
+        where: { id: quoteRequestId },
+        data: { currentStatus: status },
+      });
+    });
+    passMsg('quoteStatusHistory 테이블 데이터 생성', `Length ${quoteRequest.length}`);
+    // await create(
+    //   'quoteStatusHistory',
+    //   quoteRequest.map(async (val): Promise<Prisma.QuoteStatusHistoryCreateManyInput> => {
+    //     const index = random(quoteStatusHistoryMock);
+    //     const { status } = quoteStatusHistoryMock[index];
+    //     const { id: quoteRequestId } = val;
+    //     return {
+    //       quoteRequestId,
+    //       status,
+    //     };
+    //   }),
+    // );
   } catch (err) {
     errorMsg(`QuoteStatusHistory mock 데이터 생성`, err);
   }
