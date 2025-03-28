@@ -1,5 +1,6 @@
 import { Prisma, PrismaClient } from '@prisma/client';
 import { CreateQuoteRequestData } from '../dto/createQuoteRequest.dto';
+import { QuoteStatus } from '@/types/quoteStatus.types';
 
 export default class QuoteRequestsRepository {
   constructor(private prismaClient: PrismaClient) {}
@@ -35,17 +36,6 @@ export default class QuoteRequestsRepository {
     },
   };
 
-  // 견적 요청 목록에서 QUOTE_REQUESTED 상태만 필터링
-  private QUOTE_REQUESTED_STATUS_CLAUSE = {
-    quoteStatusHistories: {
-      some: {
-        status: {
-          in: ['QUOTE_REQUESTED'],
-        },
-      },
-    },
-  };
-
   async createQuoteRequest(data: CreateQuoteRequestData) {
     return await this.prismaClient.quoteRequest.create({
       data: {
@@ -58,6 +48,23 @@ export default class QuoteRequestsRepository {
       include: {
         quoteRequestAddresses: true,
         quoteStatusHistories: true,
+      },
+    });
+  }
+
+  async updateQuoteRequestStatus(
+    quoteId: string,
+    status: QuoteStatus,
+    tx?: Prisma.TransactionClient,
+  ) {
+    const client = tx || this.prismaClient;
+    return await client.quoteRequest.update({
+      where: { id: quoteId },
+      data: {
+        currentStatus: status,
+        quoteStatusHistories: {
+          create: [{ status }],
+        },
       },
     });
   }
@@ -87,7 +94,12 @@ export default class QuoteRequestsRepository {
     const skip = (page - 1) * pageSize;
 
     const filteredWhere = {
-      AND: [whereClause || {}, this.QUOTE_REQUESTED_STATUS_CLAUSE],
+      AND: [
+        whereClause || {},
+        {
+          currentStatus: 'QUOTE_REQUESTED',
+        },
+      ],
     };
 
     const totalCount = await this.prismaClient.quoteRequest.count({

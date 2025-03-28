@@ -183,6 +183,7 @@ model QuoteRequest {
   fromRegion            Region                 @map("from_region") // 출발지
   toRegion              Region                 @map("to_region") // 도착지
   moveDate              DateTime               @map("move_date") // 이사 예정일 및 시간대
+  currentStatus         String                 @default("QUOTE_REQUESTED") @map("current_status") // 현재 상태
   createdAt             DateTime               @default(now()) @map("created_at")
   updatedAt             DateTime               @updatedAt @map("updated_at")
   customer              Customer               @relation(fields: [customerId], references: [id], onDelete: Cascade) // 고객-견적요청 1:N

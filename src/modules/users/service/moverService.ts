@@ -39,44 +39,51 @@ export async function getMoverProfileDetail(userId: string) {
 
   if (!user || !user.mover) return null;
 
-  const average = await prisma.review.aggregate({
-    _avg: {
-      rating: true,
-    },
-    where: {
-      quoteMatch: {
-        moverQuote: {
-          mover: {
-            userId: userId,
+  const [average, total, favoriteCount] = await Promise.all([
+    prisma.review.aggregate({
+      _avg: {
+        rating: true,
+      },
+      where: {
+        quoteMatch: {
+          moverQuote: {
+            mover: {
+              userId: userId,
+            },
           },
         },
       },
-    },
-  });
+    }),
+    prisma.review.count({
+      where: {
+        quoteMatch: {
+          moverQuote: {
+            mover: {
+              userId: userId,
+            },
+          },
+        },
+      },
+    }),
+    prisma.customerFavorite.count({
+      where: {
+        mover: {
+          userId: userId,
+        },
+      },
+    }),
+  ]);
 
-  const total = await prisma.review.count({
-    where: {
-      quoteMatch: {
-        moverQuote: {
-          mover: {
-            userId: userId,
-          },
-        },
-      },
-    },
-  });
-  console.log(user.mover.moverServices);
-  console.log(average);
-  console.log(total);
   return {
-    name: user.name,
+    moverName: user.name,
     introduction: user.mover.introduction,
-    profileImage: user.mover.profileImage,
+    imageUrl: user.mover.profileImage,
     averageRating: parseFloat((average._avg.rating ?? 0).toFixed(1)),
-    totalReviews: total,
+    ratingCount: total, //총리뷰수
     experienceYears: user.mover.experienceYears,
-    totalConfirmedCount: user.mover.totalConfirmedCount,
-    movingType: user.mover.moverServices.map((s) => MOVE_TYPE[s.serviceType]), //이사종류  moveType
-    regions: user.mover.moverServiceRegions.map((r) => reverseRegionMap[r.region]), // 서비스 가능 지역
+    quoteCount: user.mover.totalConfirmedCount,
+    favoriteCount,
+    movingType: user.mover.moverServices.map((s) => MOVE_TYPE[s.serviceType]),
+    regions: user.mover.moverServiceRegions.map((r) => reverseRegionMap[r.region]),
   };
 }
