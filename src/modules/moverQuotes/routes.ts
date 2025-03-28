@@ -9,7 +9,7 @@ import { createAuthMiddleware } from '../../core/middleware/auth/auth';
 const router = express.Router();
 
 const quotesRepository = new QuotesRepository(prismaClient);
-const quoteService = new QuotesService(quotesRepository);
+const quoteService = new QuotesService(quotesRepository, prismaClient);
 const quoteController = new QuotesController(quoteService);
 const { getQuoteByIdForCustomer, getQuoteByIdForMover, getQuotesListByMover, submitQuoteByMover } =
   quoteController;
