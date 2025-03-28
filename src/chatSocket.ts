@@ -1,39 +1,24 @@
 import { Server, Namespace } from 'socket.io';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import prismaClient from './prismaClient';
+import { Request } from 'express';
 
 export default function ChatIo(io: Server | Namespace) {
   io.on('connection', (socket) => {
-    const user = socket.on('user', async (accessToken, cb) => {
-      //   const decoded = jwt.verify(accessToken, process.env.JWT_SECRET!) as JwtPayload;
-      //   const { userId, roleId, type } = decoded;
-      const myId = accessToken;
-      try {
-        // return await prismaClient.user.findUnique({
-        //   where: {
-        //     id: myId,
-        //   },
-        //   select: {
-        //     id: true,
-        //   },
-        // });
-      } catch (err) {
-        cb({ ok: false, error: err });
-        // return null;
-      }
-    });
-
     socket.on('chatRoom', async ({ accessToken, targetId }, cb) => {
       console.log(new Date(), '채팅방 연결', socket.id);
-      const myId = accessToken;
+      const user = mapUser.get('user') || {
+        userId: '',
+        roleId: '',
+        type: '',
+      };
       if (!user) return cb({ ok: false, mesasge: '접근 불가' });
-
       try {
         let chatRoom = await prismaClient.chatRoom.findFirst({
           where: {
             users: {
               some: {
-                userId: user.id,
+                userId: user.userId,
                 chatRoom: {
                   users: {
                     some: {
@@ -45,7 +30,7 @@ export default function ChatIo(io: Server | Namespace) {
             },
           },
           include: {
-            users: true, // 필요하면 유저 정보도 가져옴
+            users: true,
           },
         });
 
@@ -54,7 +39,7 @@ export default function ChatIo(io: Server | Namespace) {
             data: {
               users: {
                 create: [
-                  { user: { connect: { id: myId } } },
+                  { user: { connect: { id: user.userId } } },
                   { user: { connect: { id: targetId } } },
                 ],
               },
@@ -81,3 +66,5 @@ export default function ChatIo(io: Server | Namespace) {
     });
   });
 }
+
+export const mapUser = new Map<string, Request['user']>();

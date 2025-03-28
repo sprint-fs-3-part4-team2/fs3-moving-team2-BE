@@ -41,9 +41,6 @@ const io = new Server(server, {
     credentials: true,
   },
 });
-const chatNamespace = io.of('/chat');
-ChatIo(chatNamespace);
-
 // 미들웨어 설정
 app.use(
   cors({
@@ -57,6 +54,9 @@ app.use(express.json());
 app.use(extractUserMiddleware);
 app.use(express.urlencoded({ extended: true })); // 필요한거야?  // body-parser 대체
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec)); // swagger 설정
+
+const chatNamespace = io.of('/chat');
+ChatIo(chatNamespace);
 
 // 기본 라우터 설정
 app.get('/', (req: Request, res: Response) => {
