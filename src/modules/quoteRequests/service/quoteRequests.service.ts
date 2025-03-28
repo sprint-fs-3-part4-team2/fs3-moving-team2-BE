@@ -37,7 +37,9 @@ export default class QuoteRequestsService {
       },
     });
 
-    return { data: quoteRequest, message: '견적 요청이 성공적으로 생성되었습니다.' };
+    console.log('quoteRequestData', quoteRequest);
+
+    return { message: '견적 요청이 성공적으로 생성되었습니다.' };
   }
 
   async getLatestQuoteRequestForCustomer(customerId: string) {
