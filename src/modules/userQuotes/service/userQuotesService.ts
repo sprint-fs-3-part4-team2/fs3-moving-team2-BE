@@ -84,13 +84,12 @@ export async function confirmQuote(moverQuoteId: string, customerId: string) {
       'MOVE_COMPLETED',
       prisma,
     );
-    // moverQuote 상태 업데이트
     await prisma.moverQuote.update({
       where: { id: moverQuoteId },
       data: {
         quoteMatch: {
           create: {
-            isCompleted: true, // 견적이 확정되었지만 이사 완료되지 않음 (유석님에게 안내해야함)
+            isCompleted: true,
           },
         },
       },
