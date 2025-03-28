@@ -9,7 +9,7 @@ import MoverQuotesRepository from '../moverQuotes/repository/moverQuotesReposito
 
 const router = express.Router();
 
-const quoteRequestsRepository = new QuoteRequestsRepository(prismaClient);
+export const quoteRequestsRepository = new QuoteRequestsRepository(prismaClient);
 const moverquotesRepository = new MoverQuotesRepository(prismaClient);
 const quoteRequestsService = new QuoteRequestsService(
   quoteRequestsRepository,
