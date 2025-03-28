@@ -28,6 +28,19 @@ export async function getMoverReviews(moverId: string) {
                   },
                 },
               },
+              quoteRequest: {
+                select: {
+                  customer: {
+                    select: {
+                      user: {
+                        select: {
+                          id: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
             },
           },
         },
@@ -71,7 +84,7 @@ export async function getMoverReviews(moverId: string) {
     }
   }
 
-  const averageRating = aggregateResult._avg.rating ?? 0;
+  const averageRating = Number((aggregateResult._avg.rating ?? 0).toFixed(1));
   const ratingCount = aggregateResult._count.rating ?? 0;
 
   return {
@@ -82,7 +95,7 @@ export async function getMoverReviews(moverId: string) {
       rating: review.rating,
       content: review.content,
       writtenAt: review.createdAt.toISOString().split('T')[0],
-      nickname: review.quoteMatch.moverQuote.mover.user.id,
+      name: review.quoteMatch.moverQuote.quoteRequest.customer.user.id,
     })),
   };
 }
