@@ -22,7 +22,6 @@ export interface CreateQuoteRequestData {
   moveDate: Date;
   fromRegion: Region;
   toRegion: Region;
-  currentStatus: 'QUOTE_REQUESTED';
   quoteRequestAddresses: {
     create: Array<{
       type: 'DEPARTURE' | 'ARRIVAL';
