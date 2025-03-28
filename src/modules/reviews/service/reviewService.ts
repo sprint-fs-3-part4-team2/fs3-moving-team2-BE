@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 export async function getPendingReviews(userId: string) {
   const quoteMatchesWithoutReview = await prisma.quoteMatch.findMany({
     where: {
-      isCompleted: false,
+      isCompleted: true,
       review: null,
       moverQuote: {
         quoteRequest: {
