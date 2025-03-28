@@ -28,13 +28,6 @@ export default class TargetedQuoteRequestService {
         throw new Error('견적 상태 테이블의 Quote status is not QUOTE_REQUESTED');
       }
 
-      // 2. 견적 상태 TARGETED_QUOTE_REJECTED: 생성
-      await this.quoteRequestsRepository.updateQuoteRequestStatus(
-        quoteId,
-        'TARGETED_QUOTE_REJECTED',
-        tx,
-      );
-
       // 3. 지정 견적 요청(TargetedQuoteRequest) 조회 (기사님 id와 견적 요청 id 기준)
       const targetedQuoteRequest = await this.targetedQuoteRequestRepository.findOneByQuoteAndMover(
         quoteId,
