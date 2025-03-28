@@ -17,28 +17,6 @@ export class MoverController {
     }
   }
 
-  // 지역 목록 조회
-  async getRegions(req: Request, res: Response) {
-    try {
-      const regions = await prisma.moverServiceRegion.findMany({
-        select: { region: true },
-      });
-      res.json(regions.map((r) => r.region));
-    } catch (error) {
-      res.status(500).json({ error: '서버 오류 발생' });
-    }
-  }
-
-  // 서비스 목록 조회
-  async getServices(req: Request, res: Response) {
-    try {
-      const services = await prisma.moverService.findMany();
-      res.json(services);
-    } catch (error) {
-      res.status(500).json({ error: '서버 오류 발생' });
-    }
-  }
-
   // 검색 API
   async searchMovers(req: Request, res: Response): Promise<void> {
     try {
