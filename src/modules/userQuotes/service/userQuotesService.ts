@@ -3,6 +3,8 @@ import { NotFoundException } from '@/core/errors/notFoundException';
 import { AUTH_MESSAGES } from '@/constants/authMessages';
 import { EXCEPTION_MESSAGES } from '@/constants/exceptionMessages';
 import { UnauthorizedException } from '@/core/errors/unauthorizedException';
+import { ForbiddenException } from '@/core/errors';
+import { quoteRequestsRepository } from '@/modules/quoteRequests/routes';
 
 const prisma = new PrismaClient();
 
@@ -53,73 +55,47 @@ export async function getPendingQuotes(userId: string, roleId: string) {
   return pendingQuotes;
 }
 
-// // 견적 확정
-// export async function confirmQuote(quoteRequestId: string, moverQuoteId: string) {
-//   const quoteRequest = await prisma.quoteRequest.findUnique({
-//     where: { id: quoteRequestId },
-//   });
-//   if (!quoteRequest) {
-//     throw new NotFoundException(EXCEPTION_MESSAGES.quoteNotFound);
-//   }
-//   await prisma.quoteRequest.update({
-//     where: { id: quoteRequestId },
-//     data: {
-//       quoteStatusHistories: {
-//         create: {
-//           status: 'QUOTE_CONFIRMED',
-//           updatedAt: new Date(),
-//         },
-//       },
-//     },
-//   });
-//   await prisma.moverQuote.update({
-//     where: { id: moverQuoteId },
-//     data: {
-//       quoteMatch: {
-//         create: {
-//           isCompleted: false,
-//         },
-//       },
-//     },
-//   });
-// }
-
-export async function confirmQuote(quoteRequestId: string, moverQuoteId: string) {
-  const quoteRequest = await prisma.quoteRequest.findUnique({
-    where: { id: quoteRequestId },
-  });
-  if (!quoteRequest) {
-    throw new NotFoundException(EXCEPTION_MESSAGES.quoteNotFound);
-  }
-  // 견적 상태를 "QUOTE_CONFIRMED"로 업데이트
-  await prisma.quoteRequest.update({
-    where: { id: quoteRequestId },
-    data: {
-      quoteStatusHistories: {
-        create: {
-          status: 'QUOTE_CONFIRMED', // 견적 확정 상태로 변경
-          updatedAt: new Date(),
+// 견적 확정
+export async function confirmQuote(moverQuoteId: string, customerId: string) {
+  const result = await prisma.$transaction(async (prisma) => {
+    const moverQuote = await prisma.moverQuote.findUnique({
+      where: { id: moverQuoteId },
+      select: {
+        quoteRequest: {
+          select: {
+            customerId: true,
+            id: true,
+          },
         },
       },
-    },
-  });
-  // 선택된 견적에 대해 moverQuote 상태를 업데이트
-  const moverQuote = await prisma.moverQuote.findUnique({
-    where: { id: moverQuoteId },
-  });
-  if (!moverQuote) {
-    throw new NotFoundException(EXCEPTION_MESSAGES.quoteNotFound);
-  }
-  // 기사님에게 견적을 보내는 상태로 업데이트
-  await prisma.moverQuote.update({
-    where: { id: moverQuoteId },
-    data: {
-      quoteMatch: {
-        create: {
-          isCompleted: false, // 견적이 확정되었으므로 기사님에게 수락을 요청하는 상태로 변경
+    });
+    if (moverQuote?.quoteRequest.customerId !== customerId) {
+      throw new ForbiddenException(AUTH_MESSAGES.forbidden);
+    }
+    // 견적 상태를 "QUOTE_CONFIRMED"로 업데이트 이후 "MOVE_COMPLETED"도 같이 업데이트
+    const quoteRequestId = moverQuote.quoteRequest.id;
+    await quoteRequestsRepository.updateQuoteRequestStatus(
+      quoteRequestId,
+      'QUOTE_CONFIRMED',
+      prisma,
+    );
+    await quoteRequestsRepository.updateQuoteRequestStatus(
+      quoteRequestId,
+      'MOVE_COMPLETED',
+      prisma,
+    );
+    // moverQuote 상태 업데이트
+    await prisma.moverQuote.update({
+      where: { id: moverQuoteId },
+      data: {
+        quoteMatch: {
+          create: {
+            isCompleted: true, // 견적이 확정되었지만 이사 완료되지 않음 (유석님에게 안내해야함)
+          },
         },
       },
-    },
+    });
+    return { message: '견적이 확정되었습니다.' };
   });
-  return { message: '견적이 확정되었습니다.' };
+  return result;
 }

@@ -34,11 +34,12 @@ export async function getPendingQuotes(req: Request, res: Response): Promise<Res
 // 견적 확정
 export async function confirmQuote(req: Request, res: Response): Promise<Response> {
   try {
-    const { quoteRequestId, moverQuoteId } = req.body;
-    if (!quoteRequestId || !moverQuoteId) {
+    const customerId = req.user?.roleId ?? '';
+    const { moverQuoteId } = req.params;
+    if (!moverQuoteId) {
       return res.status(400).json({ error: 'quoteRequestId와 moverQuoteId가 필요합니다.' });
     }
-    await quoteService.confirmQuote(quoteRequestId, moverQuoteId);
+    await quoteService.confirmQuote(moverQuoteId, customerId);
     return res.status(200).json({ message: '견적이 확정되었습니다.' });
   } catch (error) {
     return handleError(error, res);
