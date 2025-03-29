@@ -1,24 +1,43 @@
-import { Request, Response } from 'express';
+import { Request, Response, RequestHandler } from 'express';
 import { MoverService } from '../service/moverService';
 import { PrismaClient } from '@prisma/client';
 
 const moverService = new MoverService();
-const prisma = new PrismaClient();
 
 export class MoverController {
   // 기사님 목록 조회 API
-  async getMovers(req: Request, res: Response) {
+  getMovers: RequestHandler = async (req, res) => {
     try {
       const { sortBy } = req.query;
-      const movers = await moverService.getMovers(sortBy as string);
-      res.json(movers);
+
+      // 정렬 옵션 검증
+      const validSortOptions = ['reviews', 'rating', 'price', 'experience'];
+      const sortOption = (sortBy as string) || 'reviews';
+
+      if (!validSortOptions.includes(sortOption)) {
+        res.status(400).json({
+          error: '잘못된 정렬 옵션',
+          message: '지원하지 않는 정렬 옵션입니다.',
+        });
+        return;
+      }
+
+      const movers = await moverService.getMovers(sortOption);
+      res.status(200).json({
+        message: '기사님 목록 조회 성공',
+        data: movers,
+      });
     } catch (error) {
-      res.status(500).json({ error: '서버 오류 발생' });
+      console.error('기사님 목록 조회 중 오류 발생:', error);
+      res.status(500).json({
+        error: '서버 오류 발생',
+        message: '기사님 목록을 불러오는 중 오류가 발생했습니다.',
+      });
     }
-  }
+  };
 
   // 검색 API
-  async searchMovers(req: Request, res: Response): Promise<void> {
+  searchMovers: RequestHandler = async (req, res) => {
     try {
       const keyword = req.query.keyword as string;
 
@@ -65,5 +84,5 @@ export class MoverController {
         message: '검색 중 예상치 못한 오류가 발생했습니다.',
       });
     }
-  }
+  };
 }

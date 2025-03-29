@@ -8,9 +8,31 @@ export class MoverRepository {
     const orderBy = this.getOrderBy(sortBy);
 
     return await prisma.mover.findMany({
-      include: {
-        moverServices: true,
-        moverServiceRegions: true,
+      select: {
+        id: true,
+        profileImage: true,
+        experienceYears: true,
+        introduction: true,
+        description: true,
+        averageRating: true,
+        totalReviews: true,
+        totalCustomerFavorite: true,
+        totalConfirmedCount: true,
+        user: {
+          select: {
+            name: true,
+          },
+        },
+        moverServices: {
+          select: {
+            serviceType: true,
+          },
+        },
+        moverServiceRegions: {
+          select: {
+            region: true,
+          },
+        },
       },
       orderBy,
     });
@@ -23,12 +45,12 @@ export class MoverRepository {
         return { totalReviews: 'desc' };
       case 'rating':
         return { averageRating: 'desc' };
-      case 'experience':
-        return { experienceYears: 'desc' };
       case 'confirmed':
         return { totalConfirmedCount: 'desc' };
+      case 'experience':
+        return { experienceYears: 'desc' };
       default:
-        return {};
+        return { createdAt: 'desc' };
     }
   }
 
@@ -40,6 +62,32 @@ export class MoverRepository {
           { introduction: { contains: keyword, mode: 'insensitive' } },
           { description: { contains: keyword, mode: 'insensitive' } },
         ],
+      },
+      select: {
+        id: true,
+        profileImage: true,
+        experienceYears: true,
+        introduction: true,
+        description: true,
+        averageRating: true,
+        totalReviews: true,
+        totalCustomerFavorite: true,
+        totalConfirmedCount: true,
+        user: {
+          select: {
+            name: true,
+          },
+        },
+        moverServices: {
+          select: {
+            serviceType: true,
+          },
+        },
+        moverServiceRegions: {
+          select: {
+            region: true,
+          },
+        },
       },
     });
   }
