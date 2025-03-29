@@ -149,4 +149,17 @@ export default class QuoteRequestsRepository {
       },
     });
   }
+
+  // 특정 견적 요청을 id로 조회하며, 상태 내역 등 관련 정보를 포함함
+  async findQuoteRequestById(quoteId: string, tx?: Prisma.TransactionClient) {
+    const client = tx || this.prismaClient;
+    return await client.quoteRequest.findUnique({
+      where: { id: quoteId },
+      include: {
+        quoteStatusHistories: {
+          orderBy: { createdAt: 'desc' },
+        },
+      },
+    });
+  }
 }
