@@ -53,42 +53,4 @@ export class MoverRepository {
         return { createdAt: 'desc' };
     }
   }
-
-  // 검색 기능 (이름, 소개에서 검색)
-  async searchMovers(keyword: string) {
-    return await prisma.mover.findMany({
-      where: {
-        OR: [
-          { introduction: { contains: keyword, mode: 'insensitive' } },
-          { description: { contains: keyword, mode: 'insensitive' } },
-        ],
-      },
-      select: {
-        id: true,
-        profileImage: true,
-        experienceYears: true,
-        introduction: true,
-        description: true,
-        averageRating: true,
-        totalReviews: true,
-        totalCustomerFavorite: true,
-        totalConfirmedCount: true,
-        user: {
-          select: {
-            name: true,
-          },
-        },
-        moverServices: {
-          select: {
-            serviceType: true,
-          },
-        },
-        moverServiceRegions: {
-          select: {
-            region: true,
-          },
-        },
-      },
-    });
-  }
 }
