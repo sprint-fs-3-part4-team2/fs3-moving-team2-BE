@@ -9,6 +9,7 @@ export class MoverController {
   getMovers: RequestHandler = async (req, res) => {
     try {
       const { sortBy } = req.query;
+      const userId = req.user?.userId; // 로그인한 사용자 ID
 
       // 정렬 옵션 검증
       const validSortOptions = ['reviews', 'rating', 'price', 'experience'];
@@ -22,7 +23,7 @@ export class MoverController {
         return;
       }
 
-      const movers = await moverService.getMovers(sortOption);
+      const movers = await moverService.getMovers(sortOption, userId);
       res.status(200).json({
         message: '기사님 목록 조회 성공',
         data: movers,
@@ -40,6 +41,7 @@ export class MoverController {
   searchMovers: RequestHandler = async (req, res) => {
     try {
       const keyword = req.query.keyword as string;
+      const userId = req.user?.userId; // 로그인한 사용자 ID
 
       // 검색어 길이 검증 추가
       if (!keyword || keyword.trim().length === 0) {
@@ -60,7 +62,7 @@ export class MoverController {
       }
 
       // 서비스 레이어 검색 메서드 호출
-      const movers = await moverService.searchMovers(keyword.trim());
+      const movers = await moverService.searchMovers(keyword.trim(), userId);
 
       // 검색 결과 없을 때 처리
       if (!movers || movers.length === 0) {
