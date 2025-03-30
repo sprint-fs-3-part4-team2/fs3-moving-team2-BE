@@ -39,7 +39,6 @@ export default class AuthController {
   signUp = async (req: Request, res: Response) => {
     const userType = req.params.userType as LowercaseUserType;
     const { email, password, phoneNumber, name } = req.body;
-    console.log(phoneNumber);
 
     const {
       tokens: { accessToken, refreshToken },
@@ -74,13 +73,76 @@ export default class AuthController {
 
   snsLogin = async (req: Request, res: Response) => {
     const { provider } = req.params; // 로그인 제공자 (google, kakao, naver)
+    const { userType } = req.query;
+    if (!userType || (userType !== 'customer' && userType !== 'mover')) {
+      return res.status(400).json({ message: '유효하지 않은 사용자 타입입니다.' });
+    }
+
+    const state = this.authService.generateState({ userType: userType as string });
+    const loginUrl = this.authService.getSnsLoginUrl(provider as OauthTypes, state);
+    return res.redirect(loginUrl);
+  };
+
+  oAuthCallback = async (req: Request, res: Response) => {
+    const { provider } = req.params;
+    const { code, state } = req.query;
+
+    if (!code || typeof code !== 'string') {
+      return res.status(400).json({ message: '인증 코드가 없습니다.' });
+    }
+
+    let userType: LowercaseUserType = 'customer';
+
+    if (state && typeof state === 'string') {
+      try {
+        const decodedState = this.authService.decodeState(state);
+        userType = decodedState.userType as LowercaseUserType;
+        // 상태 정보 유효성 검증 (예: 타임스탬프 확인)
+        const now = Date.now();
+        const stateAge = now - decodedState.timestamp;
+        if (stateAge > 10 * 60 * 1000) {
+          // 10분 이상 지난 state는 거부
+          return res.status(400).json({ message: '만료된 인증 요청입니다.' });
+        }
+      } catch (error) {
+        console.error('상태 정보 디코딩 실패:', error);
+        return res.status(400).json({ message: '유효하지 않은 상태 정보입니다.' });
+      }
+    }
 
     try {
-      const loginUrl = this.authService.getSnsLoginUrl(provider as OauthTypes);
-      return res.redirect(loginUrl);
+      let token;
+
+      switch (provider) {
+        case 'google': {
+          const googleResult = await this.authService.handleGoogleCallback(code);
+          token = googleResult.token;
+          break;
+        }
+        case 'naver': {
+          const naverResult = await this.authService.handleNaverCallback(code, provider, userType);
+          token = naverResult.tokens;
+          break;
+        }
+        case 'kakao': {
+          break;
+        }
+        default:
+          return res.status(400).json({ message: '지원하지 않는 로그인 제공자입니다.' });
+      }
+      const { accessToken, refreshToken } = token;
+
+      this.setAccessToken(res, accessToken);
+      this.setRefreshToken(res, refreshToken);
+      const rootUrl =
+        process.env.NODE_ENV === 'production'
+          ? process.env.DEPLOYED_URL
+          : process.env.LOCALHOST_URL;
+      const redirectUrl =
+        userType === 'customer' ? `${rootUrl}/user/movers` : `${rootUrl}/mover/quotes/requested`;
+      res.redirect(redirectUrl);
     } catch (error) {
-      console.error(error);
-      return res.status(400).json({ message: '잘못된 로그인 요청입니다.' });
+      console.log(error);
     }
   };
 }
