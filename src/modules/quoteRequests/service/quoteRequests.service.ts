@@ -3,6 +3,9 @@ import { getEnglishMoveType, MOVE_TYPE_KOREAN, REGION_MAP } from '@/constants/se
 import { createQuoteRequestDto } from '../dto/createQuoteRequest.dto';
 import QuoteRequestsMapper from '../mapper/quoteRequests.mapper';
 import MoverQuotesRepository from '@/modules/moverQuotes/repository/moverQuotesRepository';
+import { ConflictException, ForbiddenException, NotFoundException } from '@/core/errors';
+import { AUTH_MESSAGES } from '@/constants/authMessages';
+import { EXCEPTION_MESSAGES } from '@/constants/exceptionMessages';
 
 export default class QuoteRequestsService {
   constructor(
@@ -154,5 +157,17 @@ export default class QuoteRequestsService {
       pageSize: data.pageSize,
       totalPages: data.totalPages,
     };
+  }
+
+  async cancelQuoteRequestById(customerId: string, quoteRequestId: string) {
+    const quoteRequest = await this.quoteRequestRepository.findQuoteRequestById(quoteRequestId);
+    if (!quoteRequest) throw new NotFoundException(EXCEPTION_MESSAGES.quoteRequestNotFound);
+    const requestStatus = quoteRequest.currentStatus;
+    if (requestStatus !== 'QUOTE_REQUESTED' && requestStatus !== 'MOVER_SUBMITTED')
+      throw new ConflictException(EXCEPTION_MESSAGES.cannotCancelQuoteRequest);
+    if (quoteRequest?.customerId !== customerId)
+      throw new ForbiddenException(AUTH_MESSAGES.forbidden);
+
+    await this.quoteRequestRepository.deleteQuoteRequestById(quoteRequestId);
   }
 }
