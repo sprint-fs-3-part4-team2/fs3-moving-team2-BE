@@ -17,6 +17,7 @@ import rejectionRouter from './modules/rejection/routes';
 import profileRouter from './modules/profile/routes';
 import targetedQuoteRequestRouter from './modules/targetedQuoteRequest/routes';
 import moverRouter from './modules/movers/routes';
+import userQuoteRouter from './modules/userQuotes/routes';
 
 dotenv.config();
 
@@ -61,6 +62,7 @@ app.use('/notification', notificationRouter);
 app.use('/rejection', rejectionRouter);
 app.use('/profile', profileRouter);
 app.use('/movers', moverRouter);
+app.use('/quote', userQuoteRouter);
 
 // 서버 실행
 app.listen(port, () => {
