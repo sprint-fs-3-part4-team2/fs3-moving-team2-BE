@@ -1,42 +1,52 @@
-import prismaClient from '@/prismaClient';
-import { Prisma } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 
 class ChatService {
-  constructor() {}
-  async createRoom({ userId }: { userId: string[] }): Promise<any> {
-    const result = { message: '' };
-    try {
-      // const myChatingRoom = await prismaClient.chatRoom.findMany({
-      //   where: {
-      //     AND: userId.map((v): Prisma.ChatRoomWhereInput => {
-      //       return { user: { some: { id: v } } };
-      //     }),
-      //   },
-      // });
-      // console.log(myChatingRoom);
-      // if (myChatingRoom) {
-      //   return result;
-      // }
-      // const createRoom = await prismaClient.chatRoom.create({
-      //   data: {},
-      // });
-      // console.log(createRoom);
-      return result;
-    } catch (err: any) {
-      console.error('createRoom');
-      console.table(err);
-      throw new Error(err);
-    }
-  }
+  constructor(private prisma: PrismaClient) {}
+  public getRooms = async (userId: string) => {
+    const rooms = await this.prisma.chatRoom.findMany({
+      where: {
+        users: {
+          some: {
+            userId,
+          },
+        },
+      },
+      include: {
+        users: {
+          select: { joinedAt: true, role: true, userId: true, user: { select: { name: true } } },
+        },
+        ChatMessage: {
+          select: {
+            id: true,
+            content: true,
+            updatedAt: true,
+            user: {
+              select: {
+                name: true,
+                userType: true,
+              },
+            },
+          },
+          orderBy: {
+            createdAt: 'desc',
+          },
+          take: 1,
+        },
+      },
+    });
+    return rooms.map((data) => {
+      const { ChatMessage, createdAt, id, users } = data;
+      const lastMessage = ChatMessage[0];
+      const conversationPartner = users.filter((user) => user.userId !== userId);
 
-  public async createMsg() {
-    try {
-      console.log('');
-    } catch (err) {
-      console.error('createMsg');
-      console.table(err);
-    }
-  }
+      return {
+        id,
+        lastMessage,
+        roomCreatedAt: createdAt,
+        conversationPartner,
+      };
+    });
+  };
 }
 
 export default ChatService;

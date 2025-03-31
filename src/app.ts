@@ -78,13 +78,7 @@ app.use('/rejection', rejectionRouter);
 app.use('/profile', profileRouter);
 app.use('/movers', moverRouter);
 app.use('/quote', userQuoteRouter);
-app.use('/chat', (req, res, next) => {
-  if (req.headers.upgrade && req.headers.upgrade.toLowerCase() === 'websocket') {
-    next();
-  } else {
-    res.status(400).send('웹소켓 요청만 허용됩니다.');
-  }
-});
+app.use('/chat', chatRouter);
 
 // 서버 실행
 server.listen(port, () => {

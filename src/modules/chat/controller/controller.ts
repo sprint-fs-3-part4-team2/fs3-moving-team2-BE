@@ -1,17 +1,20 @@
 import { Request, Response } from 'express';
 import ChatService from '../service/service';
-
-const test1 = 'cm8o9235h0000iucytl5xyxlp';
-const test2 = 'cm8o9235h0001iucy99xuiqzu';
+import { AUTH_MESSAGES } from '@/constants/authMessages';
 
 class ChatController {
   constructor(private service: ChatService) {}
-  chat = async (req: Request, res: Response) => {
-    const chatRoom = await this.service.createRoom({ userId: [test1, test2] });
-    console.log(chatRoom);
-    res.status(201).json({
-      message: 'test',
-    });
+  getRooms = async (req: Request, res: Response) => {
+    if (!req.user) {
+      res.status(401).json({ ok: false, message: AUTH_MESSAGES.read });
+      return;
+    }
+    const { userId } = req.user;
+    const rooms = await this.service.getRooms(userId);
+    if (!rooms) {
+      res.status(404).json({ ok: false, message: ' 채팅방이 없습니다' });
+    }
+    res.status(200).json({ ok: true, rooms });
   };
 }
 
