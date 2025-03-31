@@ -60,6 +60,9 @@ export default class AuthService {
   async signUp(signUpDto: SignUpRequest, type: LowercaseUserType) {
     const uppercaseType = type.toUpperCase() as UserType;
     const existingUserByEmail = await this.userRepository.findByEmail(signUpDto.email);
+    if (existingUserByEmail?.userType === uppercaseType) {
+      throw new ConflictException(AUTH_MESSAGES.invalidRole);
+    }
     if (existingUserByEmail) throw new ConflictException(EXCEPTION_MESSAGES.duplicatedEmail);
     const { email, password, name, phoneNumber } = signUpDto;
     const formattedPhoneNumber = phoneNumber.replaceAll('-', '');
@@ -274,11 +277,12 @@ export default class AuthService {
       };
       const response = await this.findOrCreateUser(userInfo, type);
       return response;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Naver OAuth 오류', error);
       if (axios.isAxiosError(error) && error.response) {
         console.error('네이버 응답 오류:', error.response.data);
       }
+      if (error.message === 'wrong type') throw error;
       throw new Error('Naver 로그인 중 오류가 발생했습니다.');
     }
   }

@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import AuthService from '../service/service';
 import { LowercaseUserType } from '@/types/userType.types';
+import { AUTH_MESSAGES } from '@/constants/authMessages';
 
 type OauthTypes = 'kakao' | 'naver' | 'google';
 
@@ -10,6 +11,24 @@ export default class AuthController {
     secure: process.env.NODE_ENV === 'production',
     sameSite: process.env.NODE_ENV === 'production' ? ('none' as const) : ('lax' as const),
     path: '/',
+  };
+
+  private ROOT_URL =
+    process.env.NODE_ENV === 'production' ? process.env.DEPLOYED_URL : process.env.LOCALHOST_URL;
+
+  private REDIRECT_URL_ON_SUCCESS = {
+    customer: `${this.ROOT_URL}/user/movers`,
+    mover: `${this.ROOT_URL}/quotes/requested`,
+  };
+
+  private FAIL_QUERY = {
+    customer: '?warn=moverAccountExist',
+    mover: '?warn=customerAccountExist',
+  };
+
+  private REDIRECT_URL_ON_FAIL = {
+    customer: `${this.ROOT_URL}/mover/sign-in`,
+    mover: `${this.ROOT_URL}/user/sign-in`,
   };
 
   constructor(private authService: AuthService) {}
@@ -25,24 +44,29 @@ export default class AuthController {
   signIn = async (req: Request, res: Response) => {
     const userType = req.params.userType as LowercaseUserType;
     const { email, password } = req.body;
-    const {
-      tokens: { accessToken, refreshToken },
-      user,
-    } = await this.authService.signIn({ email, password }, userType);
+    try {
+      const {
+        tokens: { accessToken, refreshToken },
+      } = await this.authService.signIn({ email, password }, userType);
 
-    this.setAccessToken(res, accessToken);
-    this.setRefreshToken(res, refreshToken);
+      this.setAccessToken(res, accessToken);
+      this.setRefreshToken(res, refreshToken);
 
-    return res.status(201).json({ user });
+      return res.redirect(this.REDIRECT_URL_ON_SUCCESS[userType]);
+    } catch (error: any) {
+      if (error.message === AUTH_MESSAGES.invalidRole)
+        return res.redirect(`${this.REDIRECT_URL_ON_FAIL[userType]}${this.FAIL_QUERY[userType]}`);
+      throw error;
+    }
   };
 
   signUp = async (req: Request, res: Response) => {
+    console.log('hi');
     const userType = req.params.userType as LowercaseUserType;
     const { email, password, phoneNumber, name } = req.body;
 
     const {
       tokens: { accessToken, refreshToken },
-      user,
     } = await this.authService.signUp(
       {
         email,
@@ -56,7 +80,7 @@ export default class AuthController {
     this.setAccessToken(res, accessToken);
     this.setRefreshToken(res, refreshToken);
 
-    return res.status(201).json({ user });
+    return res.redirect(this.REDIRECT_URL_ON_SUCCESS[userType]);
   };
 
   fakeSignIn = async (req: Request, res: Response) => {
@@ -140,15 +164,11 @@ export default class AuthController {
 
       this.setAccessToken(res, accessToken);
       this.setRefreshToken(res, refreshToken);
-      const rootUrl =
-        process.env.NODE_ENV === 'production'
-          ? process.env.DEPLOYED_URL
-          : process.env.LOCALHOST_URL;
-      const redirectUrl =
-        userType === 'customer' ? `${rootUrl}/user/movers` : `${rootUrl}/mover/quotes/requested`;
-      res.redirect(redirectUrl);
-    } catch (error) {
-      console.log(error);
+      res.redirect(this.REDIRECT_URL_ON_SUCCESS[userType]);
+    } catch (error: any) {
+      if (error.message === 'wrong type')
+        return res.redirect(`${this.REDIRECT_URL_ON_FAIL[userType]}${this.FAIL_QUERY[userType]}`);
+      return res.status(500).json({ message: '로그인 중 오류 발생' });
     }
   };
 }
