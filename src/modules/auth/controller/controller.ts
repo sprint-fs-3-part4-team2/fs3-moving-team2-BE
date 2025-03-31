@@ -115,8 +115,12 @@ export default class AuthController {
 
       switch (provider) {
         case 'google': {
-          const googleResult = await this.authService.handleGoogleCallback(code);
-          token = googleResult.token;
+          const googleResult = await this.authService.handleGoogleCallback(
+            code,
+            provider,
+            userType,
+          );
+          token = googleResult.tokens;
           break;
         }
         case 'naver': {
@@ -125,6 +129,8 @@ export default class AuthController {
           break;
         }
         case 'kakao': {
+          const kakaoResult = await this.authService.handleKakaoCallback(code, provider, userType);
+          token = kakaoResult.tokens;
           break;
         }
         default:

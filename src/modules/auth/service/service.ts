@@ -10,6 +10,7 @@ import { UserType } from '@prisma/client';
 import axios from 'axios';
 import bcrypt from 'bcrypt';
 import { OauthUserInfo } from '../types/userInfo.types';
+import { getUniqueKoreanPhrase } from '@/utils/getUniqueKoreanPhrase';
 
 export default class AuthService {
   private scopes = encodeURIComponent(
@@ -120,20 +121,36 @@ export default class AuthService {
       };
     }
 
-    if (user && user.socialLogin?.provider !== userInfo.provider) {
+    if (user?.userType !== type.toUpperCase()) {
+      throw new ConflictException('wrong type');
+    }
+
+    if (user && !user.socialLogin) {
       user = await this.userRepository.addSocialProvider(
-        user.id,
+        user.email,
         userInfo.provider,
         userInfo.providerId,
       );
+      const role = user[type];
+      token = generateTokens(user.id, user[type]?.id ?? '', type);
+      return {
+        tokens: token,
+        user: {
+          id: user.id,
+          email: user.email,
+          phoneNumber: user.phoneNumber,
+          name: user.name,
+          [type]: role,
+        },
+      };
     }
 
-    if (user && user.socialLogin?.provider === userInfo.provider) {
+    if (user) {
       const roleId = type === 'mover' ? (user.mover?.id ?? '') : (user.customer?.id ?? '');
-      const tokens = generateTokens(user.id, roleId, type);
+      token = generateTokens(user.id, roleId, type);
 
       return {
-        tokens,
+        tokens: token,
         user: {
           email: user.email,
           phoneNumber: user.phoneNumber,
@@ -163,7 +180,11 @@ export default class AuthService {
     return url;
   };
 
-  async handleGoogleCallback(code: string): Promise<any> {
+  async handleGoogleCallback(
+    code: string,
+    provider: string,
+    type: LowercaseUserType,
+  ): Promise<any> {
     try {
       const tokenResponse = await axios.post('https://oauth2.googleapis.com/token', {
         code,
@@ -194,11 +215,22 @@ export default class AuthService {
         console.log('전화번호를 찾을 수 없음');
       }
 
-      const response = await axios.get('https://www.googleapis.com/oauth2/v2/userinfo', {
+      const { data } = await axios.get('https://www.googleapis.com/oauth2/v2/userinfo', {
         headers: { Authorization: `Bearer ${access_token}` },
       });
 
-      console.log(response);
+      console.log(data);
+
+      const userInfo = {
+        provider,
+        providerId: data.id,
+        email: data.email,
+        name: data.name,
+        phoneNumber: Date.now().toString(),
+      };
+
+      const response = await this.findOrCreateUser(userInfo, type);
+      return response;
     } catch (error) {
       console.error('Google Oauth 오류', error);
       throw new Error('Google 로그인 중 오류가 발생했습니다.');
@@ -248,6 +280,52 @@ export default class AuthService {
         console.error('네이버 응답 오류:', error.response.data);
       }
       throw new Error('Naver 로그인 중 오류가 발생했습니다.');
+    }
+  }
+
+  async handleKakaoCallback(code: string, provider: string, type: LowercaseUserType): Promise<any> {
+    try {
+      const tokenResponse = await axios.post(
+        'https://kauth.kakao.com/oauth/token',
+        new URLSearchParams({
+          grant_type: 'authorization_code',
+          client_id: '13773c38c523df21fcca142d3fe3a4dc',
+          redirect_uri: 'http://localhost:8000/auth/callback/kakao',
+          code: code, // 최신 코드 사용
+        }).toString(),
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
+          },
+        },
+      );
+
+      const { access_token } = tokenResponse.data;
+      const userResponse = await axios.get('https://kapi.kakao.com/v2/user/me', {
+        headers: {
+          Authorization: `Bearer ${access_token}`,
+        },
+      });
+
+      const { data } = userResponse;
+      const { kakao_account } = data;
+
+      const userInfo = {
+        provider,
+        providerId: data.id.toString(),
+        email: kakao_account.email,
+        name: getUniqueKoreanPhrase(),
+        phoneNumber: Date.now().toString(),
+      };
+
+      const response = await this.findOrCreateUser(userInfo, type);
+      return response;
+    } catch (error) {
+      console.error('Kakao OAuth 오류', error);
+      if (axios.isAxiosError(error) && error.response) {
+        console.error('카카오 응답 오류:', error.response.data);
+      }
+      throw new Error('Kakao 로그인 중 오류가 발생했습니다.');
     }
   }
 

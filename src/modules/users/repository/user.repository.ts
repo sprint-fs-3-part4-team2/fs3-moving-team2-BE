@@ -82,10 +82,10 @@ export default class UserRepository {
     });
   }
 
-  async addSocialProvider(id: string, provider: string, providerId: string) {
+  async addSocialProvider(email: string, provider: string, providerId: string) {
     return await this.prismaClient.user.update({
       where: {
-        id,
+        email: email,
       },
       data: {
         socialLogin: {
