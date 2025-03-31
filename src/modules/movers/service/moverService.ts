@@ -15,26 +15,34 @@ export class MoverService {
     let userConfirmedQuotes: string[] = [];
 
     if (userId) {
-      const [favorites, confirmedQuotes] = await Promise.all([
-        prisma.customerFavorite.findMany({
-          where: { customerId: userId },
-          select: { moverId: true },
-        }),
-        prisma.moverQuote.findMany({
-          where: {
-            quoteRequest: {
-              customerId: userId,
-            },
-            quoteMatch: {
-              isCompleted: true,
-            },
-          },
-          select: { moverId: true },
-        }),
-      ]);
+      // User ID로 Customer 정보 조회
+      const customer = await prisma.customer.findUnique({
+        where: { userId },
+        select: { id: true },
+      });
 
-      userFavorites = favorites.map((f) => f.moverId);
-      userConfirmedQuotes = confirmedQuotes.map((q) => q.moverId);
+      if (customer) {
+        const [favorites, confirmedQuotes] = await Promise.all([
+          prisma.customerFavorite.findMany({
+            where: { customerId: customer.id },
+            select: { moverId: true },
+          }),
+          prisma.moverQuote.findMany({
+            where: {
+              quoteRequest: {
+                customerId: customer.id,
+              },
+              quoteMatch: {
+                isCompleted: true,
+              },
+            },
+            select: { moverId: true },
+          }),
+        ]);
+
+        userFavorites = favorites.map((f) => f.moverId);
+        userConfirmedQuotes = confirmedQuotes.map((q) => q.moverId);
+      }
     }
 
     return movers.map((mover) => ({
