@@ -114,9 +114,12 @@ export default class QuoteRequestsService {
       }
     }
 
+    // 기존에 whereClause.AND가 없다면 빈 배열로 초기화
+    whereClause.AND = whereClause.AND || [];
+
     // 1. moverQuotes에 현재 moverId로 제출한 견적이 없어야 함.
     // 2. targetedQuoteRequests에 해당 moverId 관련 거절(반려) 기록이 없어야 함.
-    whereClause.AND = [
+    whereClause.AND.push = [
       {
         moverQuotes: {
           none: { moverId },
