@@ -35,9 +35,7 @@ export async function addFavorite(req: Request, res: Response): Promise<Response
     if (!userId || !moverId) {
       return res.status(400).json({ error: 'userId와 moverId가 필요합니다.' });
     }
-    console.log(moverId);
     const favorite = await favoriteService.addFavorite(userId, moverId);
-    console.log('Favorites found:', favorite); // 디버깅용 콘솔
     return res.status(201).json(favorite);
   } catch (error) {
     return handleError(error, res);
@@ -47,13 +45,12 @@ export async function addFavorite(req: Request, res: Response): Promise<Response
 // 찜하기 취소
 export async function removeFavorite(req: Request, res: Response): Promise<Response> {
   try {
-    const userId = req?.user?.userId ?? '';
+    const userId = req?.user?.roleId ?? '';
     const moverId = req?.params?.moverId ?? '';
     if (!userId || !moverId) {
       return res.status(400).json({ error: 'userId와 moverId가 필요합니다.' });
     }
     const result = await favoriteService.removeFavorite(userId, moverId);
-    console.log('Favorite removed:', result); // 디버깅용 콘솔
     return res.status(200).json(result);
   } catch (error) {
     return handleError(error, res);

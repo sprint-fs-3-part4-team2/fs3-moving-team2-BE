@@ -34,15 +34,12 @@ export async function getFavorites(customerId: string) {
 // 찜하기 추가
 export async function addFavorite(customerId: string, moverId: string) {
   const result = await prisma.$transaction(async (prisma) => {
-    // 1. 찜 데이터 생성
     const favorite = await prisma.customerFavorite.create({
       data: {
         customerId: customerId,
         moverId: moverId,
       },
     });
-    console.log('확인?');
-    // 2. Mover의 totalCustomerFavorite를 증가
     const mover = await prisma.mover.update({
       where: { id: moverId },
       data: {
@@ -55,13 +52,11 @@ export async function addFavorite(customerId: string, moverId: string) {
         totalCustomerFavorite: true,
       },
     });
-    console.log(`Favorite added for moverId: ${mover.id}`); // 디버깅용 로그
     return {
       favorite,
       mover,
     };
   });
-  console.log(`Favorite added for moverId: ${result.mover.id}`); // 디버깅용 로그
   return {
     moverId: result.mover.id,
     totalCustomerFavorite: result.mover.totalCustomerFavorite,
@@ -71,7 +66,6 @@ export async function addFavorite(customerId: string, moverId: string) {
 // 찜하기 취소
 export async function removeFavorite(customerId: string, moverId: string) {
   const result = await prisma.$transaction(async (prisma) => {
-    // 1. 찜 데이터 삭제
     const favorite = await prisma.customerFavorite.delete({
       where: {
         customerId_moverId: {
@@ -80,7 +74,6 @@ export async function removeFavorite(customerId: string, moverId: string) {
         },
       },
     });
-    // 2. Mover의 totalCustomerFavorite를 감소
     const mover = await prisma.mover.update({
       where: { id: moverId },
       data: {
@@ -93,13 +86,11 @@ export async function removeFavorite(customerId: string, moverId: string) {
         totalCustomerFavorite: true,
       },
     });
-    console.log(`Favorite removed for moverId: ${mover.id}`); // 디버깅용 로그
     return {
       favorite,
       mover,
     };
   });
-  console.log(`Favorite removed for moverId: ${result.mover.id}`); // 디버깅용 로그
   return {
     moverId: result.mover.id,
     totalCustomerFavorite: result.mover.totalCustomerFavorite,
