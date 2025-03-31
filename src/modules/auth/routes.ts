@@ -11,7 +11,7 @@ const router = express.Router();
 const authService = new AuthService(userRepository);
 const authController = new AuthController(authService);
 
-const { snsLogin, signIn, signUp, fakeSignIn } = authController;
+const { snsLogin, signIn, signUp, fakeSignIn, oAuthCallback } = authController;
 
 router.route('/fakeSignIn').get(asyncRequestHandler(fakeSignIn));
 router.route('/:provider').get(asyncRequestHandler(snsLogin));
@@ -21,5 +21,6 @@ router
 router
   .route('/sign-up/:userType')
   .post(validateBody(SignUpRequestStruct), asyncRequestHandler(signUp));
+router.route('/callback/:provider').get(asyncRequestHandler(oAuthCallback));
 
 export default router;

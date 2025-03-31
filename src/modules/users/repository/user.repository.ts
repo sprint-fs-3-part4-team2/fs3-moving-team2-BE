@@ -2,11 +2,6 @@ import { PrismaClient, UserType } from '@prisma/client';
 import { InfoEditType } from '../types/repo.type';
 import { SignUpRequest } from '@/structs/authStruct';
 
-// interface User {
-//   userId: string;
-//   type: 'mover' | 'customer';
-// }
-
 export default class UserRepository {
   constructor(private prismaClient: PrismaClient) {}
 
@@ -43,6 +38,7 @@ export default class UserRepository {
       include: {
         customer: true,
         mover: true,
+        socialLogin: true,
       },
     });
   }
@@ -50,11 +46,59 @@ export default class UserRepository {
   async create(data: SignUpRequest, type: UserType) {
     return await this.prismaClient.user.create({
       data: {
-        email: data.email,
-        password: data.password,
-        name: data.name,
-        phoneNumber: data.phoneNumber.toString(),
+        ...data,
         userType: type,
+      },
+      include: {
+        customer: true,
+        mover: true,
+        socialLogin: true,
+      },
+    });
+  }
+
+  async createWithSocialLogin(
+    data: SignUpRequest,
+    type: UserType,
+    provider: string,
+    providerId: string,
+  ) {
+    return await this.prismaClient.user.create({
+      data: {
+        ...data,
+        userType: type,
+        socialLogin: {
+          create: {
+            provider,
+            providerId,
+          },
+        },
+      },
+      include: {
+        customer: true,
+        mover: true,
+        socialLogin: true,
+      },
+    });
+  }
+
+  async addSocialProvider(email: string, provider: string, providerId: string) {
+    return await this.prismaClient.user.update({
+      where: {
+        email: email,
+      },
+      data: {
+        socialLogin: {
+          create: {
+            provider,
+            providerId,
+          },
+        },
+      },
+      include: {
+        socialLogin: true,
+        customer: true,
+        mover: true,
       },
     });
   }
