@@ -58,14 +58,12 @@ export default class QuoteRequestsService {
       isRequested: true,
       quote: {
         id: quote.id,
-        movingDate: quote.moveDate,
+        moveDate: quote.moveDate,
         // 내부에 저장된 enum값(예: "HOME_MOVE")을 한글로 변환
-        movingType: MOVE_TYPE_KOREAN[quote.moveType],
+        moveType: MOVE_TYPE_KOREAN[quote.moveType],
         requestedDate: quote.createdAt,
-        arrival: quote.quoteRequestAddresses.find((address) => address.type === 'ARRIVAL')
-          ?.fullAddress,
-        departure: quote.quoteRequestAddresses.find((address) => address.type === 'DEPARTURE')
-          ?.fullAddress,
+        arrival: quote.quoteRequestAddresses.find((address) => address.type === 'ARRIVAL'),
+        departure: quote.quoteRequestAddresses.find((address) => address.type === 'DEPARTURE'),
       },
     };
   }
