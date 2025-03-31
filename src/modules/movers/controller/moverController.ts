@@ -1,6 +1,7 @@
 import { Request, Response, RequestHandler } from 'express';
 import { MoverService } from '../service/moverService';
 import { PrismaClient } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 const moverService = new MoverService();
 
@@ -8,8 +9,8 @@ export class MoverController {
   // 기사님 목록 조회 API
   getMovers: RequestHandler = async (req, res) => {
     try {
-      const { sortBy } = req.query;
-      const userId = req.user?.userId; // 로그인한 사용자 ID
+      const { sortBy, area, service } = req.query;
+      const userId = req.user?.userId;
 
       // 정렬 옵션 검증
       const validSortOptions = ['reviews', 'rating', 'confirmed', 'experience'];
@@ -23,13 +24,46 @@ export class MoverController {
         return;
       }
 
-      const movers = await moverService.getMovers(sortOption, userId);
+      // area와 service 파라미터 검증
+      if (area && typeof area !== 'string') {
+        res.status(400).json({
+          error: '잘못된 지역 파라미터',
+          message: '지역 파라미터는 문자열이어야 합니다.',
+        });
+        return;
+      }
+
+      if (service && typeof service !== 'string') {
+        res.status(400).json({
+          error: '잘못된 서비스 파라미터',
+          message: '서비스 파라미터는 문자열이어야 합니다.',
+        });
+        return;
+      }
+
+      const movers = await moverService.getMovers(
+        sortOption,
+        userId,
+        area as string,
+        service as string,
+      );
+
       res.status(200).json({
         message: '기사님 목록 조회 성공',
         data: movers,
       });
     } catch (error) {
       console.error('기사님 목록 조회 중 오류 발생:', error);
+
+      // Prisma 에러 처리
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        res.status(400).json({
+          error: '데이터베이스 오류',
+          message: '잘못된 파라미터가 전달되었습니다.',
+        });
+        return;
+      }
+
       res.status(500).json({
         error: '서버 오류 발생',
         message: '기사님 목록을 불러오는 중 오류가 발생했습니다.',

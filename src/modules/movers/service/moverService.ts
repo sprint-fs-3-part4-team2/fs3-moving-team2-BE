@@ -1,14 +1,24 @@
 import { MOVE_TYPE } from '@/constants/serviceType';
 import { MoverRepository } from '../repository/moverRepository';
 import { PrismaClient } from '@prisma/client';
+import { regionMap } from '@/constants/serviceType';
 
 const moverRepository = new MoverRepository();
 const prisma = new PrismaClient();
 
+// 영문 지역 코드를 한글로 변환하는 맵
+export const reverseRegionMap: Record<string, string> = Object.entries(regionMap).reduce(
+  (acc, [kor, eng]) => {
+    acc[eng] = kor;
+    return acc;
+  },
+  {} as Record<string, string>,
+);
+
 export class MoverService {
   // 기사님 목록 가져오기 (정렬 적용)
-  async getMovers(sortBy: string, userId?: string) {
-    const movers = await moverRepository.getMovers(sortBy);
+  async getMovers(sortBy: string, userId?: string, area?: string, service?: string) {
+    const movers = await moverRepository.getMovers(sortBy, area, service);
 
     // 로그인한 사용자의 좋아요 목록과 견적 확정 목록 가져오기
     let userFavorites: string[] = [];
@@ -57,8 +67,8 @@ export class MoverService {
       quoteCount: mover.totalConfirmedCount,
       isFavorite: userFavorites.includes(mover.id),
       favoriteCount: mover.totalCustomerFavorite ?? 0,
-      isFavoriteMoverList: false,
-      description: mover.description || mover.introduction,
+      description: mover.description,
+      regions: mover.moverServiceRegions.map((r) => reverseRegionMap[r.region]),
     }));
   }
 
@@ -114,6 +124,7 @@ export class MoverService {
       favoriteCount: mover.totalCustomerFavorite ?? 0,
       isFavoriteMoverList: false,
       description: mover.description || mover.introduction,
+      regions: mover.moverServiceRegions.map((r) => reverseRegionMap[r.region]),
     }));
   }
 }
