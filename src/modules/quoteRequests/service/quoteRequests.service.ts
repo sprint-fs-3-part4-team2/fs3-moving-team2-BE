@@ -114,6 +114,25 @@ export default class QuoteRequestsService {
       }
     }
 
+    // 1. moverQuotes에 현재 moverId로 제출한 견적이 없어야 함.
+    // 2. targetedQuoteRequests에 해당 moverId 관련 거절(반려) 기록이 없어야 함.
+    whereClause.AND = [
+      {
+        moverQuotes: {
+          none: { moverId },
+        },
+      },
+      {
+        targetedQuoteRequests: {
+          none: {
+            moverId,
+            // 여기서 targetedQuoteRejection가 존재하면 지정 견적 거절(반려)이 된 것으로 간주
+            targetedQuoteRejection: { isNot: null },
+          },
+        },
+      },
+    ];
+
     // 기본 정렬: 이사빠른순 (moveDate 오름차순) / sortByQuery가 요청일빠른순인 경우만 조건 변경
     let orderBy;
     if (sortByQuery === '요청일빠른순') {
