@@ -162,4 +162,12 @@ export default class QuoteRequestsRepository {
       },
     });
   }
+
+  async deleteQuoteRequestById(quoteRequestId: string) {
+    await this.prismaClient.quoteRequest.delete({
+      where: {
+        id: quoteRequestId,
+      },
+    });
+  }
 }

@@ -3,6 +3,9 @@ import { getEnglishMoveType, MOVE_TYPE_KOREAN, REGION_MAP } from '@/constants/se
 import { createQuoteRequestDto } from '../dto/createQuoteRequest.dto';
 import QuoteRequestsMapper from '../mapper/quoteRequests.mapper';
 import MoverQuotesRepository from '@/modules/moverQuotes/repository/moverQuotesRepository';
+import { ConflictException, ForbiddenException, NotFoundException } from '@/core/errors';
+import { AUTH_MESSAGES } from '@/constants/authMessages';
+import { EXCEPTION_MESSAGES } from '@/constants/exceptionMessages';
 
 export default class QuoteRequestsService {
   constructor(
@@ -55,14 +58,12 @@ export default class QuoteRequestsService {
       isRequested: true,
       quote: {
         id: quote.id,
-        movingDate: quote.moveDate,
+        moveDate: quote.moveDate,
         // 내부에 저장된 enum값(예: "HOME_MOVE")을 한글로 변환
-        movingType: MOVE_TYPE_KOREAN[quote.moveType],
+        moveType: MOVE_TYPE_KOREAN[quote.moveType],
         requestedDate: quote.createdAt,
-        arrival: quote.quoteRequestAddresses.find((address) => address.type === 'ARRIVAL')
-          ?.fullAddress,
-        departure: quote.quoteRequestAddresses.find((address) => address.type === 'DEPARTURE')
-          ?.fullAddress,
+        arrival: quote.quoteRequestAddresses.find((address) => address.type === 'ARRIVAL'),
+        departure: quote.quoteRequestAddresses.find((address) => address.type === 'DEPARTURE'),
       },
     };
   }
@@ -176,5 +177,17 @@ export default class QuoteRequestsService {
       pageSize: data.pageSize,
       totalPages: data.totalPages,
     };
+  }
+
+  async cancelQuoteRequestById(customerId: string, quoteRequestId: string) {
+    const quoteRequest = await this.quoteRequestRepository.findQuoteRequestById(quoteRequestId);
+    if (!quoteRequest) throw new NotFoundException(EXCEPTION_MESSAGES.quoteRequestNotFound);
+    const requestStatus = quoteRequest.currentStatus;
+    if (requestStatus !== 'QUOTE_REQUESTED' && requestStatus !== 'MOVER_SUBMITTED')
+      throw new ConflictException(EXCEPTION_MESSAGES.cannotCancelQuoteRequest);
+    if (quoteRequest?.customerId !== customerId)
+      throw new ForbiddenException(AUTH_MESSAGES.forbidden);
+
+    await this.quoteRequestRepository.deleteQuoteRequestById(quoteRequestId);
   }
 }
