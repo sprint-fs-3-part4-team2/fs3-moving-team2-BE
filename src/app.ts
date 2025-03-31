@@ -18,6 +18,7 @@ import profileRouter from './modules/profile/routes';
 import targetedQuoteRequestRouter from './modules/targetedQuoteRequest/routes';
 import moverRouter from './modules/movers/routes';
 import userQuoteRouter from './modules/userQuotes/routes';
+import { startNotificationListener } from './modules/notification/controller/sseController';
 import chatRouter from './modules/chat/routes';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
@@ -79,6 +80,9 @@ app.use('/profile', profileRouter);
 app.use('/movers', moverRouter);
 app.use('/quote', userQuoteRouter);
 app.use('/chat', chatRouter);
+
+// sse 리스너 실행
+startNotificationListener();
 
 // 서버 실행
 server.listen(port, () => {
