@@ -12,7 +12,7 @@ export class MoverController {
       const userId = req.user?.userId; // 로그인한 사용자 ID
 
       // 정렬 옵션 검증
-      const validSortOptions = ['reviews', 'rating', 'price', 'experience'];
+      const validSortOptions = ['reviews', 'rating', 'confirmed', 'experience'];
       const sortOption = (sortBy as string) || 'reviews';
 
       if (!validSortOptions.includes(sortOption)) {
