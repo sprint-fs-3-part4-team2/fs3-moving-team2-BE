@@ -16,8 +16,12 @@ const quoteRequestsService = new QuoteRequestsService(
   moverquotesRepository,
 );
 const quoteRequestsController = new QuoteRequestsController(quoteRequestsService);
-const { createQuoteRequest, getAllQuoteRequests, getLatestQuoteRequestForCustomer } =
-  quoteRequestsController;
+const {
+  createQuoteRequest,
+  getAllQuoteRequests,
+  getLatestQuoteRequestForCustomer,
+  cancelQuoteRequest,
+} = quoteRequestsController;
 
 // 고객 견적 요청
 // router.route('/').post(createAuthMiddleware('customer'), asyncRequestHandler(createQuoteRequest));
@@ -29,5 +33,9 @@ router.route('/').get(asyncRequestHandler(getAllQuoteRequests));
 
 // 고객 신청한 견적 조회
 router.route('/latest').get(asyncRequestHandler(getLatestQuoteRequestForCustomer));
+
+router
+  .route('/:quoteRequestId')
+  .delete(createAuthMiddleware('customer'), asyncRequestHandler(cancelQuoteRequest));
 
 export default router;
