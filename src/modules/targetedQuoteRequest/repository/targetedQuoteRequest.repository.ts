@@ -1,5 +1,6 @@
 import { Prisma, PrismaClient } from '@prisma/client';
 import TargetedQuoteRejectionRepository from './targetedQuoteRejection.repository';
+
 export default class TargetedQuoteRequestRepository {
   constructor(
     private prismaClient: PrismaClient,
@@ -14,6 +15,25 @@ export default class TargetedQuoteRequestRepository {
       where: {
         quoteRequestId: quoteId,
         moverId,
+      },
+    });
+  }
+
+  async findByQuoteId(quoteId: string, tx?: Prisma.TransactionClient) {
+    const client = tx || this.prismaClient;
+    return await client.targetedQuoteRequest.findMany({
+      where: {
+        quoteRequestId: quoteId,
+      },
+    });
+  }
+
+  async create(data: { quoteRequestId: string; moverId: string; tx?: Prisma.TransactionClient }) {
+    const client = data.tx || this.prismaClient;
+    return await client.targetedQuoteRequest.create({
+      data: {
+        quoteRequestId: data.quoteRequestId,
+        moverId: data.moverId,
       },
     });
   }
