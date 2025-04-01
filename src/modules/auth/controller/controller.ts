@@ -78,6 +78,13 @@ export default class AuthController {
     return res.status(201).json(user);
   };
 
+  signOut = async (req: Request, res: Response) => {
+    res.clearCookie('accessToken', this.COOKIE_OPTIONS);
+    res.clearCookie('refreshToken', this.COOKIE_OPTIONS);
+
+    return res.status(200).json({ message: '로그아웃 성공' });
+  };
+
   fakeSignIn = async (req: Request, res: Response) => {
     const userId = req.query.userId as string;
     const roleId = req.query.roleId as string;
