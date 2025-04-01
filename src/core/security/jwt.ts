@@ -12,5 +12,5 @@ export const generateAccessToken = (userId: string, roleId: string, type: 'mover
 };
 
 const generateRefreshToken = (userId: string, roleId: string, type: 'mover' | 'customer') => {
-  return jwt.sign({ userId, type }, process.env.REFRESH_TOKEN_SECRET!, { expiresIn: '1d' });
+  return jwt.sign({ userId, type, roleId }, process.env.REFRESH_TOKEN_SECRET!, { expiresIn: '1d' });
 };

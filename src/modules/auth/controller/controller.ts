@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import AuthService from '../service/service';
 import { LowercaseUserType } from '@/types/userType.types';
+import { UnauthorizedException } from '@/core/errors/unauthorizedException';
 
 type OauthTypes = 'kakao' | 'naver' | 'google';
 
@@ -83,6 +84,16 @@ export default class AuthController {
     res.clearCookie('refreshToken', this.COOKIE_OPTIONS);
 
     return res.status(200).json({ message: '로그아웃 성공' });
+  };
+
+  refreshToken = async (req: Request, res: Response) => {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) throw new UnauthorizedException('리프레쉬 토큰이 없습니다.');
+
+    const newAccessToken = this.authService.refreshToken(refreshToken);
+    this.setAccessToken(res, newAccessToken);
+
+    return res.status(200).json({ message: '액세스토큰 갱신 성공' });
   };
 
   fakeSignIn = async (req: Request, res: Response) => {
