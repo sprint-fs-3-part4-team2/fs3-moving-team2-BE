@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import AuthService from '../service/service';
 import { LowercaseUserType } from '@/types/userType.types';
-import { AUTH_MESSAGES } from '@/constants/authMessages';
 
 type OauthTypes = 'kakao' | 'naver' | 'google';
 
@@ -44,28 +43,23 @@ export default class AuthController {
   signIn = async (req: Request, res: Response) => {
     const userType = req.params.userType as LowercaseUserType;
     const { email, password } = req.body;
-    try {
-      const {
-        tokens: { accessToken, refreshToken },
-      } = await this.authService.signIn({ email, password }, userType);
+    const {
+      user,
+      tokens: { accessToken, refreshToken },
+    } = await this.authService.signIn({ email, password }, userType);
 
-      this.setAccessToken(res, accessToken);
-      this.setRefreshToken(res, refreshToken);
+    this.setAccessToken(res, accessToken);
+    this.setRefreshToken(res, refreshToken);
 
-      return res.redirect(this.REDIRECT_URL_ON_SUCCESS[userType]);
-    } catch (error: any) {
-      if (error.message === AUTH_MESSAGES.invalidRole)
-        return res.redirect(`${this.REDIRECT_URL_ON_FAIL[userType]}${this.FAIL_QUERY[userType]}`);
-      throw error;
-    }
+    return res.status(200).json(user);
   };
 
   signUp = async (req: Request, res: Response) => {
-    console.log('hi');
     const userType = req.params.userType as LowercaseUserType;
     const { email, password, phoneNumber, name } = req.body;
 
     const {
+      user,
       tokens: { accessToken, refreshToken },
     } = await this.authService.signUp(
       {
@@ -80,7 +74,7 @@ export default class AuthController {
     this.setAccessToken(res, accessToken);
     this.setRefreshToken(res, refreshToken);
 
-    return res.redirect(this.REDIRECT_URL_ON_SUCCESS[userType]);
+    return res.status(201).json(user);
   };
 
   fakeSignIn = async (req: Request, res: Response) => {

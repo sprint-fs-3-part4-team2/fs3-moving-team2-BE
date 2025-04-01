@@ -1,6 +1,6 @@
 import { AUTH_MESSAGES } from '@/constants/authMessages';
 import { EXCEPTION_MESSAGES } from '@/constants/exceptionMessages';
-import { ConflictException } from '@/core/errors';
+import { ConflictException, NotFoundException } from '@/core/errors';
 import { UnauthorizedException } from '@/core/errors/unauthorizedException';
 import { generateTokens } from '@/core/security/jwt';
 import UserRepository from '@/modules/users/repository/user.repository';
@@ -29,7 +29,7 @@ export default class AuthService {
   async signIn({ email, password }: SignInRequest, type: LowercaseUserType) {
     const uppercaseType = type.toUpperCase() as UserType;
     const userEntity = await this.userRepository.findByEmail(email);
-    if (!userEntity) throw new UnauthorizedException(AUTH_MESSAGES.emailNotExist);
+    if (!userEntity) throw new NotFoundException(AUTH_MESSAGES.emailNotExist);
     if (userEntity.userType !== uppercaseType)
       throw new ConflictException(AUTH_MESSAGES.invalidRole);
 
