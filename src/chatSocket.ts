@@ -81,6 +81,7 @@ export default function ChatIo(io: Server | Namespace): void {
         }
 
         chatRoomInfo.set('chatRoom', chatRoom);
+        console.log(chatRoom);
         cb({
           ok: true,
           exists: !!chatRoom,

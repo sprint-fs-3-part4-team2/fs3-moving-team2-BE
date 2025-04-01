@@ -13,7 +13,12 @@ class ChatService {
       },
       include: {
         users: {
-          select: { joinedAt: true, role: true, userId: true, user: { select: { name: true } } },
+          select: {
+            joinedAt: true,
+            role: true,
+            userId: true,
+            user: { select: { name: true, userType: true } },
+          },
         },
         ChatMessage: {
           select: {
