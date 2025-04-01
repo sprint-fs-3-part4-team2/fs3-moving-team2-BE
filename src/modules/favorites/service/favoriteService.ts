@@ -1,51 +1,72 @@
+import { AUTH_MESSAGES } from '@/constants/authMessages';
+import { NotFoundException } from '@/core/errors';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 // 찜한 목록 조회
 export async function getFavorites(customerId: string) {
-  try {
-    const favorites = await prisma.customerFavorite.findMany({
-      where: {
-        customerId: customerId,
-      },
-      include: {
-        mover: true,
-      },
-    });
-    return favorites;
-  } catch (error) {
-    throw new Error('찜한 목록 조회 실패');
+  const customer = await prisma.customer.findUnique({
+    where: { id: customerId },
+    include: { user: true },
+  });
+  if (!customer) {
+    throw new NotFoundException(AUTH_MESSAGES.needLogin);
   }
+  const favorites = await prisma.customerFavorite.findMany({
+    where: {
+      customerId: customerId,
+    },
+    include: {
+      mover: {
+        include: {
+          moverServices: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
+  return favorites;
 }
 
 // 찜하기 추가
 export async function addFavorite(customerId: string, moverId: string) {
-  try {
+  const result = await prisma.$transaction(async (prisma) => {
     const favorite = await prisma.customerFavorite.create({
       data: {
         customerId: customerId,
         moverId: moverId,
       },
     });
-    await prisma.mover.update({
+    const mover = await prisma.mover.update({
       where: { id: moverId },
       data: {
         totalCustomerFavorite: {
           increment: 1,
         },
       },
+      select: {
+        id: true,
+        totalCustomerFavorite: true,
+      },
     });
-    return favorite;
-  } catch (error) {
-    throw new Error('찜하기 추가 실패');
-  }
+    return {
+      favorite,
+      mover,
+    };
+  });
+  return {
+    moverId: result.mover.id,
+    totalCustomerFavorite: result.mover.totalCustomerFavorite,
+  };
 }
 
 // 찜하기 취소
 export async function removeFavorite(customerId: string, moverId: string) {
-  try {
-    await prisma.customerFavorite.delete({
+  const result = await prisma.$transaction(async (prisma) => {
+    const favorite = await prisma.customerFavorite.delete({
       where: {
         customerId_moverId: {
           customerId: customerId,
@@ -53,16 +74,25 @@ export async function removeFavorite(customerId: string, moverId: string) {
         },
       },
     });
-    await prisma.mover.update({
+    const mover = await prisma.mover.update({
       where: { id: moverId },
       data: {
         totalCustomerFavorite: {
           decrement: 1,
         },
       },
+      select: {
+        id: true,
+        totalCustomerFavorite: true,
+      },
     });
-    return { message: '찜하기 취소 완료' };
-  } catch (error) {
-    throw new Error('찜하기 취소 실패');
-  }
+    return {
+      favorite,
+      mover,
+    };
+  });
+  return {
+    moverId: result.mover.id,
+    totalCustomerFavorite: result.mover.totalCustomerFavorite,
+  };
 }

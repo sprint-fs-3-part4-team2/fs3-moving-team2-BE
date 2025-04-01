@@ -1,6 +1,7 @@
 import { Request } from 'express';
 import UserRepository from '../repository/user.repository';
 import { EditBaiscInfoBody } from '../types/type';
+import { LowercaseUserType } from '@/types/userType.types';
 import bcrypt from 'bcrypt';
 
 const NOUSER = '유저를 찾을 수 없습니다.';
@@ -43,5 +44,25 @@ export default class UserService {
     });
 
     return updatedProfile;
+  }
+
+  async getMe(userId: string, type: LowercaseUserType) {
+    const me = await this.userRepository.findById(userId);
+    const profile = me?.[type];
+    const result = {
+      email: me?.email,
+      name: me?.name,
+      phoneNumber: me?.phoneNumber,
+      userType: me?.userType.toLowerCase(),
+      profile: profile
+        ? {
+            ...profile,
+            createdAt: undefined,
+            updatedAt: undefined,
+          }
+        : null,
+    };
+
+    return result;
   }
 }
