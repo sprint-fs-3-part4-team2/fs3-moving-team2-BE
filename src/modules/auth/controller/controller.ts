@@ -18,7 +18,7 @@ export default class AuthController {
 
   private REDIRECT_URL_ON_SUCCESS = {
     customer: `${this.ROOT_URL}/user/movers`,
-    mover: `${this.ROOT_URL}/quotes/requested`,
+    mover: `${this.ROOT_URL}/mover/quotes/requested`,
   };
 
   private FAIL_QUERY = {
