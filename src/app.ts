@@ -19,6 +19,7 @@ import targetedQuoteRequestRouter from './modules/targetedQuoteRequest/routes';
 import moverRouter from './modules/movers/routes';
 import userQuoteRouter from './modules/userQuotes/routes';
 import { startNotificationListener } from './modules/notification/controller/sseController';
+import { startNotificationScheduler } from './schedulers/movingReminder';
 import chatRouter from './modules/chat/routes';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
@@ -83,6 +84,9 @@ app.use('/chat', chatRouter);
 
 // sse 리스너 실행
 startNotificationListener();
+
+// 알림 스케줄러 실행
+startNotificationScheduler();
 
 // 서버 실행
 server.listen(port, () => {
