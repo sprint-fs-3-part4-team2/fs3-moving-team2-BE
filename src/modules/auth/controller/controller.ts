@@ -10,6 +10,7 @@ export default class AuthController {
     secure: process.env.NODE_ENV === 'production',
     sameSite: process.env.NODE_ENV === 'production' ? ('none' as const) : ('lax' as const),
     path: '/',
+    domain: process.env.NODE_ENV === 'production' ? '.moving-app.site' : 'localhost',
   };
 
   private ROOT_URL =
