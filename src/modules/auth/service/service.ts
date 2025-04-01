@@ -64,6 +64,12 @@ export default class AuthService {
       throw new ConflictException(AUTH_MESSAGES.invalidRole);
     }
     if (existingUserByEmail) throw new ConflictException(EXCEPTION_MESSAGES.duplicatedEmail);
+    const existingUserByPhoneNumber = await this.userRepository.findByPhoneNumber(
+      signUpDto.phoneNumber,
+      type.toUpperCase() as UserType,
+    );
+    if (existingUserByPhoneNumber)
+      throw new ConflictException(EXCEPTION_MESSAGES.duplicatedPhoneNumber);
     const { email, password, name, phoneNumber } = signUpDto;
     const formattedPhoneNumber = phoneNumber.replaceAll('-', '');
 
