@@ -234,8 +234,9 @@ export default class AuthService {
 
       const response = await this.findOrCreateUser(userInfo, type);
       return response;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Google Oauth 오류', error);
+      if (error.message === 'wrong type') throw error;
       throw new Error('Google 로그인 중 오류가 발생했습니다.');
     }
   }
@@ -324,11 +325,12 @@ export default class AuthService {
 
       const response = await this.findOrCreateUser(userInfo, type);
       return response;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Kakao OAuth 오류', error);
       if (axios.isAxiosError(error) && error.response) {
         console.error('카카오 응답 오류:', error.response.data);
       }
+      if (error.message === 'wrong type') throw error;
       throw new Error('Kakao 로그인 중 오류가 발생했습니다.');
     }
   }
