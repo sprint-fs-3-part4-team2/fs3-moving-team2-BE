@@ -293,8 +293,8 @@ export default class AuthService {
         'https://kauth.kakao.com/oauth/token',
         new URLSearchParams({
           grant_type: 'authorization_code',
-          client_id: '13773c38c523df21fcca142d3fe3a4dc',
-          redirect_uri: 'http://localhost:8000/auth/callback/kakao',
+          client_id: process.env.KAKAO_CLIENT_ID!,
+          redirect_uri: process.env.KAKAO_REDIRECT_URI!,
           code: code, // 최신 코드 사용
         }).toString(),
         {
