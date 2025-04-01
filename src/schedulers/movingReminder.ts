@@ -59,8 +59,8 @@ export function startNotificationScheduler() {
         const customerId = quoteRequest.customerId;
         const moverId = mover.id;
 
-        console.log('customerId', customerId);
-        console.log('moverId', moverId);
+        // console.log('customerId', customerId);
+        // console.log('moverId', moverId);
 
         // 출발지 & 도착지 가져오기
         const fromRegion =
@@ -70,50 +70,50 @@ export function startNotificationScheduler() {
 
         // 고객과 기사의 userId 조회 (병렬 실행)
         const [customerUser, moverUser] = await Promise.all([
-          customerId ? prisma.user.findUnique({ where: { id: customerId } }) : null,
-          moverId ? prisma.user.findUnique({ where: { id: moverId } }) : null,
+          customerId ? prisma.customer.findUnique({ where: { id: customerId } }) : null,
+          moverId ? prisma.mover.findUnique({ where: { id: moverId } }) : null,
         ]);
 
         if (!customerUser || !moverUser) {
           console.log('유저 확인 불가');
           return;
         }
-        console.log('🔍 고객 유저 정보:', customerUser);
-        console.log('🔍 기사 유저 정보:', moverUser);
+        // console.log('🔍 고객 유저 정보:', customerUser);
+        // console.log('🔍 기사 유저 정보:', moverUser);
 
         // 고객에게 알림 보내기 (중복 방지)
         if (customerUser?.id && !notifiedUsers.has(customerUser.id)) {
           notificationPromises.push(
             createNotification({
-              userId: customerUser.id,
+              userId: customerUser.userId,
               messageType: 'dayBefore',
               fromRegion,
               toRegion,
             }),
           );
-          console.log(`✅ 고객(${customerUser.id})에게 알림 생성`);
-          notifiedUsers.add(customerUser.id);
+          console.log(`고객(${customerUser.userId})에게 알림 생성`);
+          notifiedUsers.add(customerUser.userId);
         }
 
         // 기사에게 알림 보내기 (중복 방지)
         if (moverUser?.id && !notifiedUsers.has(moverUser.id)) {
           notificationPromises.push(
             createNotification({
-              userId: moverUser.id,
+              userId: moverUser.userId,
               messageType: 'dayBefore',
               fromRegion,
               toRegion,
             }),
           );
-          console.log(`✅ 기사(${moverUser.id})에게 알림 생성`);
-          notifiedUsers.add(moverUser.id);
+          console.log(`기사(${moverUser.userId})에게 알림 생성`);
+          notifiedUsers.add(moverUser.userId);
         }
       }
 
       // 알림을 병렬로 실행
       await Promise.all(notificationPromises);
       console.log('내일 이사할 고객이랑 기사에게 알림 전송 완료!');
-      console.log(notificationPromises);
+      // console.log(notificationPromises);
     } catch (err) {
       console.error('알림 스케줄링 오류:', err);
     }
