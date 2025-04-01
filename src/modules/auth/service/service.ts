@@ -1,6 +1,6 @@
 import { AUTH_MESSAGES } from '@/constants/authMessages';
 import { EXCEPTION_MESSAGES } from '@/constants/exceptionMessages';
-import { ConflictException } from '@/core/errors';
+import { ConflictException, NotFoundException } from '@/core/errors';
 import { UnauthorizedException } from '@/core/errors/unauthorizedException';
 import { generateTokens } from '@/core/security/jwt';
 import UserRepository from '@/modules/users/repository/user.repository';
@@ -29,7 +29,7 @@ export default class AuthService {
   async signIn({ email, password }: SignInRequest, type: LowercaseUserType) {
     const uppercaseType = type.toUpperCase() as UserType;
     const userEntity = await this.userRepository.findByEmail(email);
-    if (!userEntity) throw new UnauthorizedException(AUTH_MESSAGES.emailNotExist);
+    if (!userEntity) throw new NotFoundException(AUTH_MESSAGES.emailNotExist);
     if (userEntity.userType !== uppercaseType)
       throw new ConflictException(AUTH_MESSAGES.invalidRole);
 
@@ -293,8 +293,8 @@ export default class AuthService {
         'https://kauth.kakao.com/oauth/token',
         new URLSearchParams({
           grant_type: 'authorization_code',
-          client_id: '13773c38c523df21fcca142d3fe3a4dc',
-          redirect_uri: 'http://localhost:8000/auth/callback/kakao',
+          client_id: process.env.KAKAO_CLIENT_ID!,
+          redirect_uri: process.env.KAKAO_REDIRECT_URI!,
           code: code, // 최신 코드 사용
         }).toString(),
         {
