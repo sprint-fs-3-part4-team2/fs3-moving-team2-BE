@@ -5,4 +5,5 @@ export const EXCEPTION_MESSAGES = {
   cannotCancelQuoteRequest: '취소할 수 없는 견적요청입니다.',
   alreadyRequestedQuote: '이미 견적 요청을 하셨습니다.',
   cannotCreateQuoteBeforeMoveNextDay: '이사일 다음날 이후에 견적 요청을 생성할 수 있습니다.',
+  alreadySubmittedQuote: '이미 견적을 제출하셨습니다.',
 } as const;
