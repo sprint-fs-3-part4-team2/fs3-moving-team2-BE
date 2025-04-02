@@ -5,6 +5,8 @@ import QuoteMapper from '../mapper/moverQuote.mapper';
 import { AUTH_MESSAGES } from '@/constants/authMessages';
 import { quoteRequestsRepository } from '@/modules/quoteRequests/routes';
 import { PrismaClient } from '@prisma/client';
+import { createNotification } from '@/modules/notification/service/notificationService';
+import { moverRepository } from '@/modules/movers/service/moverService';
 
 export default class QuotesService {
   constructor(
@@ -64,7 +66,20 @@ export default class QuotesService {
         tx,
       );
 
-      // 4. 견적 요청 알림 생성
+      // 4. moverId에 해당하는 기사의 이름을 조회
+      const mover = await moverRepository.getMoverNameById(moverId, tx);
+      if (!mover) {
+        throw new NotFoundException(EXCEPTION_MESSAGES.moverNotFound);
+      }
+
+      // 5. 견적 요청 알림 생성
+      await createNotification({
+        userId: quote.customer.userId,
+        messageType: 'quoteArrive',
+        moverName: mover.user.name,
+        moveType: quote.moveType,
+        url: `/quote-requests/${quoteId}`,
+      });
 
       // 5. 결과 조회
       const completeQuote = await this.quotesRepository.getMoverQuoteById(newMoverQuote.id, tx);
