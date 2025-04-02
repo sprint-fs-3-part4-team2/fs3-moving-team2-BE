@@ -99,4 +99,41 @@ export class MoverController {
       });
     }
   };
+
+  // 기사님 상세 정보 조회 API
+  getMoverById: RequestHandler = async (req, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user?.userId;
+
+      if (!id) {
+        res.status(400).json({
+          error: '잘못된 요청',
+          message: '기사 ID가 필요합니다.',
+        });
+        return;
+      }
+
+      const mover = await moverService.getMoverById(id, userId);
+
+      if (!mover) {
+        res.status(404).json({
+          error: '찾을 수 없음',
+          message: '해당 기사를 찾을 수 없습니다.',
+        });
+        return;
+      }
+
+      res.status(200).json({
+        message: '기사 상세 정보 조회 성공',
+        data: mover,
+      });
+    } catch (error) {
+      console.error('기사 상세 정보 조회 중 오류 발생:', error);
+      res.status(500).json({
+        error: '서버 오류 발생',
+        message: '기사 상세 정보를 불러오는 중 오류가 발생했습니다.',
+      });
+    }
+  };
 }
