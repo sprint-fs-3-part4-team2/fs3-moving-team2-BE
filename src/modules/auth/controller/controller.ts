@@ -1,6 +1,12 @@
 import { Request, Response } from 'express';
 import AuthService from '../service/service';
 import { LowercaseUserType } from '@/types/userType.types';
+import { UnauthorizedException } from '@/core/errors/unauthorizedException';
+import {
+  COOKIE_OPTIONS,
+  ACCESS_TOKEN_MAX_AGE,
+  REFRESH_TOKEN_MAX_AGE,
+} from '../../../constants/cookieOptions';
 
 type OauthTypes = 'kakao' | 'naver' | 'google';
 
@@ -18,7 +24,7 @@ export default class AuthController {
 
   private REDIRECT_URL_ON_SUCCESS = {
     customer: `${this.ROOT_URL}/user/movers`,
-    mover: `${this.ROOT_URL}/quotes/requested`,
+    mover: `${this.ROOT_URL}/mover/quotes/requested`,
   };
 
   private FAIL_QUERY = {
@@ -34,11 +40,11 @@ export default class AuthController {
   constructor(private authService: AuthService) {}
 
   private setAccessToken = (res: Response, token: string) => {
-    res.cookie('accessToken', token, { ...this.COOKIE_OPTIONS, maxAge: 2 * 60 * 60 * 1000 });
+    res.cookie('accessToken', token, { ...COOKIE_OPTIONS, maxAge: ACCESS_TOKEN_MAX_AGE });
   };
 
   private setRefreshToken = (res: Response, token: string) => {
-    res.cookie('refreshToken', token, { ...this.COOKIE_OPTIONS, maxAge: 24 * 60 * 60 * 1000 });
+    res.cookie('refreshToken', token, { ...COOKIE_OPTIONS, maxAge: REFRESH_TOKEN_MAX_AGE });
   };
 
   signIn = async (req: Request, res: Response) => {
@@ -76,6 +82,23 @@ export default class AuthController {
     this.setRefreshToken(res, refreshToken);
 
     return res.status(201).json(user);
+  };
+
+  signOut = async (req: Request, res: Response) => {
+    res.clearCookie('accessToken', this.COOKIE_OPTIONS);
+    res.clearCookie('refreshToken', this.COOKIE_OPTIONS);
+
+    return res.status(200).json({ message: '로그아웃 성공' });
+  };
+
+  refreshToken = async (req: Request, res: Response) => {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) throw new UnauthorizedException('리프레쉬 토큰이 없습니다.');
+
+    const newAccessToken = this.authService.refreshToken(refreshToken);
+    this.setAccessToken(res, newAccessToken);
+
+    return res.status(200).json({ message: '액세스 토큰 갱신 성공' });
   };
 
   fakeSignIn = async (req: Request, res: Response) => {

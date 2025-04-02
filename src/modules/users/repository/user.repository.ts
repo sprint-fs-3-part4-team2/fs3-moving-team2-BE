@@ -43,6 +43,17 @@ export default class UserRepository {
     });
   }
 
+  async findByPhoneNumber(phoneNumber: string, userType: UserType) {
+    return await this.prismaClient.user.findUnique({
+      where: {
+        userType_phoneNumber: {
+          userType,
+          phoneNumber,
+        },
+      },
+    });
+  }
+
   async create(data: SignUpRequest, type: UserType) {
     return await this.prismaClient.user.create({
       data: {
