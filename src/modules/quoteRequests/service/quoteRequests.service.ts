@@ -14,6 +14,32 @@ export default class QuoteRequestsService {
   ) {}
 
   async createQuoteRequest(customerId: string, data: createQuoteRequestDto) {
+    // 견적 요청이 안되는 견적 상태 조건
+    const notAllowedConditions = ['QUOTE_REQUESTED', 'QUOTE_CONFIRMED']; // 견적 요청, 견적 확정 상태
+
+    // 1. 최근 견적 요청이 있는지 확인
+    const latestQuote =
+      await this.quoteRequestRepository.getLatestQuoteRequestForCustomer(customerId);
+
+    // 2. 최근 견적 요청이 존재하고 active 상태라면 생성할 수 없으므로 예외 처리
+    if (latestQuote && notAllowedConditions.includes(latestQuote.currentStatus)) {
+      throw new ConflictException(EXCEPTION_MESSAGES.alreadyRequestedQuote);
+    }
+
+    // 3. 이사일이 지났는지 확인
+    if (latestQuote && latestQuote.currentStatus === 'MOVE_COMPLETED') {
+      const moveDate = new Date(latestQuote.moveDate); // 이사일
+      const allowedCreationDate = new Date(moveDate); // 이사일을 기준으로 설정
+      allowedCreationDate.setDate(moveDate.getDate() + 1);
+      allowedCreationDate.setHours(0, 0, 0, 0); // 이사일 다음 날 자정으로 설정
+      const now = new Date();
+      if (now < allowedCreationDate) {
+        // 아직 이사일 다음 날이 되지 않은 경우
+        throw new ConflictException(EXCEPTION_MESSAGES.cannotCreateQuoteBeforeMoveNextDay);
+      }
+    }
+
+    // 4. 조건이 만족되면 견적 요청을 생성
     const quoteRequest = await this.quoteRequestRepository.createQuoteRequest({
       customerId,
       moveType: getEnglishMoveType(data.moveType),
