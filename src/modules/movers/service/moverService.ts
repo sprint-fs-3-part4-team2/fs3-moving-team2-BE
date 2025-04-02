@@ -184,8 +184,83 @@ export class MoverService {
       quoteCount: mover.totalConfirmedCount,
       isFavorite,
       favoriteCount: mover.totalCustomerFavorite ?? 0,
-      description: mover.description || mover.introduction,
+      introduction: mover.introduction,
+      description: mover.description,
       regions: mover.moverServiceRegions.map((r) => reverseRegionMap[r.region]),
+    };
+  }
+
+  // 기사님 리뷰 목록 조회
+  async getMoverReviews(moverId: string, page: number, limit: number) {
+    const skip = (page - 1) * limit;
+
+    const [reviews, totalCount] = await Promise.all([
+      prisma.review.findMany({
+        where: {
+          quoteMatch: {
+            moverQuote: {
+              moverId,
+            },
+          },
+        },
+        select: {
+          id: true,
+          rating: true,
+          content: true,
+          createdAt: true,
+          quoteMatch: {
+            select: {
+              moverQuote: {
+                select: {
+                  quoteRequest: {
+                    select: {
+                      customer: {
+                        select: {
+                          user: {
+                            select: {
+                              name: true,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+        skip,
+        take: limit,
+      }),
+      prisma.review.count({
+        where: {
+          quoteMatch: {
+            moverQuote: {
+              moverId,
+            },
+          },
+        },
+      }),
+    ]);
+
+    return {
+      reviews: reviews.map((review) => ({
+        id: review.id,
+        name: review.quoteMatch.moverQuote.quoteRequest.customer.user.name.replace(
+          /(?<=.{2})./g,
+          '*',
+        ),
+        writtenAt: review.createdAt.toISOString().split('T')[0],
+        rating: review.rating,
+        content: review.content,
+      })),
+      totalCount,
+      currentPage: page,
+      totalPages: Math.ceil(totalCount / limit),
     };
   }
 }

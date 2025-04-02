@@ -136,4 +136,44 @@ export class MoverController {
       });
     }
   };
+
+  // 기사님 리뷰 목록 조회 API
+  getMoverReviews: RequestHandler = async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { page = '1', limit = '5' } = req.query;
+
+      if (!id) {
+        res.status(400).json({
+          error: '잘못된 요청',
+          message: '기사 ID가 필요합니다.',
+        });
+        return;
+      }
+
+      const pageNum = parseInt(page as string);
+      const limitNum = parseInt(limit as string);
+
+      if (isNaN(pageNum) || isNaN(limitNum) || pageNum < 1 || limitNum < 1) {
+        res.status(400).json({
+          error: '잘못된 요청',
+          message: '페이지와 페이지당 항목 수는 1 이상이어야 합니다.',
+        });
+        return;
+      }
+
+      const reviews = await moverService.getMoverReviews(id, pageNum, limitNum);
+
+      res.status(200).json({
+        message: '기사 리뷰 목록 조회 성공',
+        data: reviews,
+      });
+    } catch (error) {
+      console.error('기사 리뷰 목록 조회 중 오류 발생:', error);
+      res.status(500).json({
+        error: '서버 오류 발생',
+        message: '기사 리뷰 목록을 불러오는 중 오류가 발생했습니다.',
+      });
+    }
+  };
 }
