@@ -93,7 +93,7 @@ export default class AuthController {
     const newAccessToken = this.authService.refreshToken(refreshToken);
     this.setAccessToken(res, newAccessToken);
 
-    return res.status(200).json({ message: '액세스토큰 갱신 성공' });
+    return res.status(200).json({ message: '액세스 토큰 갱신 성공' });
   };
 
   fakeSignIn = async (req: Request, res: Response) => {

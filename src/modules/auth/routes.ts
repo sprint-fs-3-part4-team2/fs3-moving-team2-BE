@@ -16,8 +16,10 @@ const { snsLogin, signIn, signUp, signOut, refreshToken, fakeSignIn, oAuthCallba
 
 router.route('/fakeSignIn').get(asyncRequestHandler(fakeSignIn));
 router.route('/sign-out').post(asyncRequestHandler(signOut));
-router.route('/:provider').get(asyncRequestHandler(snsLogin));
 router.route('/refresh-token').post(asyncRequestHandler(refreshToken));
+
+router.route('/:provider').get(asyncRequestHandler(snsLogin));
+
 router
   .route('/sign-in/:userType')
   .post(validateBody(signInRequestStruct), asyncRequestHandler(signIn));
