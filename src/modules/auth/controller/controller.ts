@@ -2,6 +2,11 @@ import { Request, Response } from 'express';
 import AuthService from '../service/service';
 import { LowercaseUserType } from '@/types/userType.types';
 import { UnauthorizedException } from '@/core/errors/unauthorizedException';
+import {
+  COOKIE_OPTIONS,
+  ACCESS_TOKEN_MAX_AGE,
+  REFRESH_TOKEN_MAX_AGE,
+} from '../../../constants/cookieOptions';
 
 type OauthTypes = 'kakao' | 'naver' | 'google';
 
@@ -35,11 +40,11 @@ export default class AuthController {
   constructor(private authService: AuthService) {}
 
   private setAccessToken = (res: Response, token: string) => {
-    res.cookie('accessToken', token, { ...this.COOKIE_OPTIONS, maxAge: 2 * 60 * 60 * 1000 });
+    res.cookie('accessToken', token, { ...COOKIE_OPTIONS, maxAge: ACCESS_TOKEN_MAX_AGE });
   };
 
   private setRefreshToken = (res: Response, token: string) => {
-    res.cookie('refreshToken', token, { ...this.COOKIE_OPTIONS, maxAge: 24 * 60 * 60 * 1000 });
+    res.cookie('refreshToken', token, { ...COOKIE_OPTIONS, maxAge: REFRESH_TOKEN_MAX_AGE });
   };
 
   signIn = async (req: Request, res: Response) => {
