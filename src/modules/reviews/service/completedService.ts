@@ -24,9 +24,12 @@ export default async function getReviewsByUserId(userId: string) {
               targetedQuoteRequestId: true,
               mover: {
                 select: {
+                  id: true,
                   profileImage: true,
                   user: {
-                    select: { name: true },
+                    select: {
+                      name: true,
+                    },
                   },
                 },
               },
@@ -44,8 +47,8 @@ export default async function getReviewsByUserId(userId: string) {
   });
 
   return reviews.map((review) => ({
-    id: review.id,
     writtenAt: review.createdAt.toISOString().split('T')[0],
+    id: review.quoteMatch.moverQuote.mover.id,
     moverName: review.quoteMatch.moverQuote.mover.user.name,
     imageUrl: review.quoteMatch.moverQuote.mover.profileImage,
     movingDate: review.quoteMatch.moverQuote.quoteRequest.moveDate.toISOString().split('T')[0],

@@ -6,7 +6,20 @@ const clients = new Map<string, Response[]>(); // userId별 SSE 연결 저장
 // PostgreSQL 연결 설정
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL, // .env에서 DB 정보 가져오기
+  ssl: process.env.USE_SSL === 'true' ? { rejectUnauthorized: false } : false,
+  idleTimeoutMillis: 30000, // 30초 후 유휴 연결 해제
+  connectionTimeoutMillis: 5000, // 5초 안에 연결되지 않으면 에러
 });
+// 주기적으로 DB 연결 유지 (매 10초마다)
+setInterval(async () => {
+  try {
+    const client = await pool.connect();
+    await client.query('SELECT 1'); // 연결 유지
+    client.release();
+  } catch (err) {
+    console.error('PostgreSQL Keep-Alive 실패:', err);
+  }
+}, 10000); // 10초마다 실행
 
 // PostgreSQL LISTEN 이벤트 수신
 export const startNotificationListener = async () => {

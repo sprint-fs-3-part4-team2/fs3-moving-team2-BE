@@ -1,10 +1,12 @@
-import { ForbiddenException, NotFoundException } from '@/core/errors';
+import { ConflictException, ForbiddenException, NotFoundException } from '@/core/errors';
 import MoverQuotesRepository from '../repository/moverQuotesRepository';
 import { EXCEPTION_MESSAGES } from '@/constants/exceptionMessages';
 import QuoteMapper from '../mapper/moverQuote.mapper';
 import { AUTH_MESSAGES } from '@/constants/authMessages';
 import { quoteRequestsRepository } from '@/modules/quoteRequests/routes';
 import { PrismaClient } from '@prisma/client';
+import { createNotification } from '@/modules/notification/service/notificationService';
+import { moverRepository } from '@/modules/movers/service/moverService';
 
 export default class QuotesService {
   constructor(
@@ -48,14 +50,15 @@ export default class QuotesService {
         throw new NotFoundException(EXCEPTION_MESSAGES.quoteNotFound);
       }
 
-      // 2. 현재 상태 확인 (예를 들어, "QUOTE_REQUESTED" 상태여야 함)
-      if (quote.currentStatus !== 'QUOTE_REQUESTED') {
-        throw new ForbiddenException('견적 요청 상태가 견적 제출 가능한 상태가 아닙니다.');
+      // 2. 현재 기사(moverId)가 이미 해당 견적 요청에 대해 견적을 제출했는지 확인
+      const existingMoverQuote = await this.quotesRepository.findFirstMoverQuote(
+        moverId,
+        quoteId,
+        tx,
+      );
+      if (existingMoverQuote) {
+        throw new ConflictException(EXCEPTION_MESSAGES.alreadySubmittedQuote);
       }
-      // const latestStatus = quote.quoteStatusHistories[0]?.status;
-      // if (latestStatus !== 'QUOTE_REQUESTED') {
-      //   throw new ForbiddenException('견적 상태 이력 상 제출 가능한 상태가 아닙니다.');
-      // }
 
       // 3. MoverQuote 생성
       const newMoverQuote = await this.quotesRepository.createMoverQuote(
@@ -63,7 +66,22 @@ export default class QuotesService {
         tx,
       );
 
-      // 4. 결과 조회
+      // 4. moverId에 해당하는 기사의 이름을 조회
+      const mover = await moverRepository.getMoverNameById(moverId, tx);
+      if (!mover) {
+        throw new NotFoundException(EXCEPTION_MESSAGES.moverNotFound);
+      }
+
+      // 5. 견적 요청 알림 생성
+      await createNotification({
+        userId: quote.customer.userId,
+        messageType: 'quoteArrive',
+        moverName: mover.user.name,
+        moveType: quote.moveType,
+        url: `/quote-requests/${quoteId}`,
+      });
+
+      // 5. 결과 조회
       const completeQuote = await this.quotesRepository.getMoverQuoteById(newMoverQuote.id, tx);
       console.log(completeQuote);
       return { message: `견적을 제출했습니다.` };

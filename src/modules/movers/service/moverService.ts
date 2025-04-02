@@ -3,7 +3,7 @@ import { MoverRepository } from '../repository/moverRepository';
 import { PrismaClient } from '@prisma/client';
 import { regionMap } from '@/constants/serviceType';
 
-const moverRepository = new MoverRepository();
+export const moverRepository = new MoverRepository();
 const prisma = new PrismaClient();
 
 // 영문 지역 코드를 한글로 변환하는 맵

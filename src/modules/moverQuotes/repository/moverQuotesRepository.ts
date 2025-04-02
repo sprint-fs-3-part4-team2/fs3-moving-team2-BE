@@ -179,4 +179,19 @@ export default class QuotesRepository {
       },
     });
   }
+
+  // 기사님이 특정 견적 요청에 대해 이미 견적을 제출했는지 확인
+  async findFirstMoverQuote(
+    moverId: string,
+    quoteRequestId: string,
+    tx?: Prisma.TransactionClient,
+  ) {
+    const client = tx || this.prismaClient;
+    return await client.moverQuote.findFirst({
+      where: {
+        moverId,
+        quoteRequestId,
+      },
+    });
+  }
 }
