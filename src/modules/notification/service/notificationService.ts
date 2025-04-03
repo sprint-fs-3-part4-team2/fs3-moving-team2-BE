@@ -76,8 +76,15 @@ export async function createNotification(postData: {
 }) {
   const { userId, messageType, moverName, moveType, fromRegion, toRegion, url } = postData;
 
+  const moveTypeMap: Record<string, string> = {
+    SMALL_MOVE: '소형이사',
+    HOME_MOVE: '가정이사',
+    OFFICE_MOVE: '사무실이사',
+  };
+  const moveTypeKor = moveType ? moveTypeMap[moveType] || moveType : '';
+
   const MESSAGE_MAP: Record<string, string> = {
-    quoteArrive: `${moverName} 기사님의 ${moveType} 견적이 도착했어요!`,
+    quoteArrive: `${moverName} 기사님의 ${moveTypeKor} 견적이 도착했어요!`,
     quoteRequest: '지정 견적 요청이 도착했어요!',
     quoteConfirm: `${moverName} 기사님의 견적이 확정되었어요!!`,
     quoteRefuse: `${moverName} 기사님이 견적 요청을 거절했어요..`,
@@ -86,9 +93,9 @@ export async function createNotification(postData: {
   };
 
   const HIGHLIGHT_WORDS: Record<string, string[]> = {
-    quoteArrive: [moveType ?? '', '견적'],
+    quoteArrive: [moveTypeKor ?? '', '견적'],
     quoteRequest: ['지정 견적 요청', '도착'],
-    quoteConfirm: [moveType ?? '', '확정'],
+    quoteConfirm: [moveTypeKor ?? '', '확정'],
     quoteRefuse: ['지정 견적 요청', '도착'],
     dayBefore: [`${fromRegion} -> ${toRegion} 이사 예정일`],
     newReview: ['새로운 리뷰'],
@@ -102,28 +109,31 @@ export async function createNotification(postData: {
   }
 
   try {
-    // 알림 생성
-    const newAlarm = await prisma.notification.create({
-      data: {
-        userId,
-        message,
-        highlight,
-        url,
-      },
+    const result = await prisma.$transaction(async (tx) => {
+      const newAlarm = await tx.notification.create({
+        data: {
+          userId,
+          message,
+          highlight,
+          url,
+        },
+      });
+
+      await tx.$executeRawUnsafe(`
+        NOTIFY new_notification, '${JSON.stringify({
+          id: newAlarm.id,
+          userId: newAlarm.userId,
+          message: newAlarm.message,
+          highlight: newAlarm.highlight,
+          url: newAlarm.url,
+          createdAt: newAlarm.createdAt,
+        })}'
+      `);
+
+      return newAlarm;
     });
 
-    await prisma.$executeRawUnsafe(`
-      NOTIFY new_notification, '${JSON.stringify({
-        id: newAlarm.id,
-        userId: newAlarm.userId,
-        message: newAlarm.message,
-        highlight: newAlarm.highlight,
-        url: newAlarm.url,
-        createdAt: newAlarm.createdAt,
-      })}'
-    `);
-
-    return newAlarm;
+    return result;
   } catch (error) {
     console.error('알림 생성 실패:', error);
     throw new Error('알림 생성 중 오류가 발생했습니다.');
