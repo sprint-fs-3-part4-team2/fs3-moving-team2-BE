@@ -179,7 +179,10 @@ export default class QuoteRequestsService {
       const moverRegionsObjects =
         await this.moverQuotesRepository.getServiceRegionsForMover(moverId);
       const moverRegions: Array<keyof typeof REGION_MAP> = moverRegionsObjects.map((m) => m.region);
-      whereClause.AND = [{ fromRegion: { in: moverRegions } }, { toRegion: { in: moverRegions } }];
+      whereClause.AND.push(
+        { fromRegion: { in: moverRegions } },
+        { toRegion: { in: moverRegions } },
+      );
     }
 
     // isTargetedQuoteQuery가 true이면,
