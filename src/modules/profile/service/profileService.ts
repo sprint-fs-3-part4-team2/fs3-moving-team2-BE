@@ -35,9 +35,9 @@ export async function createUserProfile(profileData: {
       },
     });
     return customerProfile;
-  } catch (err) {
-    console.log('error : ', err);
-    return;
+  } catch (err: any) {
+    console.error('DB 등록 중 오류 발생:', err);
+    throw new Error(err.message || '서버 오류');
   }
 }
 

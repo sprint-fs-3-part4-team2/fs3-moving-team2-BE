@@ -49,6 +49,7 @@ const generateAndSetCookie = (
 export async function postCustomerProfileInfo(req: Request, res: Response) {
   try {
     const userId = req.user?.userId ?? '';
+    // const userId = 'cm914rhmu0004voa4kee6s779';
     console.log(userId);
     if (!userId) {
       res.status(401).json({ message: '등록된 유저가 아닙니다' });
@@ -74,6 +75,14 @@ export async function postCustomerProfileInfo(req: Request, res: Response) {
       serviceTypes,
       locations,
     });
+
+    if (!postData) {
+      console.error('DB 등록은 되었으나 응답 데이터가 없음');
+
+      res.status(500).json({ message: '프로필 등록 실패' });
+      return;
+    }
+
     generateAndSetCookie(userId, postData?.id ?? '', 'customer', res);
 
     res.status(201).json({
@@ -85,6 +94,7 @@ export async function postCustomerProfileInfo(req: Request, res: Response) {
       res.status(409).json({ message: err.message });
       return;
     }
+    console.log('컨트롤러 오류', err);
     res.status(500).json({ message: '서버 오류' });
   }
 }
