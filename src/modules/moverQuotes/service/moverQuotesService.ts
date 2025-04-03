@@ -18,7 +18,7 @@ export default class QuotesService {
     const quote = await this.quotesRepository.getQuoteForCustomer(quoteId);
     if (!quote) throw new NotFoundException(EXCEPTION_MESSAGES.quoteNotFound);
     if (quote?.quoteRequest.customerId !== customerId)
-      throw new ForbiddenException(AUTH_MESSAGES.forbidden);
+      throw new ForbiddenException('본인에게 온 견적만 조회할 수 있습니다.');
 
     return QuoteMapper.toQuoteForCustomerDto(quote);
   }
