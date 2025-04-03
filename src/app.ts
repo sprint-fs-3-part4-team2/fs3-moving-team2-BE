@@ -18,6 +18,8 @@ import profileRouter from './modules/profile/routes';
 import targetedQuoteRequestRouter from './modules/targetedQuoteRequest/routes';
 import moverRouter from './modules/movers/routes';
 import userQuoteRouter from './modules/userQuotes/routes';
+import { startNotificationListener } from './modules/notification/controller/sseController';
+import { startNotificationScheduler } from './schedulers/movingReminder';
 
 dotenv.config();
 
@@ -63,6 +65,12 @@ app.use('/rejection', rejectionRouter);
 app.use('/profile', profileRouter);
 app.use('/movers', moverRouter);
 app.use('/quote', userQuoteRouter);
+
+// sse 리스너 실행
+startNotificationListener();
+
+// 알림 스케줄러 실행
+startNotificationScheduler();
 
 // 서버 실행
 app.listen(port, () => {

@@ -3,6 +3,7 @@ import getReviewsByUserId from '../service/completedService';
 
 export async function getSubmittedReviews(req: Request, res: Response) {
   const roleId = req.user?.roleId ?? '';
+
   try {
     const submittedReviews = await getReviewsByUserId(roleId);
     res.status(200).json(submittedReviews);

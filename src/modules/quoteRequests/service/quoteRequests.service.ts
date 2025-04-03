@@ -3,6 +3,9 @@ import { getEnglishMoveType, MOVE_TYPE_KOREAN, REGION_MAP } from '@/constants/se
 import { createQuoteRequestDto } from '../dto/createQuoteRequest.dto';
 import QuoteRequestsMapper from '../mapper/quoteRequests.mapper';
 import MoverQuotesRepository from '@/modules/moverQuotes/repository/moverQuotesRepository';
+import { ConflictException, ForbiddenException, NotFoundException } from '@/core/errors';
+import { AUTH_MESSAGES } from '@/constants/authMessages';
+import { EXCEPTION_MESSAGES } from '@/constants/exceptionMessages';
 
 export default class QuoteRequestsService {
   constructor(
@@ -11,6 +14,32 @@ export default class QuoteRequestsService {
   ) {}
 
   async createQuoteRequest(customerId: string, data: createQuoteRequestDto) {
+    // 견적 요청이 안되는 견적 상태 조건
+    const notAllowedConditions = ['QUOTE_REQUESTED', 'QUOTE_CONFIRMED']; // 견적 요청, 견적 확정 상태
+
+    // 1. 최근 견적 요청이 있는지 확인
+    const latestQuote =
+      await this.quoteRequestRepository.getLatestQuoteRequestForCustomer(customerId);
+
+    // 2. 최근 견적 요청이 존재하고 active 상태라면 생성할 수 없으므로 예외 처리
+    if (latestQuote && notAllowedConditions.includes(latestQuote.currentStatus)) {
+      throw new ConflictException(EXCEPTION_MESSAGES.alreadyRequestedQuote);
+    }
+
+    // 3. 이사일이 지났는지 확인
+    if (latestQuote && latestQuote.currentStatus === 'MOVE_COMPLETED') {
+      const moveDate = new Date(latestQuote.moveDate); // 이사일
+      const allowedCreationDate = new Date(moveDate); // 이사일을 기준으로 설정
+      allowedCreationDate.setDate(moveDate.getDate() + 1);
+      allowedCreationDate.setHours(0, 0, 0, 0); // 이사일 다음 날 자정으로 설정
+      const now = new Date();
+      if (now < allowedCreationDate) {
+        // 아직 이사일 다음 날이 되지 않은 경우
+        throw new ConflictException(EXCEPTION_MESSAGES.cannotCreateQuoteBeforeMoveNextDay);
+      }
+    }
+
+    // 4. 조건이 만족되면 견적 요청을 생성
     const quoteRequest = await this.quoteRequestRepository.createQuoteRequest({
       customerId,
       moveType: getEnglishMoveType(data.moveType),
@@ -55,14 +84,12 @@ export default class QuoteRequestsService {
       isRequested: true,
       quote: {
         id: quote.id,
-        movingDate: quote.moveDate,
+        moveDate: quote.moveDate,
         // 내부에 저장된 enum값(예: "HOME_MOVE")을 한글로 변환
-        movingType: MOVE_TYPE_KOREAN[quote.moveType],
+        moveType: MOVE_TYPE_KOREAN[quote.moveType],
         requestedDate: quote.createdAt,
-        arrival: quote.quoteRequestAddresses.find((address) => address.type === 'ARRIVAL')
-          ?.fullAddress,
-        departure: quote.quoteRequestAddresses.find((address) => address.type === 'DEPARTURE')
-          ?.fullAddress,
+        arrival: quote.quoteRequestAddresses.find((address) => address.type === 'ARRIVAL'),
+        departure: quote.quoteRequestAddresses.find((address) => address.type === 'DEPARTURE'),
       },
     };
   }
@@ -114,6 +141,28 @@ export default class QuoteRequestsService {
       }
     }
 
+    // 기존에 whereClause.AND가 없다면 빈 배열로 초기화
+    whereClause.AND = whereClause.AND || [];
+
+    // 1. moverQuotes에 현재 moverId로 제출한 견적이 없어야 함.
+    // 2. targetedQuoteRequests에 해당 moverId 관련 거절(반려) 기록이 없어야 함.
+    whereClause.AND.push = [
+      {
+        moverQuotes: {
+          none: { moverId },
+        },
+      },
+      {
+        targetedQuoteRequests: {
+          none: {
+            moverId,
+            // 여기서 targetedQuoteRejection가 존재하면 지정 견적 거절(반려)이 된 것으로 간주
+            targetedQuoteRejection: { isNot: null },
+          },
+        },
+      },
+    ];
+
     // 기본 정렬: 이사빠른순 (moveDate 오름차순) / sortByQuery가 요청일빠른순인 경우만 조건 변경
     let orderBy;
     if (sortByQuery === '요청일빠른순') {
@@ -154,5 +203,17 @@ export default class QuoteRequestsService {
       pageSize: data.pageSize,
       totalPages: data.totalPages,
     };
+  }
+
+  async cancelQuoteRequestById(customerId: string, quoteRequestId: string) {
+    const quoteRequest = await this.quoteRequestRepository.findQuoteRequestById(quoteRequestId);
+    if (!quoteRequest) throw new NotFoundException(EXCEPTION_MESSAGES.quoteRequestNotFound);
+    const requestStatus = quoteRequest.currentStatus;
+    if (requestStatus !== 'QUOTE_REQUESTED' && requestStatus !== 'MOVER_SUBMITTED')
+      throw new ConflictException(EXCEPTION_MESSAGES.cannotCancelQuoteRequest);
+    if (quoteRequest?.customerId !== customerId)
+      throw new ForbiddenException(AUTH_MESSAGES.forbidden);
+
+    await this.quoteRequestRepository.deleteQuoteRequestById(quoteRequestId);
   }
 }

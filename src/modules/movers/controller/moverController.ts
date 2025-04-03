@@ -1,69 +1,102 @@
-import { Request, Response } from 'express';
+import { Request, Response, RequestHandler } from 'express';
 import { MoverService } from '../service/moverService';
 import { PrismaClient } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 const moverService = new MoverService();
-const prisma = new PrismaClient();
 
 export class MoverController {
   // 기사님 목록 조회 API
-  async getMovers(req: Request, res: Response) {
+  getMovers: RequestHandler = async (req, res) => {
     try {
-      const { sortBy } = req.query;
-      const movers = await moverService.getMovers(sortBy as string);
-      res.json(movers);
-    } catch (error) {
-      res.status(500).json({ error: '서버 오류 발생' });
-    }
-  }
+      const { sortBy, area, service } = req.query;
+      const userId = req.user?.userId;
 
-  // 검색 API
-  async searchMovers(req: Request, res: Response): Promise<void> {
-    try {
-      const keyword = req.query.keyword as string;
+      // 정렬 옵션 검증
+      const validSortOptions = ['reviews', 'rating', 'confirmed', 'experience'];
+      const sortOption = (sortBy as string) || 'reviews';
 
-      // 검색어 길이 검증 추가
-      if (!keyword || keyword.trim().length === 0) {
+      if (!validSortOptions.includes(sortOption)) {
         res.status(400).json({
-          error: '검색어를 입력하세요.',
-          message: '최소 1자 이상의 검색어가 필요합니다.',
+          error: '잘못된 정렬 옵션',
+          message: '지원하지 않는 정렬 옵션입니다.',
         });
         return;
       }
 
-      // 검색어 길이 제한 (옵션)
-      if (keyword.length > 30) {
+      // area와 service 파라미터 검증
+      if (area && typeof area !== 'string') {
         res.status(400).json({
-          error: '검색어가 너무 깁니다.',
-          message: '검색어는 30자 이내로 입력해주세요.',
+          error: '잘못된 지역 파라미터',
+          message: '지역 파라미터는 문자열이어야 합니다.',
         });
         return;
       }
 
-      // 서비스 레이어 검색 메서드 호출
-      const movers = await moverService.searchMovers(keyword.trim());
-
-      // 검색 결과 없을 때 처리
-      if (!movers || movers.length === 0) {
-        res.status(404).json({
-          error: '검색 결과 없음',
-          message: '해당 검색어에 대한 결과가 없습니다.',
+      if (service && typeof service !== 'string') {
+        res.status(400).json({
+          error: '잘못된 서비스 파라미터',
+          message: '서비스 파라미터는 문자열이어야 합니다.',
         });
         return;
       }
 
-      // 성공 응답
+      const movers = await moverService.getMovers(
+        sortOption,
+        userId,
+        area as string,
+        service as string,
+      );
+
       res.status(200).json({
-        message: `${movers.length}건의 검색 결과`,
+        message: '기사님 목록 조회 성공',
         data: movers,
       });
     } catch (error) {
-      // 에러 로깅 및 상세 에러 응답
-      console.error('검색 중 오류 발생:', error);
+      console.error('기사님 목록 조회 중 오류 발생:', error);
+
+      // Prisma 에러 처리
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        res.status(400).json({
+          error: '데이터베이스 오류',
+          message: '잘못된 파라미터가 전달되었습니다.',
+        });
+        return;
+      }
+
       res.status(500).json({
         error: '서버 오류 발생',
-        message: '검색 중 예상치 못한 오류가 발생했습니다.',
+        message: '기사님 목록을 불러오는 중 오류가 발생했습니다.',
       });
     }
-  }
+  };
+
+  // 기사님 검색 API
+  searchMovers: RequestHandler = async (req, res) => {
+    try {
+      const { keyword } = req.query;
+      const userId = req.user?.userId;
+
+      if (!keyword || typeof keyword !== 'string' || keyword.trim().length < 2) {
+        res.status(400).json({
+          error: '잘못된 검색어',
+          message: '검색어는 2자 이상이어야 합니다.',
+        });
+        return;
+      }
+
+      const movers = await moverService.searchMovers(keyword.trim(), userId);
+
+      res.status(200).json({
+        message: '기사님 검색 성공',
+        data: movers,
+      });
+    } catch (error) {
+      console.error('기사님 검색 중 오류 발생:', error);
+      res.status(500).json({
+        error: '서버 오류 발생',
+        message: '기사님 검색 중 오류가 발생했습니다.',
+      });
+    }
+  };
 }

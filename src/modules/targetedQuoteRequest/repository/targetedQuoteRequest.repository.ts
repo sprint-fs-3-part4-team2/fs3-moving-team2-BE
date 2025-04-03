@@ -1,5 +1,4 @@
 import { Prisma, PrismaClient } from '@prisma/client';
-import TargetedQuoteRejectionRepository from './targetedQuoteRejection.repository';
 export default class TargetedQuoteRequestRepository {
   constructor(private prismaClient: PrismaClient) {}
 

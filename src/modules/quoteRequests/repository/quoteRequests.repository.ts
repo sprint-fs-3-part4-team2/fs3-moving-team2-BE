@@ -74,11 +74,6 @@ export default class QuoteRequestsRepository {
     return await this.prismaClient.quoteRequest.findFirst({
       where: {
         customerId,
-        // 견적 상태 기록 중 active 상태를 갖는 경우만 필터링(QUOTE_REQUESTED", "QUOTE_CONFIRMED")에 해당하는 요청만 반환)
-        // ...this.CANCEL_QUOTE_STATUS_HISTORY_CLAUSE,
-        currentStatus: {
-          in: ['QUOTE_REQUESTED', 'QUOTE_CONFIRMED'],
-        },
       },
       orderBy: {
         createdAt: 'desc',
@@ -146,6 +141,32 @@ export default class QuoteRequestsRepository {
         quoteStatusHistories: {
           orderBy: { createdAt: 'desc' },
         },
+      },
+    });
+  }
+
+  // 특정 견적 요청을 id로 조회하며, 상태 내역 등 관련 정보를 포함함
+  async findQuoteRequestById(quoteId: string, tx?: Prisma.TransactionClient) {
+    const client = tx || this.prismaClient;
+    return await client.quoteRequest.findUnique({
+      where: { id: quoteId },
+      include: {
+        quoteStatusHistories: {
+          orderBy: { createdAt: 'desc' },
+        },
+        customer: {
+          select: {
+            userId: true,
+          },
+        },
+      },
+    });
+  }
+
+  async deleteQuoteRequestById(quoteRequestId: string) {
+    await this.prismaClient.quoteRequest.delete({
+      where: {
+        id: quoteRequestId,
       },
     });
   }

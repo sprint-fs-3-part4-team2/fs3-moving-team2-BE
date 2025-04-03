@@ -34,4 +34,13 @@ export default class UserController {
       data,
     });
   };
+
+  getMe = async (req: Request, res: Response) => {
+    const userId = req.user?.userId ?? '';
+    const userType = req.user?.type ?? '';
+    if (!userType || !userId) return res.status(200).json(null);
+    const userData = await this.userService.getMe(userId, userType);
+
+    return res.status(200).json(userData);
+  };
 }
