@@ -5,9 +5,11 @@ export default class QuoteRequestsController {
   constructor(private quoteRequestsService: QuoteRequestsService) {}
 
   createQuoteRequest = async (req: Request, res: Response) => {
-    // 고객인지 확인하는 코드 필요
-    // 데이터 유효성 검사 필요
     const customerId = req.user?.roleId ?? '';
+
+    if (!customerId) {
+      return res.status(400).json({ error: 'Customer ID is required' });
+    }
 
     const quoteRequest = await this.quoteRequestsService.createQuoteRequest(customerId, req.body);
     res.status(201).json(quoteRequest);
@@ -15,6 +17,11 @@ export default class QuoteRequestsController {
 
   getLatestQuoteRequestForCustomer = async (req: Request, res: Response) => {
     const customerId = req.user?.roleId ?? '';
+
+    if (!customerId) {
+      return res.status(400).json({ error: 'Customer ID is required' });
+    }
+
     const quote = await this.quoteRequestsService.getLatestQuoteRequestForCustomer(customerId);
 
     res.status(200).json(quote);
@@ -22,6 +29,10 @@ export default class QuoteRequestsController {
 
   getAllQuoteRequests = async (req: Request, res: Response) => {
     const moverId = req.user?.roleId ?? '';
+
+    if (!moverId) {
+      return res.status(400).json({ error: 'Mover ID is required' });
+    }
 
     // query 파라미터로부터 페이지와 페이지 크기 추출, 기본값 설정
     const { page, pageSize, search, moveType, isServiceRegionMatch, isTargetedQuote, sortBy } =
@@ -51,6 +62,10 @@ export default class QuoteRequestsController {
 
   cancelQuoteRequest = async (req: Request, res: Response) => {
     const customerId = req.user?.roleId ?? '';
+
+    if (!customerId) {
+      return res.status(400).json({ error: 'Customer ID is required' });
+    }
     const { quoteRequestId } = req.params;
 
     await this.quoteRequestsService.cancelQuoteRequestById(customerId, quoteRequestId);
