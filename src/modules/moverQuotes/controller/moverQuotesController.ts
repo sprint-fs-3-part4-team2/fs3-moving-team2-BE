@@ -5,15 +5,15 @@ export default class QuotesController {
   constructor(private quoteService: QuotesService) {}
 
   getQuoteByIdForCustomer = async (req: Request, res: Response) => {
-    const userId = req.user?.userId ?? '';
+    const customerId = req.user?.roleId ?? '';
     const quoteId = req.params.quoteId;
-    const quote = await this.quoteService.getQuoteByIdForCustomer(quoteId, userId);
+    const quote = await this.quoteService.getQuoteByIdForCustomer(quoteId, customerId);
 
     res.status(200).json(quote);
   };
 
   getQuoteByIdForMover = async (req: Request, res: Response) => {
-    const moverId = req.user?.userId ?? '';
+    const moverId = req.user?.roleId ?? '';
     const quoteId = req.params.quoteId;
     const quote = await this.quoteService.getQuoteByIdForMover(quoteId, moverId);
 
@@ -21,7 +21,7 @@ export default class QuotesController {
   };
 
   getQuotesListByMover = async (req: Request, res: Response) => {
-    const moverId = req.user?.userId ?? '';
+    const moverId = req.user?.roleId ?? '';
     const { page, pageSize } = req.query;
     const numberedPage = page !== undefined ? Number(page) : 1;
     const numberedPageSize = pageSize !== undefined ? Number(pageSize) : 4;

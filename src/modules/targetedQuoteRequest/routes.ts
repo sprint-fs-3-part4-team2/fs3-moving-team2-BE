@@ -10,10 +10,7 @@ import QuoteRequestsRepository from '../quoteRequests/repository/quoteRequests.r
 const router = express.Router();
 
 const targetedQuoteRejectionRepository = new TargetedQuoteRejectionRepository(prismaClient);
-const targetedQuoteRequestRepository = new TargetedQuoteRequestRepository(
-  prismaClient,
-  targetedQuoteRejectionRepository,
-);
+const targetedQuoteRequestRepository = new TargetedQuoteRequestRepository(prismaClient);
 const quoteRequestsRepository = new QuoteRequestsRepository(prismaClient);
 
 const targetedQuoteRequestService = new TargetedQuoteRequestService(

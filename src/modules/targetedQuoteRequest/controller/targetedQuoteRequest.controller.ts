@@ -29,6 +29,10 @@ export default class TargetedQuoteRequestController {
     const quoteId = req.params.quoteId;
     const rejectionReason = req.body.rejectionReason;
 
+    if (!moverId) {
+      return res.status(400).json({ error: 'Mover ID is required' });
+    }
+
     const rejectQuote = await this.targetedQuoteRequestService.rejectQuoteByMover(
       quoteId,
       moverId,

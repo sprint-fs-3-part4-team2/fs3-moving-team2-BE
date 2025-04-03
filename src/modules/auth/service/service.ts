@@ -1,8 +1,8 @@
 import { AUTH_MESSAGES } from '@/constants/authMessages';
 import { EXCEPTION_MESSAGES } from '@/constants/exceptionMessages';
-import { ConflictException } from '@/core/errors';
+import { ConflictException, NotFoundException } from '@/core/errors';
 import { UnauthorizedException } from '@/core/errors/unauthorizedException';
-import { generateTokens } from '@/core/security/jwt';
+import { generateAccessToken, generateTokens } from '@/core/security/jwt';
 import UserRepository from '@/modules/users/repository/user.repository';
 import { SignInRequest, SignUpRequest } from '@/structs/authStruct';
 import { LowercaseUserType } from '@/types/userType.types';
@@ -11,6 +11,7 @@ import axios from 'axios';
 import bcrypt from 'bcrypt';
 import { OauthUserInfo } from '../types/userInfo.types';
 import { getUniqueKoreanPhrase } from '@/utils/getUniqueKoreanPhrase';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 
 export default class AuthService {
   private scopes = encodeURIComponent(
@@ -29,7 +30,7 @@ export default class AuthService {
   async signIn({ email, password }: SignInRequest, type: LowercaseUserType) {
     const uppercaseType = type.toUpperCase() as UserType;
     const userEntity = await this.userRepository.findByEmail(email);
-    if (!userEntity) throw new UnauthorizedException(AUTH_MESSAGES.emailNotExist);
+    if (!userEntity) throw new NotFoundException(AUTH_MESSAGES.emailNotExist);
     if (userEntity.userType !== uppercaseType)
       throw new ConflictException(AUTH_MESSAGES.invalidRole);
 
@@ -64,6 +65,12 @@ export default class AuthService {
       throw new ConflictException(AUTH_MESSAGES.invalidRole);
     }
     if (existingUserByEmail) throw new ConflictException(EXCEPTION_MESSAGES.duplicatedEmail);
+    const existingUserByPhoneNumber = await this.userRepository.findByPhoneNumber(
+      signUpDto.phoneNumber,
+      type.toUpperCase() as UserType,
+    );
+    if (existingUserByPhoneNumber)
+      throw new ConflictException(EXCEPTION_MESSAGES.duplicatedPhoneNumber);
     const { email, password, name, phoneNumber } = signUpDto;
     const formattedPhoneNumber = phoneNumber.replaceAll('-', '');
 
@@ -86,6 +93,17 @@ export default class AuthService {
         profile: null,
       },
     };
+  }
+
+  refreshToken(refreshToken: string) {
+    try {
+      const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET!) as JwtPayload;
+      const accessToken = generateAccessToken(decoded.userId, decoded.roleId, decoded.type);
+
+      return accessToken;
+    } catch {
+      throw new UnauthorizedException('액세스토큰 갱신 실패');
+    }
   }
 
   fakeSignIn(userId: string, roleId: string, type: LowercaseUserType) {
@@ -234,8 +252,9 @@ export default class AuthService {
 
       const response = await this.findOrCreateUser(userInfo, type);
       return response;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Google Oauth 오류', error);
+      if (error.message === 'wrong type') throw error;
       throw new Error('Google 로그인 중 오류가 발생했습니다.');
     }
   }
@@ -293,8 +312,8 @@ export default class AuthService {
         'https://kauth.kakao.com/oauth/token',
         new URLSearchParams({
           grant_type: 'authorization_code',
-          client_id: '13773c38c523df21fcca142d3fe3a4dc',
-          redirect_uri: 'http://localhost:8000/auth/callback/kakao',
+          client_id: process.env.KAKAO_CLIENT_ID!,
+          redirect_uri: process.env.KAKAO_REDIRECT_URI!,
           code: code, // 최신 코드 사용
         }).toString(),
         {
@@ -324,11 +343,12 @@ export default class AuthService {
 
       const response = await this.findOrCreateUser(userInfo, type);
       return response;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Kakao OAuth 오류', error);
       if (axios.isAxiosError(error) && error.response) {
         console.error('카카오 응답 오류:', error.response.data);
       }
+      if (error.message === 'wrong type') throw error;
       throw new Error('Kakao 로그인 중 오류가 발생했습니다.');
     }
   }

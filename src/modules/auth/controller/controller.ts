@@ -1,7 +1,12 @@
 import { Request, Response } from 'express';
 import AuthService from '../service/service';
 import { LowercaseUserType } from '@/types/userType.types';
-import { AUTH_MESSAGES } from '@/constants/authMessages';
+import { UnauthorizedException } from '@/core/errors/unauthorizedException';
+import {
+  COOKIE_OPTIONS,
+  ACCESS_TOKEN_MAX_AGE,
+  REFRESH_TOKEN_MAX_AGE,
+} from '../../../constants/cookieOptions';
 
 type OauthTypes = 'kakao' | 'naver' | 'google';
 
@@ -11,6 +16,7 @@ export default class AuthController {
     secure: process.env.NODE_ENV === 'production',
     sameSite: process.env.NODE_ENV === 'production' ? ('none' as const) : ('lax' as const),
     path: '/',
+    domain: process.env.NODE_ENV === 'production' ? '.moving-app.site' : 'localhost',
   };
 
   private ROOT_URL =
@@ -18,7 +24,7 @@ export default class AuthController {
 
   private REDIRECT_URL_ON_SUCCESS = {
     customer: `${this.ROOT_URL}/user/movers`,
-    mover: `${this.ROOT_URL}/quotes/requested`,
+    mover: `${this.ROOT_URL}/mover/quotes/requested`,
   };
 
   private FAIL_QUERY = {
@@ -34,38 +40,33 @@ export default class AuthController {
   constructor(private authService: AuthService) {}
 
   private setAccessToken = (res: Response, token: string) => {
-    res.cookie('accessToken', token, { ...this.COOKIE_OPTIONS, maxAge: 2 * 60 * 60 * 1000 });
+    res.cookie('accessToken', token, { ...COOKIE_OPTIONS, maxAge: ACCESS_TOKEN_MAX_AGE });
   };
 
   private setRefreshToken = (res: Response, token: string) => {
-    res.cookie('refreshToken', token, { ...this.COOKIE_OPTIONS, maxAge: 24 * 60 * 60 * 1000 });
+    res.cookie('refreshToken', token, { ...COOKIE_OPTIONS, maxAge: REFRESH_TOKEN_MAX_AGE });
   };
 
   signIn = async (req: Request, res: Response) => {
     const userType = req.params.userType as LowercaseUserType;
     const { email, password } = req.body;
-    try {
-      const {
-        tokens: { accessToken, refreshToken },
-      } = await this.authService.signIn({ email, password }, userType);
+    const {
+      user,
+      tokens: { accessToken, refreshToken },
+    } = await this.authService.signIn({ email, password }, userType);
 
-      this.setAccessToken(res, accessToken);
-      this.setRefreshToken(res, refreshToken);
+    this.setAccessToken(res, accessToken);
+    this.setRefreshToken(res, refreshToken);
 
-      return res.redirect(this.REDIRECT_URL_ON_SUCCESS[userType]);
-    } catch (error: any) {
-      if (error.message === AUTH_MESSAGES.invalidRole)
-        return res.redirect(`${this.REDIRECT_URL_ON_FAIL[userType]}${this.FAIL_QUERY[userType]}`);
-      throw error;
-    }
+    return res.status(200).json(user);
   };
 
   signUp = async (req: Request, res: Response) => {
-    console.log('hi');
     const userType = req.params.userType as LowercaseUserType;
     const { email, password, phoneNumber, name } = req.body;
 
     const {
+      user,
       tokens: { accessToken, refreshToken },
     } = await this.authService.signUp(
       {
@@ -80,7 +81,24 @@ export default class AuthController {
     this.setAccessToken(res, accessToken);
     this.setRefreshToken(res, refreshToken);
 
-    return res.redirect(this.REDIRECT_URL_ON_SUCCESS[userType]);
+    return res.status(201).json(user);
+  };
+
+  signOut = async (req: Request, res: Response) => {
+    res.clearCookie('accessToken', this.COOKIE_OPTIONS);
+    res.clearCookie('refreshToken', this.COOKIE_OPTIONS);
+
+    return res.status(200).json({ message: '로그아웃 성공' });
+  };
+
+  refreshToken = async (req: Request, res: Response) => {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) throw new UnauthorizedException('리프레쉬 토큰이 없습니다.');
+
+    const newAccessToken = this.authService.refreshToken(refreshToken);
+    this.setAccessToken(res, newAccessToken);
+
+    return res.status(200).json({ message: '액세스 토큰 갱신 성공' });
   };
 
   fakeSignIn = async (req: Request, res: Response) => {

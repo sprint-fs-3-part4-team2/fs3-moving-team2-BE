@@ -124,4 +124,54 @@ export class MoverRepository {
         return { createdAt: 'desc' };
     }
   }
+
+  // 특정 기사님 정보 조회
+  async getMoverNameById(moverId: string, tx?: Prisma.TransactionClient) {
+    const client = tx || prisma;
+    return await client.mover.findUnique({
+      where: { id: moverId },
+      select: {
+        user: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+  }
+
+  // 기사님 상세 정보 조회
+  async getMoverById(moverId: string) {
+    return await prisma.mover.findUnique({
+      where: {
+        id: moverId,
+      },
+      select: {
+        id: true,
+        profileImage: true,
+        experienceYears: true,
+        introduction: true,
+        description: true,
+        averageRating: true,
+        totalReviews: true,
+        totalCustomerFavorite: true,
+        totalConfirmedCount: true,
+        user: {
+          select: {
+            name: true,
+          },
+        },
+        moverServices: {
+          select: {
+            serviceType: true,
+          },
+        },
+        moverServiceRegions: {
+          select: {
+            region: true,
+          },
+        },
+      },
+    });
+  }
 }
