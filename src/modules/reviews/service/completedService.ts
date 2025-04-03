@@ -47,7 +47,6 @@ export default async function getReviewsByUserId(userId: string) {
   });
 
   return reviews.map((review) => ({
-    // id: review.id,
     writtenAt: review.createdAt.toISOString().split('T')[0],
     id: review.quoteMatch.moverQuote.mover.id,
     moverName: review.quoteMatch.moverQuote.mover.user.name,

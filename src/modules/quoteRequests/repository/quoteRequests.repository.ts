@@ -154,6 +154,11 @@ export default class QuoteRequestsRepository {
         quoteStatusHistories: {
           orderBy: { createdAt: 'desc' },
         },
+        customer: {
+          select: {
+            userId: true,
+          },
+        },
       },
     });
   }

@@ -1,5 +1,12 @@
-import { Request, Response, RequestHandler } from 'express';
+import { Request, Response } from 'express';
 import * as profileService from '../service/profileService';
+import { generateTokens } from '@/core/security/jwt';
+import {
+  ACCESS_TOKEN_MAX_AGE,
+  COOKIE_OPTIONS,
+  REFRESH_TOKEN_MAX_AGE,
+} from '@/constants/cookieOptions';
+import { LowercaseUserType } from '@/types/userType.types';
 
 const regionMap: Record<string, string> = {
   서울: 'SEOUL',
@@ -25,6 +32,17 @@ const moveTypeMap: Record<string, string> = {
   소형이사: 'SMALL_MOVE',
   가정이사: 'HOME_MOVE',
   사무실이사: 'OFFICE_MOVE',
+};
+
+const generateAndSetCookie = (
+  userId: string,
+  roleId: string,
+  type: LowercaseUserType,
+  res: Response,
+) => {
+  const { accessToken, refreshToken } = generateTokens(userId, roleId, type);
+  res.cookie('accessToken', accessToken, { ...COOKIE_OPTIONS, maxAge: ACCESS_TOKEN_MAX_AGE });
+  res.cookie('refreshToken', refreshToken, { ...COOKIE_OPTIONS, maxAge: REFRESH_TOKEN_MAX_AGE });
 };
 
 // 고객 프로필 등록 (이미지, 이용 서비스, 지역)
@@ -56,6 +74,8 @@ export async function postCustomerProfileInfo(req: Request, res: Response) {
       serviceTypes,
       locations,
     });
+    generateAndSetCookie(userId, postData?.id ?? '', 'customer', res);
+
     res.status(201).json({
       message: '등록 성공!',
       data: { postData },
@@ -141,6 +161,8 @@ export async function postMoverProfileInfo(req: Request, res: Response) {
       serviceTypes,
       locations,
     });
+    generateAndSetCookie(userId, postData?.id ?? '', 'mover', res);
+
     res.status(201).json({
       message: '등록 성공!',
       data: { postData },
