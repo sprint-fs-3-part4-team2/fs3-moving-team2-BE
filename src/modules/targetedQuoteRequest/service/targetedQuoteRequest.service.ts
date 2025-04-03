@@ -15,47 +15,35 @@ export default class TargetedQuoteRequestService {
     private quoteRequestsRepository: QuoteRequestsRepository,
   ) {}
 
-  async createTargetedQuoteRequest(quoteId: string, customerId: string, moverId: string) {
-    await this.prismaClient.$transaction(async (tx) => {
-      // 1. 견적 요청(QuoteRequest) 조회 및 검증
-      const quote = await this.quoteRequestsRepository.findUniqueQuoteWithStatus(quoteId, tx);
-      if (!quote) throw new Error('견적 요청을 찾을 수 없습니다.');
+  async createTargetedQuoteRequest(customerId: string, moverId: string) {
+    // 1. 해당 고객의 최신 일반 견적 요청 조회
+    const latestQuote = await this.quoteRequestsRepository.findLatestQuoteByCustomerId(customerId);
 
-      // 1-1. 견적 요청이 해당 고객의 것인지 확인
-      if (quote.customerId !== customerId) {
-        throw new Error('해당 견적 요청에 대한 권한이 없습니다.');
-      }
+    if (!latestQuote) {
+      throw new ConflictException('일반 견적 요청이 존재하지 않습니다.');
+    }
 
-      // 1-2. 견적 요청 상태가 QUOTE_REQUESTED인지 확인
-      if (quote.currentStatus !== 'QUOTE_REQUESTED') {
-        throw new Error('견적 요청 상태가 올바르지 않습니다.');
-      }
+    if (latestQuote.currentStatus !== 'QUOTE_REQUESTED') {
+      throw new ConflictException('유효하지 않은 견적 상태입니다.');
+    }
 
-      // 2. 지정 견적 요청 제한 확인 (고객당 5명)
-      const existingRequests = await this.targetedQuoteRequestRepository.findByQuoteId(quoteId, tx);
-      if (existingRequests.length >= 5) {
-        throw new Error('지정 견적 요청은 최대 5명까지만 가능합니다.');
-      }
+    // 2. 기존 지정 견적 요청 확인
+    const existingRequest = await this.targetedQuoteRequestRepository.findOneByQuoteAndMover(
+      latestQuote.id,
+      moverId,
+    );
 
-      // 3. 중복 요청 확인
-      const existingRequest = await this.targetedQuoteRequestRepository.findOneByQuoteAndMover(
-        quoteId,
-        moverId,
-        tx,
-      );
-      if (existingRequest) {
-        throw new Error('이미 지정 견적 요청이 존재합니다.');
-      }
+    if (existingRequest) {
+      throw new ConflictException('이미 해당 이사업체에 대한 견적 요청이 존재합니다.');
+    }
 
-      // 4. 지정 견적 요청 생성
-      await this.targetedQuoteRequestRepository.create({
-        quoteRequestId: quoteId,
-        moverId,
-        tx,
-      });
+    // 3. 견적 요청 생성
+    const targetedRequest = await this.targetedQuoteRequestRepository.create({
+      quoteRequestId: latestQuote.id,
+      moverId,
     });
 
-    return { message: '지정 견적 요청이 완료되었습니다.' };
+    return targetedRequest;
   }
 
   async rejectQuoteByMover(quoteId: string, moverId: string, rejectionReason: string) {

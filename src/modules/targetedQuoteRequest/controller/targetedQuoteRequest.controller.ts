@@ -6,14 +6,17 @@ export default class TargetedQuoteRequestController {
 
   createTargetedQuoteRequest = async (req: Request, res: Response) => {
     const customerId = req.user?.roleId ?? '';
-    const { quoteId, moverId } = req.body;
+    const { moverId } = req.body;
 
     if (!customerId) {
       return res.status(400).json({ error: 'Customer ID is required' });
     }
 
+    if (!moverId) {
+      return res.status(400).json({ error: 'Mover ID is required' });
+    }
+
     const result = await this.targetedQuoteRequestService.createTargetedQuoteRequest(
-      quoteId,
       customerId,
       moverId,
     );
