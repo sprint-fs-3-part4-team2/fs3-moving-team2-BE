@@ -96,3 +96,27 @@ export async function removeFavorite(customerId: string, moverId: string) {
     totalCustomerFavorite: result.mover.totalCustomerFavorite,
   };
 }
+
+// 찜하기 상태 확인
+export async function checkFavoriteStatus(customerId: string, moverId: string) {
+  const customer = await prisma.customer.findUnique({
+    where: { id: customerId },
+    include: { user: true },
+  });
+  if (!customer) {
+    throw new NotFoundException(AUTH_MESSAGES.needLogin);
+  }
+
+  const favorite = await prisma.customerFavorite.findUnique({
+    where: {
+      customerId_moverId: {
+        customerId: customerId,
+        moverId: moverId,
+      },
+    },
+  });
+
+  return {
+    isFavorite: !!favorite,
+  };
+}
