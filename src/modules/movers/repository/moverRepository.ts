@@ -125,6 +125,21 @@ export class MoverRepository {
     }
   }
 
+  // 특정 기사님 정보 조회
+  async getMoverNameById(moverId: string, tx?: Prisma.TransactionClient) {
+    const client = tx || prisma;
+    return await client.mover.findUnique({
+      where: { id: moverId },
+      select: {
+        user: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+  }
+
   // 기사님 상세 정보 조회
   async getMoverById(moverId: string) {
     return await prisma.mover.findUnique({
