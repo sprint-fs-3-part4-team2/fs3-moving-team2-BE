@@ -3,10 +3,18 @@ import * as reviewService from '../service/reviewService';
 
 export const getPendingReviews: RequestHandler = async (req, res) => {
   const userId = req.user?.userId;
+  const roleId = req.user?.roleId;
+
   if (!userId) {
     res.status(401).json({ message: '로그인 필요' });
     return;
   }
+
+  if (!roleId || roleId === '') {
+    res.status(403).json({ message: '프로필 등록을 먼저 해주세요.' });
+    return;
+  }
+
   try {
     const pendingReviews = await reviewService.getPendingReviews(userId);
     res.status(200).json(pendingReviews);
@@ -18,10 +26,18 @@ export const getPendingReviews: RequestHandler = async (req, res) => {
 
 export const submitReview: RequestHandler = async (req, res) => {
   const userId = req.user?.userId;
+  const roleId = req.user?.roleId;
+
   if (!userId) {
     res.status(401).json({ message: '로그인 필요' });
     return;
   }
+
+  if (!roleId || roleId === '') {
+    res.status(403).json({ message: '프로필 등록을 먼저 해주세요.' });
+    return;
+  }
+
   try {
     const { estimateId, rating, comment } = req.body;
     const newReview = await reviewService.createReview({ userId, estimateId, rating, comment });
