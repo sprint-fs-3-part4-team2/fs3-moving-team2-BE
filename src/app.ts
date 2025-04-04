@@ -20,6 +20,7 @@ import moverRouter from './modules/movers/routes';
 import userQuoteRouter from './modules/userQuotes/routes';
 import { startNotificationListener } from './modules/notification/controller/sseController';
 import { startNotificationScheduler } from './schedulers/movingReminder';
+import quoteListRouter from './modules/quotesList/routes';
 
 dotenv.config();
 
@@ -65,6 +66,7 @@ app.use('/rejection', rejectionRouter);
 app.use('/profile', profileRouter);
 app.use('/movers', moverRouter);
 app.use('/quote', userQuoteRouter);
+app.use('/quotes', quoteListRouter);
 
 // sse 리스너 실행
 startNotificationListener();
