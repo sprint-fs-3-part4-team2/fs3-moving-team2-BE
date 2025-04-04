@@ -77,7 +77,7 @@ const customerFind = async (
   return new Promise((resolve, reject) => {
     setTimeout(async () => {
       try {
-        const result = await prismaClient.customer.findMany({ where });
+        const result = await prismaClient.customer.findMany({ where, include });
         if (result.length === 0) {
           return reject(new Error('❌ customer 없음'));
         }
