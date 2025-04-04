@@ -22,7 +22,7 @@ export default class UserController {
     const userType = req.user?.type ?? '';
     if (!userType || !userId) return res.status(200).json(null);
 
-    const data = await this.userService.mbiEdit(
+    const { data, message } = await this.userService.mbiEdit(
       {
         new_password: new_password,
         current_password: current_password,
@@ -31,15 +31,13 @@ export default class UserController {
       },
       req.user,
     );
-
     if (!data) {
-      res.status(204).json({ ok: false });
-      return;
+      return res.status(203).json({ ok: false, message });
     }
 
     res.status(200).json({
       ok: true,
-      message: '프로필 수정이 완료됐습니다.',
+      message,
       data,
     });
   };
