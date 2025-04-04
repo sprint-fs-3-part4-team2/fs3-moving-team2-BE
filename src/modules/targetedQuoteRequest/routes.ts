@@ -23,8 +23,9 @@ const targetedQuoteRequestService = new TargetedQuoteRequestService(
 const targetedQuoteRequestController = new TargetedQuoteRequestController(
   targetedQuoteRequestService,
 );
-const { rejectQuoteByMover } = targetedQuoteRequestController;
+const { createTargetedQuoteRequest, rejectQuoteByMover } = targetedQuoteRequestController;
 
+router.route('/').post(asyncRequestHandler(createTargetedQuoteRequest));
 router.route('/reject/:quoteId').post(asyncRequestHandler(rejectQuoteByMover));
 
 export default router;

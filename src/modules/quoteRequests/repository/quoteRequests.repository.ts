@@ -170,4 +170,23 @@ export default class QuoteRequestsRepository {
       },
     });
   }
+
+  async findLatestQuoteByCustomerId(customerId: string) {
+    return await this.prismaClient.quoteRequest.findFirst({
+      where: {
+        customerId,
+        currentStatus: 'QUOTE_REQUESTED',
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      include: {
+        quoteStatusHistories: {
+          orderBy: {
+            createdAt: 'desc',
+          },
+        },
+      },
+    });
+  }
 }

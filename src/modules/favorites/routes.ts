@@ -1,5 +1,10 @@
 import express from 'express';
-import { getFavorites, addFavorite, removeFavorite } from './controller/favoriteController';
+import {
+  getFavorites,
+  addFavorite,
+  removeFavorite,
+  checkFavoriteStatus,
+} from './controller/favoriteController';
 import { createAuthMiddleware } from '@/core/middleware/auth/auth';
 import asyncRequestHandler from '@/core/handlers/asyncRequestHandler';
 
@@ -14,6 +19,12 @@ router.delete(
   '/delete/:moverId',
   createAuthMiddleware('customer'),
   asyncRequestHandler(removeFavorite),
+);
+// 찜하기 상태 확인
+router.get(
+  '/check/:moverId',
+  createAuthMiddleware('customer'),
+  asyncRequestHandler(checkFavoriteStatus),
 );
 
 export default router;
