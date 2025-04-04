@@ -19,7 +19,7 @@ export async function checkCustomerExistence(customerId: string) {
   return customer;
 }
 
-// 대기 중인 견적 목록 조회 123
+// 대기 중인 견적 목록 조회
 export async function getPendingQuotes(userId: string, roleId: string) {
   const customer = await prisma.customer.findUnique({
     where: { id: roleId },
