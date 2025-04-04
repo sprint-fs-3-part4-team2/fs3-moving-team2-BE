@@ -15,6 +15,37 @@ export default class TargetedQuoteRequestService {
     private quoteRequestsRepository: QuoteRequestsRepository,
   ) {}
 
+  async createTargetedQuoteRequest(customerId: string, moverId: string) {
+    // 1. 해당 고객의 최신 일반 견적 요청 조회
+    const latestQuote = await this.quoteRequestsRepository.findLatestQuoteByCustomerId(customerId);
+
+    if (!latestQuote) {
+      throw new ConflictException('일반 견적 요청이 존재하지 않습니다.');
+    }
+
+    if (latestQuote.currentStatus !== 'QUOTE_REQUESTED') {
+      throw new ConflictException('유효하지 않은 견적 상태입니다.');
+    }
+
+    // 2. 기존 지정 견적 요청 확인
+    const existingRequest = await this.targetedQuoteRequestRepository.findOneByQuoteAndMover(
+      latestQuote.id,
+      moverId,
+    );
+
+    if (existingRequest) {
+      throw new ConflictException('이미 해당 이사업체에 대한 견적 요청이 존재합니다.');
+    }
+
+    // 3. 견적 요청 생성
+    const targetedRequest = await this.targetedQuoteRequestRepository.create({
+      quoteRequestId: latestQuote.id,
+      moverId,
+    });
+
+    return targetedRequest;
+  }
+
   async rejectQuoteByMover(quoteId: string, moverId: string, rejectionReason: string) {
     console.log('log', quoteId, moverId, rejectionReason);
 
