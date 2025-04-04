@@ -56,3 +56,18 @@ export async function removeFavorite(req: Request, res: Response): Promise<Respo
     return handleError(error, res);
   }
 }
+
+// 찜하기 상태 확인
+export async function checkFavoriteStatus(req: Request, res: Response): Promise<Response> {
+  try {
+    const userId = req?.user?.roleId ?? '';
+    const moverId = req?.params?.moverId ?? '';
+    if (!userId || !moverId) {
+      return res.status(400).json({ error: 'userId와 moverId가 필요합니다.' });
+    }
+    const result = await favoriteService.checkFavoriteStatus(userId, moverId);
+    return res.status(200).json(result);
+  } catch (error) {
+    return handleError(error, res);
+  }
+}

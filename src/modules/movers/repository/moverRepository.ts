@@ -171,6 +171,20 @@ export class MoverRepository {
             region: true,
           },
         },
+        targetedQuoteRequests: {
+          select: {
+            id: true,
+          },
+        },
+        moverQuotes: {
+          select: {
+            quoteMatch: {
+              select: {
+                isCompleted: true,
+              },
+            },
+          },
+        },
       },
     });
   }

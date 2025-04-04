@@ -131,14 +131,12 @@ export class MoverService {
   // 기사님 상세 정보 조회
   async getMoverById(moverId: string, userId?: string) {
     const mover = await moverRepository.getMoverById(moverId);
-
     if (!mover) {
       return null;
     }
 
-    // 로그인한 사용자의 좋아요 여부와 견적 확정 여부 가져오기
+    // 로그인한 사용자의 좋아요 여부 가져오기
     let isFavorite = false;
-    let isCustomQuote = false;
 
     if (userId) {
       const customer = await prisma.customer.findUnique({
@@ -147,30 +145,22 @@ export class MoverService {
       });
 
       if (customer) {
-        const [favorite, confirmedQuote] = await Promise.all([
-          prisma.customerFavorite.findFirst({
-            where: {
-              customerId: customer.id,
-              moverId: mover.id,
-            },
-          }),
-          prisma.moverQuote.findFirst({
-            where: {
-              quoteRequest: {
-                customerId: customer.id,
-              },
-              quoteMatch: {
-                isCompleted: true,
-              },
-              moverId: mover.id,
-            },
-          }),
-        ]);
+        const favorite = await prisma.customerFavorite.findFirst({
+          where: {
+            customerId: customer.id,
+            moverId: mover.id,
+          },
+        });
 
         isFavorite = !!favorite;
-        isCustomQuote = !!confirmedQuote;
       }
     }
+
+    // targetedQuoteRequests가 존재하면 isCustomQuote는 true
+    const isCustomQuote = mover.targetedQuoteRequests.length > 0;
+
+    // moverQuotes 중 완료된 견적이 있는지 확인
+    const hasConfirmedQuote = mover.moverQuotes.some((quote) => quote.quoteMatch?.isCompleted);
 
     return {
       id: mover.id,
@@ -178,6 +168,7 @@ export class MoverService {
       imageUrl: mover.profileImage || '/profile-placeholder.png',
       movingType: mover.moverServices.map((service) => MOVE_TYPE[service.serviceType]),
       isCustomQuote,
+      hasConfirmedQuote,
       rating: mover.averageRating ?? 0,
       ratingCount: mover.totalReviews,
       experienceYears: mover.experienceYears,
