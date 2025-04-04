@@ -13,14 +13,12 @@ export const userRepository = new UserRepository(prismaClient);
 const userService = new UserService(userRepository);
 const userController = new UserController(userService);
 
-const { moverBasicInfoEdit, getMe } = userController;
+const { getMoverBasicInfo, patchMoverBasicInfo, getMe } = userController;
 
 // 기사 - 기본 정보 수정
-userRouter.post(
-  '/mover/baiscinfo/edit',
-  //   createAuthMiddleware('mover'),
-  moverBasicInfoEdit,
-);
+userRouter
+  .get('/mover/basicinfo', createAuthMiddleware('mover'), getMoverBasicInfo)
+  .patch('/mover/basicinfo', createAuthMiddleware('mover'), patchMoverBasicInfo);
 userRouter.get('/mover/profile', createAuthMiddleware('mover'), getMoverProfile);
 userRouter.get('/me', asyncRequestHandler(getMe));
 
