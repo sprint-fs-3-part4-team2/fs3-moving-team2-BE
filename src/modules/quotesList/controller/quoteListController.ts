@@ -12,7 +12,7 @@ function handleError(error: unknown, res: Response) {
   return res.status(500).json({ error: '요청을 처리하는 데 실패했습니다.' });
 }
 
-// 내 견적 요청 목록 조회
+// 내 견적 요청 목록 조회 123
 export async function getQuoteRequests(req: Request, res: Response) {
   try {
     const userId = req.user?.userId ?? '';
