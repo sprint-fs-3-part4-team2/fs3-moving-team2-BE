@@ -1,38 +1,58 @@
 import { Request, Response } from 'express';
 import UserService from '../service/user.service';
 import { EditBaiscInfoBody } from '../types/type';
-import { createNotification } from '@/modules/notification/service/notificationService';
 
 export default class UserController {
   constructor(private userService: UserService) {}
 
-  moverBasicInfoEdit = async (req: Request, res: Response) => {
-    const { currentPassword, newPassword, phoneNumber, name }: EditBaiscInfoBody = req.body;
+  getMoverBasicInfo = async (req: Request, res: Response) => {
+    try {
+      const user = req.user;
+      if (!user) {
+        res.status(401).json({ ok: false, message: '유저 조회 실패' });
+        return;
+      }
+      const data = await this.userService.mbiGet(user);
 
-    const user = req.user
-      ? req.user
-      : ({ userId: 'cm8r03ll90000iuux1x0r69ce', roleId: '', type: 'mover' } as Request['user']);
-    // hash 비교 코드 필요
-    const data = await this.userService.mbiEdit(
-      {
-        newPassword,
-        currentPassword,
-        phoneNumber,
-        name,
-      },
-      user,
-    );
-
-    if (!data.ok) {
-      res.status(204).json({ ok: false });
-      return;
+      res.status(200).json({ ok: true, data });
+    } catch (err) {
+      res.status(204).json({ ok: false, err });
     }
+  };
 
-    await createNotification({ userId: user!.userId, messageType: 'newReview' });
-    res.status(200).json({
-      ok: true,
-      data,
-    });
+  patchMoverBasicInfo = async (req: Request, res: Response) => {
+    try {
+      const { current_password, new_password, phoneNumber, name }: EditBaiscInfoBody = req.body;
+
+      const user = req.user;
+      if (!user) {
+        res.status(401).json({ ok: false });
+        return;
+      }
+
+      const data = await this.userService.mbiEdit(
+        {
+          new_password: new_password,
+          current_password: current_password,
+          phoneNumber,
+          name,
+        },
+        user,
+      );
+
+      if (!data) {
+        res.status(204).json({ ok: false });
+        return;
+      }
+
+      res.status(200).json({
+        ok: true,
+        message: '프로필 수정이 완료됐습니다.',
+        data,
+      });
+    } catch (err) {
+      res.status(204).json({ ok: false, err });
+    }
   };
 
   getMe = async (req: Request, res: Response) => {
