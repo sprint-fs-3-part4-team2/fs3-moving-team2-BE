@@ -21,9 +21,10 @@ import userQuoteRouter from './modules/userQuotes/routes';
 import { startNotificationListener } from './modules/notification/controller/sseController';
 import { startNotificationScheduler } from './schedulers/movingReminder';
 import chatRouter from './modules/chat/routes';
-import { createServer } from 'http';
-import { Server } from 'socket.io';
-import ChatIo from './chatSocket';
+// 채팅 개발 중
+// import { createServer } from 'http';
+// import { Server } from 'socket.io';
+// import ChatIo from './chatSocket';
 
 dotenv.config();
 
@@ -35,15 +36,17 @@ const allowedOrigins: string[] = [
 ].filter((origin) => origin.trim() !== '');
 
 const app = express();
+
 // 채팅 기능용 소켓
-const server = createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: allowedOrigins.length > 0 ? allowedOrigins : '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-    credentials: true,
-  },
-});
+// const server = createServer(app);
+// const io = new Server(server, {
+//   cors: {
+//     origin: allowedOrigins.length > 0 ? allowedOrigins : '*',
+//     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+//     credentials: true,
+//   },
+// });
+
 // 미들웨어 설정
 app.use(
   cors({
@@ -58,8 +61,9 @@ app.use(extractUserMiddleware);
 app.use(express.urlencoded({ extended: true })); // 필요한거야?  // body-parser 대체
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec)); // swagger 설정
 
-const chatNamespace = io.of('/chat');
-ChatIo(chatNamespace);
+// 채팅 기능 주석
+// const chatNamespace = io.of('/chat');
+// ChatIo(chatNamespace);
 
 // 기본 라우터 설정
 app.get('/', (req: Request, res: Response) => {
@@ -89,7 +93,7 @@ startNotificationListener();
 startNotificationScheduler();
 
 // 서버 실행
-server.listen(port, () => {
+app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
 });
 
