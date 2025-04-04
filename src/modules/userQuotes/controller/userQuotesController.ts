@@ -18,12 +18,6 @@ export async function getPendingQuotes(req: Request, res: Response): Promise<Res
   try {
     const userId = req?.user?.userId ?? '';
     const roleId = req?.user?.roleId ?? '';
-    if (!userId || !roleId) {
-      return res.status(400).json({ error: AUTH_MESSAGES.needLogin });
-    }
-    if (req.user?.userId !== userId || req.user?.roleId !== roleId) {
-      return res.status(400).json({ error: AUTH_MESSAGES.needLogin });
-    }
     const pendingQuotes = await quoteService.getPendingQuotes(userId as string, roleId as string);
     return res.status(200).json({ data: pendingQuotes });
   } catch (error) {
