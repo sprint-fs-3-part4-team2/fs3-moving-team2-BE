@@ -146,7 +146,7 @@ export default class QuoteRequestsService {
 
     // 1. moverQuotes에 현재 moverId로 제출한 견적이 없어야 함.
     // 2. targetedQuoteRequests에 해당 moverId 관련 거절(반려) 기록이 없어야 함.
-    whereClause.AND.push = [
+    whereClause.AND.push(
       {
         moverQuotes: {
           none: { moverId },
@@ -161,7 +161,7 @@ export default class QuoteRequestsService {
           },
         },
       },
-    ];
+    );
 
     // 기본 정렬: 이사빠른순 (moveDate 오름차순) / sortByQuery가 요청일빠른순인 경우만 조건 변경
     let orderBy;
@@ -179,7 +179,10 @@ export default class QuoteRequestsService {
       const moverRegionsObjects =
         await this.moverQuotesRepository.getServiceRegionsForMover(moverId);
       const moverRegions: Array<keyof typeof REGION_MAP> = moverRegionsObjects.map((m) => m.region);
-      whereClause.AND = [{ fromRegion: { in: moverRegions } }, { toRegion: { in: moverRegions } }];
+      whereClause.AND.push(
+        { fromRegion: { in: moverRegions } },
+        { toRegion: { in: moverRegions } },
+      );
     }
 
     // isTargetedQuoteQuery가 true이면,
