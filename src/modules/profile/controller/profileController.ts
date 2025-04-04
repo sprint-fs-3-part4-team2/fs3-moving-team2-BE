@@ -98,7 +98,7 @@ export async function postCustomerProfileInfo(req: Request, res: Response) {
     res.status(500).json({ message: '서버 오류' });
   }
 }
-// 고객 프로필 수정 (이름, 이메일, 전화번호, 현재 비밀번호, 새 비밀번호, 새 비밀번호 확인, 이미지, 이용 서비스, 지역)
+// 고객 프로필 수정 (현재 비밀번호, 새 비밀번호, 새 비밀번호 확인, 이미지, 이용 서비스, 지역)
 export async function patchCustomerProfileInfo(req: Request, res: Response) {
   try {
     const userId = req.user?.userId ?? '';
@@ -107,15 +107,8 @@ export async function patchCustomerProfileInfo(req: Request, res: Response) {
       res.status(401).json({ message: '등록된 유저가 아닙니다' });
       return;
     }
-    const {
-      name,
-      email,
-      phoneAddress,
-      passwordNew,
-      profileImage,
-      selectedMoveTypes,
-      selectedRegions,
-    } = req.body;
+    const { passwordCurrent, passwordNew, profileImage, selectedMoveTypes, selectedRegions } =
+      req.body;
     // db에 맞는 타입으로 변환
     const locations = selectedRegions.map((region: string) => regionMap[region]);
     const serviceTypes = selectedMoveTypes.map((type: string) => moveTypeMap[type]);
@@ -123,9 +116,7 @@ export async function patchCustomerProfileInfo(req: Request, res: Response) {
     // 수정
     const patchData = await profileService.patchUserProfile({
       userId,
-      name,
-      email,
-      phoneAddress,
+      passwordCurrent,
       passwordNew,
       profileImage,
       locations,
@@ -133,11 +124,9 @@ export async function patchCustomerProfileInfo(req: Request, res: Response) {
     });
     res.status(200).json({ message: '수정 완료!', data: patchData });
   } catch (err: any) {
-    if (err.message === '이미 사용 중인 전화번호입니다') {
-      res.status(409).json({ message: err.message });
-      return;
-    }
-    console.log('error:', err);
+    res.status(500).json({ message: err.message });
+
+    console.log('프로필 수정 오류:', err);
   }
 }
 // 기사 프로필 등록 (이미지, 별명, 경력, 한 줄 소개, 상세설명, 제공 서비스, 지역)
