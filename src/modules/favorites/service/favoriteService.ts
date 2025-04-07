@@ -5,9 +5,9 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 // 찜한 목록 조회
-export async function getFavorites(customerId: string) {
+export async function getFavorites(userId: string, roleId: string) {
   const customer = await prisma.customer.findUnique({
-    where: { id: customerId },
+    where: { id: roleId },
     include: { user: true },
   });
   if (!customer) {
@@ -15,11 +15,12 @@ export async function getFavorites(customerId: string) {
   }
   const favorites = await prisma.customerFavorite.findMany({
     where: {
-      customerId: customerId,
+      customerId: roleId,
     },
     include: {
       mover: {
         include: {
+          user: true,
           moverServices: true,
         },
       },
