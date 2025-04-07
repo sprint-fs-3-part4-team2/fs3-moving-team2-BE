@@ -23,6 +23,7 @@ export class MoverService {
     // 로그인한 사용자의 좋아요 목록과 견적 확정 목록 가져오기
     let userFavorites: string[] = [];
     let userConfirmedQuotes: string[] = [];
+    let userTargetedQuotes: string[] = [];
 
     if (userId) {
       // User ID로 Customer 정보 조회
@@ -32,7 +33,7 @@ export class MoverService {
       });
 
       if (customer) {
-        const [favorites, confirmedQuotes] = await Promise.all([
+        const [favorites, confirmedQuotes, targetedQuotes] = await Promise.all([
           prisma.customerFavorite.findMany({
             where: { customerId: customer.id },
             select: { moverId: true },
@@ -48,10 +49,19 @@ export class MoverService {
             },
             select: { moverId: true },
           }),
+          prisma.targetedQuoteRequest.findMany({
+            where: {
+              quoteRequest: {
+                customerId: customer.id,
+              },
+            },
+            select: { moverId: true },
+          }),
         ]);
 
         userFavorites = favorites.map((f) => f.moverId);
         userConfirmedQuotes = confirmedQuotes.map((q) => q.moverId);
+        userTargetedQuotes = targetedQuotes.map((t) => t.moverId);
       }
     }
 
@@ -61,6 +71,7 @@ export class MoverService {
       imageUrl: mover.profileImage || '/profile-placeholder.png',
       movingType: mover.moverServices.map((service) => MOVE_TYPE[service.serviceType]),
       isCustomQuote: userConfirmedQuotes.includes(mover.id),
+      isTargetedQuote: userTargetedQuotes.includes(mover.id),
       rating: mover.averageRating ?? 0,
       ratingCount: mover.totalReviews,
       experienceYears: mover.experienceYears,
@@ -79,6 +90,7 @@ export class MoverService {
     // 로그인한 사용자의 좋아요 목록과 견적 확정 목록 가져오기
     let userFavorites: string[] = [];
     let userConfirmedQuotes: string[] = [];
+    let userTargetedQuotes: string[] = [];
 
     if (userId) {
       const customer = await prisma.customer.findUnique({
@@ -87,7 +99,7 @@ export class MoverService {
       });
 
       if (customer) {
-        const [favorites, confirmedQuotes] = await Promise.all([
+        const [favorites, confirmedQuotes, targetedQuotes] = await Promise.all([
           prisma.customerFavorite.findMany({
             where: { customerId: customer.id },
             select: { moverId: true },
@@ -103,10 +115,19 @@ export class MoverService {
             },
             select: { moverId: true },
           }),
+          prisma.targetedQuoteRequest.findMany({
+            where: {
+              quoteRequest: {
+                customerId: customer.id,
+              },
+            },
+            select: { moverId: true },
+          }),
         ]);
 
         userFavorites = favorites.map((f) => f.moverId);
         userConfirmedQuotes = confirmedQuotes.map((q) => q.moverId);
+        userTargetedQuotes = targetedQuotes.map((t) => t.moverId);
       }
     }
 
@@ -116,6 +137,7 @@ export class MoverService {
       imageUrl: mover.profileImage || '/profile-placeholder.png',
       movingType: mover.moverServices.map((service) => MOVE_TYPE[service.serviceType]),
       isCustomQuote: userConfirmedQuotes.includes(mover.id),
+      isTargetedQuote: userTargetedQuotes.includes(mover.id),
       rating: mover.averageRating ?? 0,
       ratingCount: mover.totalReviews,
       experienceYears: mover.experienceYears,
