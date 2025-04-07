@@ -71,9 +71,17 @@ export default class QuoteRequestsRepository {
   }
 
   async getLatestQuoteRequestForCustomer(customerId: string) {
+    const now = new Date();
+
     return await this.prismaClient.quoteRequest.findFirst({
       where: {
         customerId,
+        moveDate: {
+          gt: now,
+        },
+        currentStatus: {
+          in: ['QUOTE_REQUESTED', 'QUOTE_CONFIRMED'],
+        },
       },
       orderBy: {
         createdAt: 'desc',
