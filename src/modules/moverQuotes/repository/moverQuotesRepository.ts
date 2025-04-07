@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 
 export default class QuotesRepository {
   constructor(private prismaClient: PrismaClient) {}
@@ -151,69 +151,47 @@ export default class QuotesRepository {
     });
   }
 
-  // 받은 요청에 대한 기사님 견적 생성
-  async submitQuoteByMover(quoteId: string, moverId: string, price: number, comment: string) {
-    return await this.prismaClient.$transaction(async (tx) => {
-      // 1. 견적 요청(QuoteRequest)와 관련 데이터를 조회
-      const quote = await tx.quoteRequest.findUnique({
-        where: { id: quoteId },
-        include: {
-          quoteStatusHistories: {
-            orderBy: { createdAt: 'desc' },
+  // 견적 요청에 대한 기사님 견적 생성
+  async createMoverQuote(
+    data: { moverId: string; quoteRequestId: string; price: number; comment: string },
+    tx?: Prisma.TransactionClient,
+  ) {
+    const client = tx || this.prismaClient;
+    return await client.moverQuote.create({
+      data,
+    });
+  }
+
+  // 견적 요청에 대한 기사님 견적 조회
+  async getMoverQuoteById(quoteId: string, tx?: Prisma.TransactionClient) {
+    const client = tx || this.prismaClient;
+    return await client.moverQuote.findUnique({
+      where: { id: quoteId },
+      include: {
+        quoteRequest: {
+          include: {
+            quoteStatusHistories: true,
+            quoteRequestAddresses: true,
           },
         },
-      });
-      if (!quote) throw new Error('Quote not found');
-      // (필요하다면 quote.moverId와 moverId 일치 여부 등 추가 검증)
+        mover: true,
+        quoteMatch: true,
+      },
+    });
+  }
 
-      // 1-1. 최근 견적 상태가 QUOTE_REQUESTED 인지 검증
-      if (quote.currentStatus !== 'QUOTE_REQUESTED') {
-        throw new Error('견적 요청 테이블의 현재 상태에서, Quote status is not QUOTE_REQUESTED');
-      }
-      const latestStatus = quote.quoteStatusHistories[0]?.status;
-      if (latestStatus !== 'QUOTE_REQUESTED') {
-        throw new Error('견적 상태 테이블, Quote status is not QUOTE_REQUESTED');
-      }
-
-      // 2. 견적 상태 MOVER_SUBMITTED 생성
-      await tx.quoteRequest.update({
-        where: { id: quoteId },
-        data: {
-          currentStatus: 'MOVER_SUBMITTED',
-          quoteStatusHistories: {
-            create: { status: 'MOVER_SUBMITTED' },
-          },
-        },
-      });
-
-      // 3. 관련된 이사업자 견적(MoverQuote) 업데이트
-      const newMoverQuote = await tx.moverQuote.create({
-        data: {
-          moverId,
-          quoteRequestId: quoteId,
-          price,
-          comment,
-        },
-      });
-
-      // 4. 관련 견적 정보 및 상태 내역 등 전체 정보 재조회
-      const completeQuote = await tx.moverQuote.findUnique({
-        where: { id: newMoverQuote.id },
-        include: {
-          // 견적 요청 정보 및 그에 따른 상태 내역과 주소
-          quoteRequest: {
-            include: {
-              quoteStatusHistories: true,
-              quoteRequestAddresses: true,
-            },
-          },
-          // 이사업자 정보 및 견적 매칭 정보 (필요에 따라 선택)
-          mover: true,
-          quoteMatch: true,
-        },
-      });
-
-      return completeQuote;
+  // 기사님이 특정 견적 요청에 대해 이미 견적을 제출했는지 확인
+  async findFirstMoverQuote(
+    moverId: string,
+    quoteRequestId: string,
+    tx?: Prisma.TransactionClient,
+  ) {
+    const client = tx || this.prismaClient;
+    return await client.moverQuote.findFirst({
+      where: {
+        moverId,
+        quoteRequestId,
+      },
     });
   }
 }

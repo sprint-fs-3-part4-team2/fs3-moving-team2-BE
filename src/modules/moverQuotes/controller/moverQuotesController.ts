@@ -5,23 +5,21 @@ export default class QuotesController {
   constructor(private quoteService: QuotesService) {}
 
   getQuoteByIdForCustomer = async (req: Request, res: Response) => {
-    const userId = req.user?.userId ?? '';
     const quoteId = req.params.quoteId;
-    const quote = await this.quoteService.getQuoteByIdForCustomer(quoteId, userId);
+    const quote = await this.quoteService.getQuoteByIdForCustomer(quoteId);
 
     res.status(200).json(quote);
   };
 
   getQuoteByIdForMover = async (req: Request, res: Response) => {
-    const moverId = req.user?.userId ?? '';
     const quoteId = req.params.quoteId;
-    const quote = await this.quoteService.getQuoteByIdForMover(quoteId, moverId);
+    const quote = await this.quoteService.getQuoteByIdForMover(quoteId);
 
     res.status(200).json(quote);
   };
 
   getQuotesListByMover = async (req: Request, res: Response) => {
-    const moverId = req.user?.userId ?? '';
+    const moverId = req.user?.roleId ?? '';
     const { page, pageSize } = req.query;
     const numberedPage = page !== undefined ? Number(page) : 1;
     const numberedPageSize = pageSize !== undefined ? Number(pageSize) : 4;
@@ -36,7 +34,7 @@ export default class QuotesController {
   };
 
   submitQuoteByMover = async (req: Request, res: Response) => {
-    const moverId = 'cm8p9c6sa005iwsm9fikr4asm';
+    const moverId = req.user?.roleId ?? '';
     const quoteId = req.params.quoteId;
     const price = req.body.price;
     const comment = req.body.comment;

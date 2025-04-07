@@ -31,6 +31,11 @@ export async function getPendingQuotes(userId: string, roleId: string) {
   const pendingQuotes = await prisma.quoteRequest.findFirst({
     where: {
       customerId: roleId,
+      NOT: {
+        quoteStatusHistories: {
+          some: { status: 'MOVE_COMPLETED' },
+        },
+      },
       quoteStatusHistories: {
         some: { status: 'QUOTE_REQUESTED' },
       },
@@ -42,6 +47,18 @@ export async function getPendingQuotes(userId: string, roleId: string) {
         include: {
           mover: {
             include: {
+              user: true,
+              moverServices: true,
+            },
+          },
+        },
+      },
+      targetedQuoteRequests: {
+        include: {
+          moverQuote: true,
+          mover: {
+            include: {
+              user: true,
               moverServices: true,
             },
           },
@@ -53,9 +70,6 @@ export async function getPendingQuotes(userId: string, roleId: string) {
     },
     take: 1,
   });
-  if (!pendingQuotes) {
-    throw new NotFoundException(EXCEPTION_MESSAGES.quoteNotFound);
-  }
   return pendingQuotes;
 }
 

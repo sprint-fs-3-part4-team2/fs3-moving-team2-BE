@@ -18,12 +18,6 @@ export async function getPendingQuotes(req: Request, res: Response): Promise<Res
   try {
     const userId = req?.user?.userId ?? '';
     const roleId = req?.user?.roleId ?? '';
-    if (!userId || !roleId) {
-      return res.status(400).json({ error: AUTH_MESSAGES.needLogin });
-    }
-    if (req.user?.userId !== userId || req.user?.roleId !== roleId) {
-      return res.status(400).json({ error: AUTH_MESSAGES.needLogin });
-    }
     const pendingQuotes = await quoteService.getPendingQuotes(userId as string, roleId as string);
     return res.status(200).json({ data: pendingQuotes });
   } catch (error) {
@@ -37,7 +31,7 @@ export async function confirmQuote(req: Request, res: Response): Promise<Respons
     const customerId = req.user?.roleId ?? '';
     const { moverQuoteId } = req.params;
     if (!moverQuoteId) {
-      return res.status(400).json({ error: 'quoteRequestId와 moverQuoteId가 필요합니다.' });
+      return res.status(400).json({ error: 'moverQuoteId가 필요합니다.' });
     }
     await quoteService.confirmQuote(moverQuoteId, customerId);
     return res.status(200).json({ message: '견적이 확정되었습니다.' });

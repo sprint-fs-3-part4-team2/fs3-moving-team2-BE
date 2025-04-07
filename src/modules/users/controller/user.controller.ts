@@ -1,37 +1,53 @@
 import { Request, Response } from 'express';
 import UserService from '../service/user.service';
 import { EditBaiscInfoBody } from '../types/type';
-import { createNotification } from '@/modules/notification/service/notificationService';
 
 export default class UserController {
   constructor(private userService: UserService) {}
 
-  moverBasicInfoEdit = async (req: Request, res: Response) => {
-    const { currentPassword, newPassword, phoneNumber, name }: EditBaiscInfoBody = req.body;
+  getMoverBasicInfo = async (req: Request, res: Response) => {
+    const userId = req.user?.userId ?? '';
+    const userType = req.user?.type ?? '';
+    if (!userType || !userId) return res.status(200).json(null);
 
-    const user = req.user
-      ? req.user
-      : ({ userId: 'cm8r03ll90000iuux1x0r69ce', roleId: '', type: 'mover' } as Request['user']);
-    // hash 비교 코드 필요
-    const data = await this.userService.mbiEdit(
+    const data = await this.userService.mbiGet(req.user);
+
+    res.status(200).json({ ok: true, data });
+  };
+
+  patchMoverBasicInfo = async (req: Request, res: Response) => {
+    const { current_password, new_password, phoneNumber, name }: EditBaiscInfoBody = req.body;
+
+    const userId = req.user?.userId ?? '';
+    const userType = req.user?.type ?? '';
+    if (!userType || !userId) return res.status(200).json(null);
+
+    const { data, message } = await this.userService.mbiEdit(
       {
-        newPassword,
-        currentPassword,
+        new_password: new_password,
+        current_password: current_password,
         phoneNumber,
         name,
       },
-      user,
+      req.user,
     );
-
-    if (!data.ok) {
-      res.status(204).json({ ok: false });
-      return;
+    if (!data) {
+      return res.status(203).json({ ok: false, message });
     }
 
-    await createNotification({ userId: user!.userId, messageType: 'newReview' });
     res.status(200).json({
       ok: true,
+      message,
       data,
     });
+  };
+
+  getMe = async (req: Request, res: Response) => {
+    const userId = req.user?.userId ?? '';
+    const userType = req.user?.type ?? '';
+    if (!userType || !userId) return res.status(200).json(null);
+    const userData = await this.userService.getMe(userId, userType);
+
+    return res.status(200).json(userData);
   };
 }

@@ -1,11 +1,12 @@
 import { PrismaClient } from '@prisma/client';
+import { createNotification } from '@/modules/notification/service/notificationService';
 
 const prisma = new PrismaClient();
 
 export async function getPendingReviews(userId: string) {
   const quoteMatchesWithoutReview = await prisma.quoteMatch.findMany({
     where: {
-      isCompleted: false,
+      isCompleted: true,
       review: null,
       moverQuote: {
         quoteRequest: {
@@ -56,6 +57,7 @@ export async function createReview(reviewData: {
           quoteRequest: {
             include: { customer: true },
           },
+          mover: { include: { user: true } },
         },
       },
     },
@@ -71,5 +73,13 @@ export async function createReview(reviewData: {
       content: comment,
     },
   });
+
+  const moverUserId = quoteMatch.moverQuote.mover.user.id;
+  await createNotification({
+    userId: moverUserId,
+    messageType: 'newReview',
+    url: `/mover/profile`,
+  });
+
   return review;
 }
