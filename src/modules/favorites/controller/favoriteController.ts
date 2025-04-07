@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import * as favoriteService from '../service/favoriteService';
-import { AUTH_MESSAGES } from '@/constants/authMessages';
 import { HttpException, NotFoundException } from '@/core/errors';
 
 // 오류 처리 함수
@@ -17,10 +16,7 @@ export async function getFavorites(req: Request, res: Response): Promise<Respons
   try {
     const userId = req?.user?.userId ?? '';
     const roleId = req?.user?.roleId ?? '';
-    if (!userId || !roleId) {
-      return res.status(400).json({ error: AUTH_MESSAGES.needLogin });
-    }
-    const favorites = await favoriteService.getFavorites(roleId);
+    const favorites = await favoriteService.getFavorites(userId as string, roleId as string);
     return res.status(200).json({ data: favorites });
   } catch (error) {
     return handleError(error, res);
