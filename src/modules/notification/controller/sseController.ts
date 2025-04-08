@@ -70,10 +70,7 @@ export const handleSSEConnection = (req: any, res: Response) => {
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
-  res.setHeader(
-    'Access-Control-Allow-Origin',
-    process.env.NODE_ENV === 'production' ? process.env.DEPLOYED_URL! : process.env.LOCALHOST_URL!,
-  ); // 이거 2줄 추가함 테스트 필요
+  res.setHeader('Access-Control-Allow-Origin', process.env.DEPLOYED_URL!); // 이거 2줄 추가함 테스트 필요
   res.setHeader('Access-Control-Allow-Credentials', 'true');
 
   // userId별로 SSE 연결 저장
