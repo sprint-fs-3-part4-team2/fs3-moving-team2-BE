@@ -16,6 +16,7 @@ import {
   createTargetedQuoteReject,
   createTargetedQuoteRequest,
   createUser,
+  updateFavorite,
 } from './service/create';
 
 async function main() {
@@ -39,6 +40,7 @@ async function main() {
     await createTargetedQuoteRequest();
     await createTargetedQuoteReject();
     await createReview();
+    await updateFavorite();
   } catch (err) {
     console.error(`seed 실패 : ${err}`);
   } finally {

@@ -74,6 +74,9 @@ export default class QuoteRequestsRepository {
     return await this.prismaClient.quoteRequest.findFirst({
       where: {
         customerId,
+        currentStatus: {
+          in: ['QUOTE_REQUESTED', 'MOVER_SUBMITTED'],
+        },
       },
       orderBy: {
         createdAt: 'desc',
