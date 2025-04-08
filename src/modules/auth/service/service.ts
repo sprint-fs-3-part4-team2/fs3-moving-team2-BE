@@ -32,7 +32,7 @@ export default class AuthService {
     const userEntity = await this.userRepository.findByEmail(email);
     if (!userEntity) throw new NotFoundException(AUTH_MESSAGES.emailNotExist);
     if (userEntity.userType !== uppercaseType)
-      throw new ConflictException(AUTH_MESSAGES.invalidRole);
+      throw new ConflictException(AUTH_MESSAGES.invalidRole[type]);
 
     const isPasswordValid = await bcrypt.compare(password, userEntity?.password);
     if (!isPasswordValid) throw new UnauthorizedException(AUTH_MESSAGES.invalidPassword);
@@ -61,8 +61,8 @@ export default class AuthService {
   async signUp(signUpDto: SignUpRequest, type: LowercaseUserType) {
     const uppercaseType = type.toUpperCase() as UserType;
     const existingUserByEmail = await this.userRepository.findByEmail(signUpDto.email);
-    if (existingUserByEmail?.userType === uppercaseType) {
-      throw new ConflictException(AUTH_MESSAGES.invalidRole);
+    if (existingUserByEmail && existingUserByEmail?.userType !== uppercaseType) {
+      throw new ConflictException(AUTH_MESSAGES.invalidRole[type]);
     }
     if (existingUserByEmail) throw new ConflictException(EXCEPTION_MESSAGES.duplicatedEmail);
     const existingUserByPhoneNumber = await this.userRepository.findByPhoneNumber(
