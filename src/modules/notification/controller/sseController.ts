@@ -70,8 +70,8 @@ export const handleSSEConnection = (req: Request, res: Response) => {
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
-  res.setHeader('Access-Control-Allow-Origin', process.env.DEPLOYED_URL!); // 이거 2줄 추가함 테스트 필요
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  // res.setHeader('Access-Control-Allow-Origin', process.env.DEPLOYED_URL!); // 이거 2줄 추가함 테스트 필요
+  // res.setHeader('Access-Control-Allow-Credentials', 'true');
 
   // userId별로 SSE 연결 저장
   if (!clients.has(userId)) {
