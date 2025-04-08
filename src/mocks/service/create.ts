@@ -14,16 +14,18 @@ import { customerFind, find, moverFind, userCustomerFind, userMoverFind } from '
 import { random } from '../lib/lib';
 // mock data
 import userMock from '../data/common/user.json';
+import userIdMock from '../data/common/userCuid.json';
 import moverMock from '../data/mover/mover.json';
+import moverIdMock from '../data/mover/moverCuid.json';
+import customerIdMock from '../data/customer/customerCuid.json';
 import notiMock from '../data/common/notification.json';
-import quotesRequestMock from '../data/quote/quoteRequest.json';
-import moverQuoteMock from '../data/quote/moverQuote.json';
+import quotesRequestMock from '../data/quote/quoteRequests/quoteRequest.json';
+import quotesRequestByOthersMock from '../data/quote/quoteRequests/quoteRequestByOtherCustomers.json';
+import moverQuoteMock from '../data/quote/moverQuotes/moverQuoteForQuoteRequest.json';
 import quoteRequestAddressMock from '../data/quote/quoteRequestAddress.json';
 import quoteStatusHistoryMock from '../data/quote/quoteStatusHistory.json';
-import targetedQuoteRejectionMock from '../data/quote/targetedQuoteRejection.json';
 import reviewMock from '../data/Review.json';
 import { errorMsg, passMsg, startMsg } from '../lib/msg';
-import { update } from './update';
 import bcrypt from 'bcrypt';
 
 const prismaClient = new PrismaClient();
@@ -75,12 +77,14 @@ const createUser = async () => {
   startMsg('user create');
   try {
     const saltRounds = 10;
-    const password = 'qwer1234!';
+    const password = 'qwerasdf1234!';
     const hashedPassword = await bcrypt.hash(password, saltRounds);
     await create(
       'user',
       userMock.map((user, i: number): Prisma.UserCreateInput => {
         return {
+          id: userIdMock[i],
+          // userType: user.user_type as UserType,
           userType: i % 5 !== 0 ? 'CUSTOMER' : 'MOVER',
           email: user.email,
           name: user.name,
@@ -102,10 +106,11 @@ const createCustomer = async () => {
     const customer = await userCustomerFind();
     await create(
       'customer',
-      customer.map((user): Prisma.CustomerCreateManyInput => {
+      customer.map((user, i): Prisma.CustomerCreateManyInput => {
         const { id } = user;
         const imgPath = `/img/sample-profile/sample-${random(Array.from({ length: 5 })) + 1}.svg`;
         return {
+          id: customerIdMock[i],
           userId: id,
           profileImage: imgPath,
           location: enArea[random(enArea)] as Region,
@@ -123,19 +128,19 @@ const createMover = async () => {
     const mover = await userMoverFind();
     await create(
       'mover',
-      mover.map((user): Prisma.MoverCreateManyInput => {
-        const randomMover = random(moverMock);
+      mover.map((user, i): Prisma.MoverCreateManyInput => {
         const { id } = user;
-        const { experience_years, introduction, description } = moverMock[randomMover];
         const imgPath = `/img/sample-profile/sample-${random(Array.from({ length: 5 })) + 1}.svg`;
         return {
+          id: moverIdMock[i],
           userId: id,
           profileImage: imgPath,
-          experienceYears: experience_years || 0,
-          introduction: introduction || '',
-          description: description || '',
-          averageRating: 0,
-          totalReviews: 0,
+          experienceYears: moverMock[i].experience_years || 0,
+          introduction: moverMock[i].introduction || '',
+          description: moverMock[i].description || '',
+          averageRating: moverMock[i].average_rating,
+          totalConfirmedCount: moverMock[i].total_confirmed_count,
+          totalReviews: moverMock[i].total_reviews,
         };
       }),
     );
@@ -220,27 +225,28 @@ const createCustomerFavorite = async () => {
 
 const createQuoteRequest = async () => {
   startMsg('quoteRequest create');
+  const customer = await customerFind({}, leanTime);
+
   try {
-    const customer = await customerFind({}, leanTime);
-    await create(
-      'quoteRequest',
-      customer.map((val): Prisma.QuoteRequestCreateManyInput => {
-        const qrmIndex = random(quotesRequestMock);
-        const { moveDate } = quotesRequestMock[qrmIndex];
-        const { id, location } = val;
-        const region = Object.values(Region).filter((x) => x !== location);
-        const regionIndex = random(region);
-        const serviceType = Object.values(ServiceType);
-        const serviceTypeIndex = random(serviceType);
-        return {
-          customerId: id,
-          moveType: serviceType[serviceTypeIndex],
-          fromRegion: location,
-          toRegion: region[regionIndex],
-          moveDate: moveDate,
-        };
-      }),
-    );
+    await create('quoteRequest', [
+      ...quotesRequestMock.map((val) => ({
+        id: val.id,
+        customerId: val.customerId,
+        moveType: val.moveType,
+        moveDate: val.moveDate,
+        fromRegion: val.fromRegion,
+        toRegion: val.toRegion,
+        currentStatus: val.currentStatus,
+      })),
+      ...quotesRequestByOthersMock.map((val, i) => ({
+        customerId: customer[i + 1].id, // 첫번째 고객은 제외(테스트용 고객)
+        moveType: val.moveType,
+        moveDate: val.moveDate,
+        fromRegion: val.fromRegion,
+        toRegion: val.toRegion,
+        currentStatus: val.currentStatus,
+      })),
+    ]);
   } catch (err) {
     errorMsg(`quoteRequest mock 데이터 생성`, err);
   }
@@ -251,25 +257,40 @@ const createMoverQuote = async () => {
   try {
     const mover = await moverFind({}, leanTime);
     const quoteRequest: QuoteRequest[] = await find('quoteRequest', {});
+    const quoteRequestByOthers = await find('quoteRequest', {
+      where: {
+        customerId: {
+          not: 'cm9556wel00643n6ve7tt98jq',
+        },
+      },
+    });
     quoteRequest.forEach(async (v) => {
-      const { id: quoteRequestId } = v;
-      const requestMoverLength = random(mover);
       await create(
         'moverQuote',
-        Array.from({ length: requestMoverLength }).map((_, i): Prisma.MoverQuoteCreateManyInput => {
-          const mqmIndex = random(moverQuoteMock);
-          const { price } = moverQuoteMock[mqmIndex];
-          const { id: moverId } = mover[i];
-
-          return {
-            quoteRequestId,
-            moverId,
-            price,
-          };
-        }),
+        [
+          ...moverQuoteMock.map((moverQuote, i2) => {
+            return {
+              quoteRequestId: v.id,
+              moverId: mover[i2 + 1].id, // 테스트 기사님을 제외하기 위해 +1
+              price: moverQuote.price,
+              comment: moverQuote.comment,
+            };
+          }),
+        ],
         true,
       );
     });
+    await create(
+      'moverQuote',
+      quoteRequestByOthers.map((quoteRequest, i) => {
+        return {
+          quoteRequestId: quoteRequest.id,
+          moverId: i % 2 === 0 ? mover[0].id : mover[1].id,
+          price: 1500000,
+          comment: '안전하고 신속하게 이사하겠습니다.',
+        };
+      }),
+    );
     passMsg(`moverQuote 테이블 데이터 생성`);
   } catch (err) {
     errorMsg(`moverQuote mock 데이터 생성`, err);
@@ -280,6 +301,11 @@ const createQuoteMatch = async () => {
   startMsg('quoteMatch create');
   try {
     const quoteRequest: QuoteRequest[] = await find('quoteRequest', {});
+    const moverQuote = await find('moverQuote', {
+      where: {
+        moverId: 'cm9557rj700643n6voktl9apa',
+      },
+    });
 
     const target = (
       await Promise.all(
@@ -298,18 +324,21 @@ const createQuoteMatch = async () => {
           return moverQuote[ranIndex];
         }),
       )
-    ).filter(Boolean);
+    )
+      .filter(Boolean)
+      .filter((quote) => quote.moverId !== 'cm9557rj700643n6voktl9apa');
 
     await create(
       'quoteMatch',
-      await Promise.all(
-        target.map(async (val, i): Promise<Prisma.QuoteMatchCreateManyInput> => {
+      await Promise.all([
+        ...target.map(async (val): Promise<Prisma.QuoteMatchCreateManyInput> => {
           return {
             moverQuoteId: val.id,
-            isCompleted: i % 2 === 0 ? true : false,
+            isCompleted: true,
           };
         }),
-      ),
+        ...moverQuote.map((quote) => ({ moverQuoteId: quote.id, isCompleted: true })),
+      ]),
     );
   } catch (err) {
     errorMsg(`quoteMatch mock 데이터 생성`, err);
@@ -427,35 +456,22 @@ const createQuoteStatusHistory = async () => {
   startMsg('quoteStatusHistory create');
   try {
     const quoteRequest: QuoteRequest[] = await find('quoteRequest', {});
-
-    quoteRequest.forEach(async (v) => {
-      const index = random(quoteStatusHistoryMock);
-      const { status } = quoteStatusHistoryMock[index];
-      const { id: quoteRequestId } = v;
-      await prismaClient.quoteStatusHistory.create({
-        data: {
-          quoteRequestId,
-          status,
+    const elseQuoteRequest = await find('quoteRequest', {
+      where: {
+        customerId: {
+          not: 'cm9556wel00643n6ve7tt98jq',
         },
-      });
-      await prismaClient.quoteRequest.update({
-        where: { id: quoteRequestId },
-        data: { currentStatus: status },
-      });
+      },
     });
+
     passMsg('quoteStatusHistory 테이블 데이터 생성', `Length ${quoteRequest.length}`);
-    // await create(
-    //   'quoteStatusHistory',
-    //   quoteRequest.map(async (val): Promise<Prisma.QuoteStatusHistoryCreateManyInput> => {
-    //     const index = random(quoteStatusHistoryMock);
-    //     const { status } = quoteStatusHistoryMock[index];
-    //     const { id: quoteRequestId } = val;
-    //     return {
-    //       quoteRequestId,
-    //       status,
-    //     };
-    //   }),
-    // );
+    await create('quoteStatusHistory', [
+      ...quoteStatusHistoryMock,
+      ...elseQuoteRequest.map((val) => ({
+        quoteRequestId: val.id,
+        status: 'QUOTE_REQUESTED',
+      })),
+    ]);
   } catch (err) {
     errorMsg(`QuoteStatusHistory mock 데이터 생성`, err);
   }
@@ -466,6 +482,8 @@ const createTargetedQuoteRequest = async () => {
   try {
     const quoteRequest = await prismaClient.quoteRequest.findMany({
       where: {
+        customerId: 'cm9556wel00643n6ve7tt98jq',
+        currentStatus: 'QUOTE_REQUESTED',
         moverQuotes: {
           some: {},
         },
@@ -478,59 +496,115 @@ const createTargetedQuoteRequest = async () => {
         },
       },
     });
-    passMsg(`quoteRequest 테이블 조회`, `${quoteRequest.length}`);
-    await create(
-      'targetedQuoteRequest',
-      Array.from({ length: quoteRequest.length / 2 }).map(
-        (_, i: number): Prisma.TargetedQuoteRequestCreateManyInput => {
-          const { id: quoteRequestId, moverQuotes } = quoteRequest[i];
-          const { moverId } = moverQuotes[0];
-          return {
-            moverId,
-            quoteRequestId,
-          };
+    const quoteRequestByOthers = await prismaClient.quoteRequest.findMany({
+      where: {
+        customerId: {
+          not: 'cm9556wel00643n6ve7tt98jq',
         },
-      ),
-    );
+        currentStatus: 'QUOTE_REQUESTED',
+        moverQuotes: {
+          some: {},
+        },
+      },
+      include: {
+        moverQuotes: {
+          select: {
+            moverId: true,
+          },
+        },
+      },
+    });
+
+    passMsg(`quoteRequest 테이블 조회`, `${quoteRequest.length}`);
+    await create('targetedQuoteRequest', [
+      ...quoteRequest
+        .map((request) => ({
+          quoteRequestId: request.id,
+          moverId: moverIdMock[0],
+        }))
+        .flat(),
+      ...quoteRequestByOthers
+        .map((request, i1) => {
+          if (i1 % 3 !== 0) return;
+          return Array.from({ length: 3 }).map((_, i2) => ({
+            quoteRequestId: request.id,
+            moverId: moverIdMock[i2],
+          }));
+        })
+        .flat()
+        .filter(Boolean),
+    ]);
+    // Array.from({ length: quoteRequest.length / 2 }).map(
+    //   (_, i: number): Prisma.TargetedQuoteRequestCreateManyInput => {
+    //     const { id: quoteRequestId, moverQuotes } = quoteRequest[i];
+    //     const { moverId } = moverQuotes[0];
+    //     return {
+    //       moverId,
+    //       quoteRequestId,
+    //     };
+    //   },
+    // ),
   } catch (err) {
     errorMsg(`targetedQuoteRequest mock 데이터 생성`, err);
-  } finally {
-    try {
-      const tqr: TargetedQuoteRequest[] = await find('targetedQuoteRequest', {});
-      await Promise.all(
-        tqr.map(async (v) => {
-          const { quoteRequestId, id, moverId } = v;
-          const args: Prisma.MoverQuoteUpdateManyArgs = {
-            where: { quoteRequestId, moverId },
-            data: { targetedQuoteRequestId: id },
-          };
-          await update('moverQuote', args);
-        }),
-      );
-      passMsg('moverQuote 업데이트', `Length ${tqr.length}`);
-    } catch (error) {
-      errorMsg('moverQuote update ', error);
-    }
   }
+  // finally {
+  //   try {
+  //     const tqr: TargetedQuoteRequest[] = await find('targetedQuoteRequest', {});
+  //     await Promise.all(
+  //       tqr.map(async (v) => {
+  //         const { quoteRequestId, id, moverId } = v;
+  //         const args: Prisma.MoverQuoteUpdateManyArgs = {
+  //           where: { quoteRequestId, moverId },
+  //           data: { targetedQuoteRequestId: id },
+  //         };
+  //         await update('moverQuote', args);
+  //       }),
+  //     );
+  //     passMsg('moverQuote 업데이트', `Length ${tqr.length}`);
+  //   } catch (error) {
+  //     errorMsg('moverQuote update ', error);
+  //   }
+  // }
 };
 
 const createTargetedQuoteReject = async () => {
   startMsg('targetQuoteReject create');
   try {
-    const tqr: TargetedQuoteRequest[] = await find('targetedQuoteRequest', {});
+    const tqr: TargetedQuoteRequest[] = await find('targetedQuoteRequest', {
+      where: {
+        moverId: 'cm9557rj700643n6voktl9apa',
+      },
+    });
+    const otherTargetedQuoteRequests = await find('targetedQuoteRequest', {
+      where: {
+        moverId: {
+          not: 'cm9557rj700643n6voktl9apa',
+        },
+      },
+    });
     await create(
       'targetedQuoteRejection',
-      Array.from({ length: tqr.length / 2 }).map(
-        (_, i): Prisma.TargetedQuoteRejectionCreateManyInput => {
-          const ranIndex = random(targetedQuoteRejectionMock);
-          const { rejectionReason } = targetedQuoteRejectionMock[ranIndex];
-          const { id: targetedQuoteRequestId } = tqr[i];
-          return {
-            targetedQuoteRequestId,
-            rejectionReason,
-          };
-        },
-      ),
+      [
+        ...tqr.slice(0, 5).map((quoteRequest) => ({
+          targetedQuoteRequestId: quoteRequest.id,
+          rejectionReason: '거리가 너무 멀어서 어려울 것 같습니다',
+        })),
+        ...otherTargetedQuoteRequests.map((quoteRequest) => ({
+          targetedQuoteRequestId: quoteRequest.id,
+          rejectionReason: '그날 다른 일정이 있습니다.',
+        })),
+      ],
+      // Array.from({ length: tqr.length / 2 }).map(
+      //   (_, i): Prisma.TargetedQuoteRejectionCreateManyInput => {
+      //     const ranIndex = random(targetedQuoteRejectionMock);
+      //     const { rejectionReason } = targetedQuoteRejectionMock[ranIndex];
+      //     const { id: targetedQuoteRequestId } = tqr[i];
+      //     return {
+      //       targetedQuoteRequestId,
+      //       rejectionReason,
+      //     };
+      //   },
+      // ),
     );
   } catch (err) {
     errorMsg(`targetedQuoteRejection mock 데이터 생성`, err);
@@ -543,11 +617,14 @@ const createReview = async () => {
     const quoteMatch: QuoteMatch[] = await find('quoteMatch', {
       where: {
         isCompleted: true,
+        moverQuote: {
+          moverId: 'cm9557rj700643n6voktl9apa',
+        },
       } as Prisma.QuoteMatchWhereInput,
     });
     await create(
       'review',
-      quoteMatch.map((val): Prisma.ReviewCreateManyInput => {
+      quoteMatch.map((val) => {
         const { id: quoteMatchId } = val;
         const ranIndex = random(reviewMock);
         const { rating, content } = reviewMock[ranIndex];
@@ -589,7 +666,8 @@ const createReview = async () => {
 
     mover
       .filter((x) => x.moverQuotes.some((mq) => mq.quoteMatch))
-      .forEach(async (v) => {
+      .forEach(async (v, i) => {
+        console.log(v.customerFavorites.length);
         const { moverQuotes, id, customerFavorites } = v;
         const rating =
           Math.floor(
@@ -622,6 +700,26 @@ const createReview = async () => {
   }
 };
 
+const updateFavorite = async () => {
+  const movers = await find('mover', {
+    include: {
+      customerFavorites: true,
+    },
+  });
+  // 각 기사별로 customerFavorites 배열 길이에 따라 totalCustomerFavorite 업데이트
+  const updatePromises = movers.map((mover) => {
+    return prismaClient.mover.update({
+      where: { id: mover.id },
+      data: {
+        totalCustomerFavorite: mover.customerFavorites.length,
+      },
+    });
+  });
+  const updatedMovers = await prismaClient.$transaction(updatePromises);
+
+  return updatedMovers;
+};
+
 export {
   createUser,
   createCustomer,
@@ -640,5 +738,6 @@ export {
   createTargetedQuoteReject,
   createReview,
   justCreate,
+  updateFavorite,
 };
 export default create;
