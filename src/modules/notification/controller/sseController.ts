@@ -1,4 +1,4 @@
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { Pool } from 'pg';
 
 const clients = new Map<string, Response[]>(); // userId별 SSE 연결 저장
@@ -59,7 +59,7 @@ export const startNotificationListener = async () => {
 };
 
 // SSE 연결 엔드포인트
-export const handleSSEConnection = (req: any, res: Response) => {
+export const handleSSEConnection = (req: Request, res: Response) => {
   const userId = req.user?.userId;
   console.log('userId', userId);
   if (!userId) {
