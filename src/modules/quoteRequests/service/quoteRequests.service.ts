@@ -68,7 +68,21 @@ export default class QuoteRequestsService {
 
     console.log('quoteRequestData', quoteRequest);
 
-    return { message: '견적 요청이 성공적으로 생성되었습니다.' };
+    return {
+      isRequested: true,
+      quote: {
+        id: quoteRequest.id,
+        moveDate: quoteRequest.moveDate,
+        // 내부에 저장된 enum값(예: "HOME_MOVE")을 한글로 변환
+        moveType: MOVE_TYPE_KOREAN[quoteRequest.moveType],
+        requestedDate: quoteRequest.createdAt,
+        status: quoteRequest.currentStatus,
+        arrival: quoteRequest.quoteRequestAddresses.find((address) => address.type === 'ARRIVAL'),
+        departure: quoteRequest.quoteRequestAddresses.find(
+          (address) => address.type === 'DEPARTURE',
+        ),
+      },
+    };
   }
 
   async getLatestQuoteRequestForCustomer(customerId: string) {
