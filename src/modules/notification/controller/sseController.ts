@@ -11,15 +11,15 @@ const pool = new Pool({
   connectionTimeoutMillis: 5000, // 5초 안에 연결되지 않으면 에러
 });
 // 주기적으로 DB 연결 유지 (매 10초마다)
-setInterval(async () => {
-  try {
-    const client = await pool.connect();
-    await client.query('SELECT 1'); // 연결 유지
-    client.release();
-  } catch (err) {
-    console.error('PostgreSQL Keep-Alive 실패:', err);
-  }
-}, 10000); // 10초마다 실행
+// setInterval(async () => {
+//   try {
+//     const client = await pool.connect();
+//     await client.query('SELECT 1'); // 연결 유지
+//     client.release();
+//   } catch (err) {
+//     console.error('PostgreSQL Keep-Alive 실패:', err);
+//   }
+// }, 10000); // 10초마다 실행
 
 // PostgreSQL LISTEN 이벤트 수신
 export const startNotificationListener = async () => {
@@ -60,7 +60,7 @@ export const startNotificationListener = async () => {
 
 // SSE 연결 엔드포인트
 export const handleSSEConnection = (req: any, res: Response) => {
-  const userId = req.user?.userId || 'cm8r03ll90000iuux1x0r69ce';
+  const userId = req.user?.userId;
   console.log('userId', userId);
   if (!userId) {
     res.status(400).send('userId가 필요합니다.');
@@ -70,7 +70,10 @@ export const handleSSEConnection = (req: any, res: Response) => {
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
-  res.setHeader('Access-Control-Allow-Origin', 'https://moving-app.site'); // 이거 2줄 추가함 테스트 필요
+  res.setHeader(
+    'Access-Control-Allow-Origin',
+    process.env.NODE_ENV === 'production' ? process.env.DEPLOYED_URL! : process.env.LOCALHOST_URL!,
+  ); // 이거 2줄 추가함 테스트 필요
   res.setHeader('Access-Control-Allow-Credentials', 'true');
 
   // userId별로 SSE 연결 저장
