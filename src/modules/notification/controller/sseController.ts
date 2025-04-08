@@ -30,15 +30,21 @@ export const startNotificationListener = async () => {
     client.query('LISTEN new_notification');
 
     client.on('notification', (msg) => {
+      // console.log('🧨 pg_notify 수신:', msg);
+
       if (msg.channel === 'new_notification') {
         const payload = JSON.parse(msg.payload!);
         const userId = payload.userId;
+
+        // console.log(`📨 사용자 ${userId}에게 알림 전달 시도`, payload);
+        // console.log('현재 연결된 clients:', [...clients.keys()]);
 
         // 해당 userId의 클라이언트들에게만 알림 전송
         if (clients.has(userId)) {
           clients.get(userId)?.forEach((res) => {
             res.write(`data: ${JSON.stringify(payload)}\n\n`);
           });
+          // console.log(`✅ ${userId}에게 알림 전송됨`);
         }
       }
     });
@@ -55,7 +61,7 @@ export const startNotificationListener = async () => {
 // SSE 연결 엔드포인트
 export const handleSSEConnection = (req: any, res: Response) => {
   const userId = req.user?.userId || 'cm8r03ll90000iuux1x0r69ce';
-
+  console.log('userId', userId);
   if (!userId) {
     res.status(400).send('userId가 필요합니다.');
     return;
@@ -64,6 +70,8 @@ export const handleSSEConnection = (req: any, res: Response) => {
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
+  res.setHeader('Access-Control-Allow-Origin', 'https://moving-app.site'); // 이거 2줄 추가함 테스트 필요
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
 
   // userId별로 SSE 연결 저장
   if (!clients.has(userId)) {
