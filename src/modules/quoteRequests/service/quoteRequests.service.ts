@@ -74,7 +74,6 @@ export default class QuoteRequestsService {
   async getLatestQuoteRequestForCustomer(customerId: string) {
     // 최근 고객의 견적 요청을 조회
     const quote = await this.quoteRequestRepository.getLatestQuoteRequestForCustomer(customerId);
-
     if (!quote) {
       return { isRequested: false };
     }
@@ -88,6 +87,7 @@ export default class QuoteRequestsService {
         // 내부에 저장된 enum값(예: "HOME_MOVE")을 한글로 변환
         moveType: MOVE_TYPE_KOREAN[quote.moveType],
         requestedDate: quote.createdAt,
+        status: quote.currentStatus,
         arrival: quote.quoteRequestAddresses.find((address) => address.type === 'ARRIVAL'),
         departure: quote.quoteRequestAddresses.find((address) => address.type === 'DEPARTURE'),
       },

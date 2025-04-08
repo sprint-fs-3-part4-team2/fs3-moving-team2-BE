@@ -80,7 +80,7 @@ export default class QuoteRequestsRepository {
           gt: now,
         },
         currentStatus: {
-          in: ['QUOTE_REQUESTED', 'QUOTE_CONFIRMED'],
+          in: ['QUOTE_REQUESTED', 'QUOTE_CONFIRMED', 'MOVE_COMPLETED'],
         },
       },
       orderBy: {

@@ -49,6 +49,7 @@ export default class QuotesRepository {
         quoteRequest: {
           select: {
             customerId: true,
+            currentStatus: true,
             moveType: true,
             moveDate: true,
             createdAt: true,
