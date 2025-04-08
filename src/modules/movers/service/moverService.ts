@@ -2,6 +2,7 @@ import { MOVE_TYPE } from '@/constants/serviceType';
 import { MoverRepository } from '../repository/moverRepository';
 import { PrismaClient } from '@prisma/client';
 import { regionMap } from '@/constants/serviceType';
+import { QuoteStatus } from '@/types/quoteStatus.types';
 
 export const moverRepository = new MoverRepository();
 const prisma = new PrismaClient();
@@ -23,6 +24,8 @@ export class MoverService {
     // 로그인한 사용자의 좋아요 목록과 견적 확정 목록 가져오기
     let userFavorites: string[] = [];
     let userConfirmedQuotes: string[] = [];
+    let userTargetedQuotes: string[] = [];
+    let userPendingQuotes: string[] = [];
 
     if (userId) {
       // User ID로 Customer 정보 조회
@@ -32,7 +35,7 @@ export class MoverService {
       });
 
       if (customer) {
-        const [favorites, confirmedQuotes] = await Promise.all([
+        const [favorites, confirmedQuotes, targetedQuotes, pendingQuotes] = await Promise.all([
           prisma.customerFavorite.findMany({
             where: { customerId: customer.id },
             select: { moverId: true },
@@ -48,10 +51,29 @@ export class MoverService {
             },
             select: { moverId: true },
           }),
+          prisma.targetedQuoteRequest.findMany({
+            where: {
+              quoteRequest: {
+                customerId: customer.id,
+              },
+            },
+            select: { moverId: true },
+          }),
+          prisma.moverQuote.findMany({
+            where: {
+              quoteRequest: {
+                customerId: customer.id,
+              },
+              quoteMatch: null,
+            },
+            select: { moverId: true },
+          }),
         ]);
 
         userFavorites = favorites.map((f) => f.moverId);
         userConfirmedQuotes = confirmedQuotes.map((q) => q.moverId);
+        userTargetedQuotes = targetedQuotes.map((t) => t.moverId);
+        userPendingQuotes = pendingQuotes.map((p) => p.moverId);
       }
     }
 
@@ -60,7 +82,12 @@ export class MoverService {
       moverName: mover.user.name,
       imageUrl: mover.profileImage || '/profile-placeholder.png',
       movingType: mover.moverServices.map((service) => MOVE_TYPE[service.serviceType]),
-      isCustomQuote: userConfirmedQuotes.includes(mover.id),
+      isCustomQuote: userTargetedQuotes.includes(mover.id),
+      quoteState: userConfirmedQuotes.includes(mover.id)
+        ? 'confirmedQuote'
+        : userPendingQuotes.includes(mover.id)
+          ? 'pendingQuote'
+          : undefined,
       rating: mover.averageRating ?? 0,
       ratingCount: mover.totalReviews,
       experienceYears: mover.experienceYears,
@@ -79,6 +106,8 @@ export class MoverService {
     // 로그인한 사용자의 좋아요 목록과 견적 확정 목록 가져오기
     let userFavorites: string[] = [];
     let userConfirmedQuotes: string[] = [];
+    let userTargetedQuotes: string[] = [];
+    let userPendingQuotes: string[] = [];
 
     if (userId) {
       const customer = await prisma.customer.findUnique({
@@ -87,7 +116,7 @@ export class MoverService {
       });
 
       if (customer) {
-        const [favorites, confirmedQuotes] = await Promise.all([
+        const [favorites, confirmedQuotes, targetedQuotes, pendingQuotes] = await Promise.all([
           prisma.customerFavorite.findMany({
             where: { customerId: customer.id },
             select: { moverId: true },
@@ -103,10 +132,29 @@ export class MoverService {
             },
             select: { moverId: true },
           }),
+          prisma.targetedQuoteRequest.findMany({
+            where: {
+              quoteRequest: {
+                customerId: customer.id,
+              },
+            },
+            select: { moverId: true },
+          }),
+          prisma.moverQuote.findMany({
+            where: {
+              quoteRequest: {
+                customerId: customer.id,
+              },
+              quoteMatch: null,
+            },
+            select: { moverId: true },
+          }),
         ]);
 
         userFavorites = favorites.map((f) => f.moverId);
         userConfirmedQuotes = confirmedQuotes.map((q) => q.moverId);
+        userTargetedQuotes = targetedQuotes.map((t) => t.moverId);
+        userPendingQuotes = pendingQuotes.map((p) => p.moverId);
       }
     }
 
@@ -115,7 +163,12 @@ export class MoverService {
       moverName: mover.user.name,
       imageUrl: mover.profileImage || '/profile-placeholder.png',
       movingType: mover.moverServices.map((service) => MOVE_TYPE[service.serviceType]),
-      isCustomQuote: userConfirmedQuotes.includes(mover.id),
+      isCustomQuote: userTargetedQuotes.includes(mover.id),
+      quoteState: userConfirmedQuotes.includes(mover.id)
+        ? 'confirmedQuote'
+        : userPendingQuotes.includes(mover.id)
+          ? 'pendingQuote'
+          : undefined,
       rating: mover.averageRating ?? 0,
       ratingCount: mover.totalReviews,
       experienceYears: mover.experienceYears,
