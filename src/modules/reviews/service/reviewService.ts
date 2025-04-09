@@ -49,37 +49,64 @@ export async function createReview(reviewData: {
 }) {
   const { userId, estimateId, rating, comment } = reviewData;
 
-  const quoteMatch = await prisma.quoteMatch.findUnique({
-    where: { id: estimateId },
-    include: {
-      moverQuote: {
-        include: {
-          quoteRequest: {
-            include: { customer: true },
+  const result = await prisma.$transaction(async (tx) => {
+    const quoteMatch = await tx.quoteMatch.findUnique({
+      where: { id: estimateId },
+      include: {
+        moverQuote: {
+          include: {
+            quoteRequest: { include: { customer: true } },
+            mover: true,
           },
-          mover: { include: { user: true } },
         },
       },
-    },
+    });
+    if (!quoteMatch || quoteMatch.moverQuote.quoteRequest.customer.userId !== userId) {
+      throw new Error('해당 견적에 대한 리뷰 작성 권한이 없습니다.');
+    }
+
+    const review = await tx.review.create({
+      data: {
+        quoteMatchId: estimateId,
+        rating,
+        content: comment,
+      },
+    });
+
+    const mover = await tx.mover.findUnique({
+      where: { id: quoteMatch.moverQuote.moverId },
+      select: { averageRating: true, totalReviews: true, userId: true },
+    });
+    if (!mover) {
+      throw new Error('해당 기사님을 찾을 수 없습니다.');
+    }
+
+    const newTotalReviews = mover.totalReviews + 1;
+    const newAverageRating = (mover.averageRating * mover.totalReviews + rating) / newTotalReviews;
+
+    await tx.mover.update({
+      where: { id: quoteMatch.moverQuote.moverId },
+      data: {
+        averageRating: newAverageRating,
+        totalReviews: newTotalReviews,
+      },
+    });
+
+    return { ...review, moverId: quoteMatch.moverQuote.moverId };
   });
-  if (!quoteMatch || quoteMatch.moverQuote.quoteRequest.customer.userId !== userId) {
-    throw new Error('해당 견적에 대한 리뷰 작성 권한이 없습니다.');
+
+  const mover = await prisma.mover.findUnique({
+    where: { id: result.moverId },
+    select: { userId: true },
+  });
+  if (!mover) {
+    throw new Error('알림 생성 실패: 기사님을 찾을 수 없습니다.');
   }
-
-  const review = await prisma.review.create({
-    data: {
-      quoteMatchId: estimateId,
-      rating,
-      content: comment,
-    },
-  });
-
-  const moverUserId = quoteMatch.moverQuote.mover.user.id;
   await createNotification({
-    userId: moverUserId,
+    userId: mover.userId,
     messageType: 'newReview',
     url: `/mover/profile`,
   });
 
-  return review;
+  return result;
 }

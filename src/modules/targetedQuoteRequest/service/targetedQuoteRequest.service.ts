@@ -16,6 +16,13 @@ export default class TargetedQuoteRequestService {
   ) {}
 
   async createTargetedQuoteRequest(customerId: string, moverId: string) {
+    const mover = await moverRepository.getMoverById(moverId);
+
+    console.log('mover', mover);
+    if (!mover) {
+      throw new NotFoundException(EXCEPTION_MESSAGES.moverNotFound);
+    }
+
     // 1. 해당 고객의 최신 일반 견적 요청 조회
     const latestQuote = await this.quoteRequestsRepository.findLatestQuoteByCustomerId(customerId);
 
@@ -49,6 +56,14 @@ export default class TargetedQuoteRequestService {
     const targetedRequest = await this.targetedQuoteRequestRepository.create({
       quoteRequestId: latestQuote.id,
       moverId,
+    });
+
+    // 5. 지정 견적 요청 알림 생성
+    await createNotification({
+      userId: mover.user.id,
+      messageType: 'quoteRequest', // 지정 견적 요청 알림
+      url: '/mover/quotes/requested',
+      customerName: latestQuote.customer.user.name, // 견적 요청 고객 이름
     });
 
     return targetedRequest;

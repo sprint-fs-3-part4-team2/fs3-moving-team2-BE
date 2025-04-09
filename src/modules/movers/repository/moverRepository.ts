@@ -159,6 +159,7 @@ export class MoverRepository {
         user: {
           select: {
             name: true,
+            id: true,
           },
         },
         moverServices: {

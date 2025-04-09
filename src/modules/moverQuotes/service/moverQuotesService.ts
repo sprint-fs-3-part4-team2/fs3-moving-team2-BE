@@ -74,7 +74,7 @@ export default class QuotesService {
         messageType: 'quoteArrive',
         moverName: mover.user.name,
         moveType: quote.moveType,
-        url: `/quote-requests/${quoteId}`,
+        url: `/user/quotes/${newMoverQuote.id}`,
       });
 
       // 5. 결과 조회
