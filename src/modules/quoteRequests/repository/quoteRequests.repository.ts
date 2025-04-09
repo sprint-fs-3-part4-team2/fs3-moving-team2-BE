@@ -195,6 +195,7 @@ export default class QuoteRequestsRepository {
         createdAt: 'desc',
       },
       include: {
+        ...this.CUSTOMER_INCLUDE_CLAUSE,
         quoteStatusHistories: {
           orderBy: {
             createdAt: 'desc',

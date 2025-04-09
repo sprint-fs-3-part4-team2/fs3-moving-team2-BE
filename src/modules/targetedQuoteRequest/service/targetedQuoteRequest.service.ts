@@ -58,11 +58,12 @@ export default class TargetedQuoteRequestService {
       moverId,
     });
 
-    // 5. 견적 요청 알림 생성
+    // 5. 지정 견적 요청 알림 생성
     await createNotification({
       userId: mover.user.id,
       messageType: 'quoteRequest', // 지정 견적 요청 알림
       url: '/mover/quotes/requested',
+      customerName: latestQuote.customer.user.name, // 견적 요청 고객 이름
     });
 
     return targetedRequest;
