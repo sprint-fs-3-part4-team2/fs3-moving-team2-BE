@@ -81,5 +81,8 @@ export async function createReview(reviewData: {
     url: `/mover/profile`,
   });
 
-  return review;
+  return {
+    ...review,
+    moverId: quoteMatch.moverQuote.mover.id,
+  };
 }
