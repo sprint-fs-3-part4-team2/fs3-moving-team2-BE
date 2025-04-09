@@ -96,7 +96,7 @@ export async function createNotification(postData: {
     quoteArrive: [moveTypeKor ?? '', '견적'],
     quoteRequest: ['지정 견적 요청', '도착'],
     quoteConfirm: [moveTypeKor ?? '', '확정'],
-    quoteRefuse: ['지정 견적 요청', '도착'],
+    quoteRefuse: ['지정 견적 요청', '거절'],
     dayBefore: [`${fromRegion} -> ${toRegion} 이사 예정일`],
     newReview: ['새로운 리뷰'],
   };
