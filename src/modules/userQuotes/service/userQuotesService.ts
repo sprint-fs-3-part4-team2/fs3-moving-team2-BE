@@ -5,6 +5,7 @@ import { EXCEPTION_MESSAGES } from '@/constants/exceptionMessages';
 import { UnauthorizedException } from '@/core/errors/unauthorizedException';
 import { ForbiddenException } from '@/core/errors';
 import { quoteRequestsRepository } from '@/modules/quoteRequests/routes';
+import { createNotification } from '@/modules/notification/service/notificationService';
 
 const prisma = new PrismaClient();
 
@@ -85,6 +86,16 @@ export async function confirmQuote(moverQuoteId: string, customerId: string) {
             id: true,
           },
         },
+        mover: {
+          select: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
       },
     });
     if (moverQuote?.quoteRequest.customerId !== customerId) {
@@ -111,6 +122,12 @@ export async function confirmQuote(moverQuoteId: string, customerId: string) {
           },
         },
       },
+    });
+    await createNotification({
+      userId: moverQuote.mover.user.id,
+      messageType: 'quoteConfirm',
+      moverName: moverQuote.mover.user.name,
+      url: '/mover/quotes/submitted',
     });
     return { message: '견적이 확정되었습니다.' };
   });
