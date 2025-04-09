@@ -229,7 +229,7 @@ model QuoteStatusHistory {
  * QUOTE_REQUESTED: 견적 요청
  * QUOTE_CONFIRMED: 견적 확정
  * QUOTE_CANCELED: 견적 취소
- * REQUEST_EXPIRED: 요청 만료
+ * QUOTE_EXPIRED: 견적 요청 만료
  * MOVE_COMPLETED: 이사 완료
  */
 
