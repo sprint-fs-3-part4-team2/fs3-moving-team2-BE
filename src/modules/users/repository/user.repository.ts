@@ -6,16 +6,23 @@ export default class UserRepository {
   constructor(private prismaClient: PrismaClient) {}
 
   async userEdit({ data, where }: InfoEditType) {
-    try {
-      const result = await this.prismaClient.user.update({
-        where,
-        data,
-      });
-      console.table(result ?? {});
-      return { ok: true, data: result };
-    } catch (err: any) {
-      return { ok: false, code: err.code, message: 'repository {userEdit} error' };
-    }
+    const result = await this.prismaClient.user.update({
+      where,
+      data,
+    });
+
+    return result;
+  }
+
+  async findByIdReturnPassword(userId: string) {
+    const user = await this.prismaClient.user.findUnique({
+      where: { id: userId },
+      select: {
+        password: true,
+      },
+    });
+    if (!user) return new Error('유저 인증 실패');
+    return user.password;
   }
 
   async findById(userId: string) {
@@ -39,6 +46,17 @@ export default class UserRepository {
         customer: true,
         mover: true,
         socialLogin: true,
+      },
+    });
+  }
+
+  async findByPhoneNumber(phoneNumber: string, userType: UserType) {
+    return await this.prismaClient.user.findUnique({
+      where: {
+        userType_phoneNumber: {
+          userType,
+          phoneNumber,
+        },
       },
     });
   }

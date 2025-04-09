@@ -1,8 +1,7 @@
-import { ConflictException, ForbiddenException, NotFoundException } from '@/core/errors';
+import { ConflictException, NotFoundException } from '@/core/errors';
 import MoverQuotesRepository from '../repository/moverQuotesRepository';
 import { EXCEPTION_MESSAGES } from '@/constants/exceptionMessages';
 import QuoteMapper from '../mapper/moverQuote.mapper';
-import { AUTH_MESSAGES } from '@/constants/authMessages';
 import { quoteRequestsRepository } from '@/modules/quoteRequests/routes';
 import { PrismaClient } from '@prisma/client';
 import { createNotification } from '@/modules/notification/service/notificationService';
@@ -14,19 +13,16 @@ export default class QuotesService {
     private prismaClient: PrismaClient,
   ) {}
 
-  async getQuoteByIdForCustomer(quoteId: string, customerId: string) {
+  async getQuoteByIdForCustomer(quoteId: string) {
     const quote = await this.quotesRepository.getQuoteForCustomer(quoteId);
     if (!quote) throw new NotFoundException(EXCEPTION_MESSAGES.quoteNotFound);
-    if (quote?.quoteRequest.customerId !== customerId)
-      throw new ForbiddenException(AUTH_MESSAGES.forbidden);
 
     return QuoteMapper.toQuoteForCustomerDto(quote);
   }
 
-  async getQuoteByIdForMover(quoteId: string, moverId: string) {
+  async getQuoteByIdForMover(quoteId: string) {
     const quote = await this.quotesRepository.getQuoteForMover(quoteId);
     if (!quote) throw new NotFoundException(EXCEPTION_MESSAGES.quoteNotFound);
-    if (quote?.moverId !== moverId) throw new ForbiddenException(AUTH_MESSAGES.forbidden);
 
     return QuoteMapper.toQuoteForMoverDto(quote);
   }

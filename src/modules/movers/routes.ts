@@ -10,4 +10,10 @@ router.get('/', moverController.getMovers);
 // 기사님 검색
 router.get('/search', moverController.searchMovers);
 
+// 기사님 상세 정보 조회
+router.get('/:id', moverController.getMoverById);
+
+// 기사님 리뷰 목록 조회
+router.get('/:id/reviews', moverController.getMoverReviews);
+
 export default router;

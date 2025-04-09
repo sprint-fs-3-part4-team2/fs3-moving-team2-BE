@@ -63,6 +63,17 @@ jobs:
       - name: Run prisma generate
         run: npx prisma generate
 
+      - name: Run Prisma db push for all databases
+        run: |
+          # 첫 번째 데이터베이스(기본 데이터베이스)
+          npx prisma db push --schema=./prisma/schema.prisma
+
+          export DATABASE_URL="postgresql://postgres:postgres@localhost:5433/test_db_2"
+          npx prisma db push --schema=./prisma/schema.prisma
+
+          export DATABASE_URL="postgresql://postgres:postgres@localhost:5434/test_db_3"
+          npx prisma db push --schema=./prisma/schema.prisma
+
       - name: Run tests
         run: npm test
 

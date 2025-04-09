@@ -24,15 +24,15 @@ const {
 } = quoteRequestsController;
 
 // 고객 견적 요청
-// router.route('/').post(createAuthMiddleware('customer'), asyncRequestHandler(createQuoteRequest));
-router.route('/').post(asyncRequestHandler(createQuoteRequest));
+router.route('/').post(createAuthMiddleware('customer'), asyncRequestHandler(createQuoteRequest));
 
 // 기사님 전체 견적 요청 조회
-// router.route('/').get(createAuthMiddleware('mover'), asyncRequestHandler(getAllQuoteRequests));
-router.route('/').get(asyncRequestHandler(getAllQuoteRequests));
+router.route('/').get(createAuthMiddleware('mover'), asyncRequestHandler(getAllQuoteRequests));
 
 // 고객 신청한 견적 조회
-router.route('/latest').get(asyncRequestHandler(getLatestQuoteRequestForCustomer));
+router
+  .route('/latest')
+  .get(createAuthMiddleware('customer'), asyncRequestHandler(getLatestQuoteRequestForCustomer));
 
 router
   .route('/:quoteRequestId')

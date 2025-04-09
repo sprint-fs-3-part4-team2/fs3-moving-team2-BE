@@ -1,5 +1,12 @@
-import { Request, Response, RequestHandler } from 'express';
+import { Request, Response } from 'express';
 import * as profileService from '../service/profileService';
+import { generateTokens } from '@/core/security/jwt';
+import {
+  ACCESS_TOKEN_MAX_AGE,
+  COOKIE_OPTIONS,
+  REFRESH_TOKEN_MAX_AGE,
+} from '@/constants/cookieOptions';
+import { LowercaseUserType } from '@/types/userType.types';
 
 const regionMap: Record<string, string> = {
   서울: 'SEOUL',
@@ -27,10 +34,22 @@ const moveTypeMap: Record<string, string> = {
   사무실이사: 'OFFICE_MOVE',
 };
 
+const generateAndSetCookie = (
+  userId: string,
+  roleId: string,
+  type: LowercaseUserType,
+  res: Response,
+) => {
+  const { accessToken, refreshToken } = generateTokens(userId, roleId, type);
+  res.cookie('accessToken', accessToken, { ...COOKIE_OPTIONS, maxAge: ACCESS_TOKEN_MAX_AGE });
+  res.cookie('refreshToken', refreshToken, { ...COOKIE_OPTIONS, maxAge: REFRESH_TOKEN_MAX_AGE });
+};
+
 // 고객 프로필 등록 (이미지, 이용 서비스, 지역)
 export async function postCustomerProfileInfo(req: Request, res: Response) {
   try {
     const userId = req.user?.userId ?? '';
+    // const userId = 'cm914rhmu0004voa4kee6s779';
     console.log(userId);
     if (!userId) {
       res.status(401).json({ message: '등록된 유저가 아닙니다' });
@@ -56,6 +75,16 @@ export async function postCustomerProfileInfo(req: Request, res: Response) {
       serviceTypes,
       locations,
     });
+
+    if (!postData) {
+      console.error('DB 등록은 되었으나 응답 데이터가 없음');
+
+      res.status(500).json({ message: '프로필 등록 실패' });
+      return;
+    }
+
+    generateAndSetCookie(userId, postData?.id ?? '', 'customer', res);
+
     res.status(201).json({
       message: '등록 성공!',
       data: { postData },
@@ -65,10 +94,11 @@ export async function postCustomerProfileInfo(req: Request, res: Response) {
       res.status(409).json({ message: err.message });
       return;
     }
+    console.log('컨트롤러 오류', err);
     res.status(500).json({ message: '서버 오류' });
   }
 }
-// 고객 프로필 수정 (이름, 이메일, 전화번호, 현재 비밀번호, 새 비밀번호, 새 비밀번호 확인, 이미지, 이용 서비스, 지역)
+// 고객 프로필 수정 (현재 비밀번호, 새 비밀번호, 새 비밀번호 확인, 이미지, 이용 서비스, 지역)
 export async function patchCustomerProfileInfo(req: Request, res: Response) {
   try {
     const userId = req.user?.userId ?? '';
@@ -77,15 +107,8 @@ export async function patchCustomerProfileInfo(req: Request, res: Response) {
       res.status(401).json({ message: '등록된 유저가 아닙니다' });
       return;
     }
-    const {
-      name,
-      email,
-      phoneAddress,
-      passwordNew,
-      profileImage,
-      selectedMoveTypes,
-      selectedRegions,
-    } = req.body;
+    const { passwordCurrent, passwordNew, profileImage, selectedMoveTypes, selectedRegions } =
+      req.body;
     // db에 맞는 타입으로 변환
     const locations = selectedRegions.map((region: string) => regionMap[region]);
     const serviceTypes = selectedMoveTypes.map((type: string) => moveTypeMap[type]);
@@ -93,9 +116,7 @@ export async function patchCustomerProfileInfo(req: Request, res: Response) {
     // 수정
     const patchData = await profileService.patchUserProfile({
       userId,
-      name,
-      email,
-      phoneAddress,
+      passwordCurrent,
       passwordNew,
       profileImage,
       locations,
@@ -103,11 +124,9 @@ export async function patchCustomerProfileInfo(req: Request, res: Response) {
     });
     res.status(200).json({ message: '수정 완료!', data: patchData });
   } catch (err: any) {
-    if (err.message === '이미 사용 중인 전화번호입니다') {
-      res.status(409).json({ message: err.message });
-      return;
-    }
-    console.log('error:', err);
+    res.status(500).json({ message: err.message });
+
+    console.log('프로필 수정 오류:', err);
   }
 }
 // 기사 프로필 등록 (이미지, 별명, 경력, 한 줄 소개, 상세설명, 제공 서비스, 지역)
@@ -141,6 +160,8 @@ export async function postMoverProfileInfo(req: Request, res: Response) {
       serviceTypes,
       locations,
     });
+    generateAndSetCookie(userId, postData?.id ?? '', 'mover', res);
+
     res.status(201).json({
       message: '등록 성공!',
       data: { postData },

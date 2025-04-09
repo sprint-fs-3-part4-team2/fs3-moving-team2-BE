@@ -13,4 +13,17 @@ export default class TargetedQuoteRejectionRepository {
       data,
     });
   }
+
+  // 견적 요청 거절 사유 조회
+  async findRejectionByTargetedQuoteRequestId(
+    targetedQuoteRequestId: string,
+    tx?: Prisma.TransactionClient,
+  ) {
+    const client = tx || this.prismaClient;
+    return await client.targetedQuoteRejection.findFirst({
+      where: {
+        targetedQuoteRequestId,
+      },
+    });
+  }
 }

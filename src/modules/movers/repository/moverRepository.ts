@@ -139,4 +139,53 @@ export class MoverRepository {
       },
     });
   }
+
+  // 기사님 상세 정보 조회
+  async getMoverById(moverId: string) {
+    return await prisma.mover.findUnique({
+      where: {
+        id: moverId,
+      },
+      select: {
+        id: true,
+        profileImage: true,
+        experienceYears: true,
+        introduction: true,
+        description: true,
+        averageRating: true,
+        totalReviews: true,
+        totalCustomerFavorite: true,
+        totalConfirmedCount: true,
+        user: {
+          select: {
+            name: true,
+          },
+        },
+        moverServices: {
+          select: {
+            serviceType: true,
+          },
+        },
+        moverServiceRegions: {
+          select: {
+            region: true,
+          },
+        },
+        targetedQuoteRequests: {
+          select: {
+            id: true,
+          },
+        },
+        moverQuotes: {
+          select: {
+            quoteMatch: {
+              select: {
+                isCompleted: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
 }

@@ -1,8 +1,9 @@
 import { PrismaClient, Region, ServiceType } from '@prisma/client';
+import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
-// 고객 프로필 등록 (이미지, 이용 서비스, 지역)
+////////////// 고객 프로필 등록 (이미지, 이용 서비스, 지역)
 export async function createUserProfile(profileData: {
   userId: string;
   profileImage: string;
@@ -35,9 +36,9 @@ export async function createUserProfile(profileData: {
       },
     });
     return customerProfile;
-  } catch (err) {
-    console.log('error : ', err);
-    return;
+  } catch (err: any) {
+    console.error('DB 등록 중 오류 발생:', err);
+    throw new Error(err.message || '서버 오류');
   }
 }
 
@@ -51,18 +52,16 @@ export async function findCustomerProfile(userId: string) {
   return findProfile;
 }
 
-// 고객 프로필 수정 (이름, 이메일, 전화번호새 비밀번호, 이미지, 이용 서비스, 지역)
+/////////////////// 고객 프로필 수정 (이름, 이메일, 전화번호새 비밀번호, 이미지, 이용 서비스, 지역)
 export async function patchUserProfile(patchData: {
   userId: string;
-  name: string;
-  email: string;
-  phoneAddress: string;
+  passwordCurrent: string;
   passwordNew: string;
   profileImage: string;
   serviceTypes: string[];
   locations: string[];
 }) {
-  const { userId, phoneAddress, passwordNew, profileImage, serviceTypes, locations } = patchData;
+  const { userId, passwordCurrent, passwordNew, profileImage, serviceTypes, locations } = patchData;
 
   // 고객 확인
   const customer = await prisma.customer.findUnique({
@@ -73,13 +72,23 @@ export async function patchUserProfile(patchData: {
   if (!customer) {
     throw new Error('해당 userId에 해당하는 고객을 찾을 수 없습니다');
   }
-  //전화번호 중복 확인
-  const existingPhone = await prisma.user.findFirst({
-    where: { phoneNumber: phoneAddress, userType: 'CUSTOMER' }, // 기사 계정이 있을 수 있으니 타입 추가
-  });
 
-  if (existingPhone && existingPhone.id !== userId) {
-    throw new Error('이미 사용 중인 전화번호입니다');
+  const pw = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { password: true },
+  });
+  if (!pw?.password) {
+    throw new Error('비밀번호를 찾을 수 없습니다.');
+  }
+  const isPasswordCorrect = await bcrypt.compare(passwordCurrent, pw.password);
+  if (!isPasswordCorrect) {
+    throw new Error('현재 비밀번호가 일치하지 않습니다.');
+  }
+
+  // 새 비밀번호 해싱 (변경하는 경우)
+  let newPasswordHashed = undefined;
+  if (passwordNew) {
+    newPasswordHashed = await bcrypt.hash(passwordNew, 10);
   }
 
   const updatedCustomerProfile = await prisma.$transaction([
@@ -96,7 +105,7 @@ export async function patchUserProfile(patchData: {
         location: locations[0] as Region,
         user: {
           update: {
-            ...(passwordNew ? { password: passwordNew } : {}), // 새 비밀번호가 있으면 업데이트
+            ...(newPasswordHashed ? { password: newPasswordHashed } : {}), // 새 비밀번호가 있으면 업데이트
           },
         },
         customerServices: {
@@ -111,7 +120,7 @@ export async function patchUserProfile(patchData: {
   return updatedCustomerProfile;
 }
 
-// 기사 프로필 등록 (이미지, 별명, 경력, 한 줄 소개, 상세설명, 제공 서비스, 지역)
+//////////////// 기사 프로필 등록 (이미지, 별명, 경력, 한 줄 소개, 상세설명, 제공 서비스, 지역)
 export async function createMoverProfile(profileData: {
   userId: string;
   experience: number;
@@ -171,7 +180,7 @@ export async function createMoverProfile(profileData: {
   return moverProfile;
 }
 
-// 기사 프로필 수정 (이미지, 별명, 경력, 한 줄 소개, 상세설명, 제공 서비스, 지역)
+/////////////// 기사 프로필 수정 (이미지, 별명, 경력, 한 줄 소개, 상세설명, 제공 서비스, 지역)
 export async function patchMoverProfile(patchData: {
   userId: string;
   experience: number;

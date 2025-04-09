@@ -68,13 +68,26 @@ export default class QuoteRequestsService {
 
     console.log('quoteRequestData', quoteRequest);
 
-    return { message: '견적 요청이 성공적으로 생성되었습니다.' };
+    return {
+      isRequested: true,
+      quote: {
+        id: quoteRequest.id,
+        moveDate: quoteRequest.moveDate,
+        // 내부에 저장된 enum값(예: "HOME_MOVE")을 한글로 변환
+        moveType: MOVE_TYPE_KOREAN[quoteRequest.moveType],
+        requestedDate: quoteRequest.createdAt,
+        status: quoteRequest.currentStatus,
+        arrival: quoteRequest.quoteRequestAddresses.find((address) => address.type === 'ARRIVAL'),
+        departure: quoteRequest.quoteRequestAddresses.find(
+          (address) => address.type === 'DEPARTURE',
+        ),
+      },
+    };
   }
 
   async getLatestQuoteRequestForCustomer(customerId: string) {
     // 최근 고객의 견적 요청을 조회
     const quote = await this.quoteRequestRepository.getLatestQuoteRequestForCustomer(customerId);
-
     if (!quote) {
       return { isRequested: false };
     }
@@ -88,6 +101,7 @@ export default class QuoteRequestsService {
         // 내부에 저장된 enum값(예: "HOME_MOVE")을 한글로 변환
         moveType: MOVE_TYPE_KOREAN[quote.moveType],
         requestedDate: quote.createdAt,
+        status: quote.currentStatus,
         arrival: quote.quoteRequestAddresses.find((address) => address.type === 'ARRIVAL'),
         departure: quote.quoteRequestAddresses.find((address) => address.type === 'DEPARTURE'),
       },
@@ -146,7 +160,7 @@ export default class QuoteRequestsService {
 
     // 1. moverQuotes에 현재 moverId로 제출한 견적이 없어야 함.
     // 2. targetedQuoteRequests에 해당 moverId 관련 거절(반려) 기록이 없어야 함.
-    whereClause.AND.push = [
+    whereClause.AND.push(
       {
         moverQuotes: {
           none: { moverId },
@@ -161,7 +175,7 @@ export default class QuoteRequestsService {
           },
         },
       },
-    ];
+    );
 
     // 기본 정렬: 이사빠른순 (moveDate 오름차순) / sortByQuery가 요청일빠른순인 경우만 조건 변경
     let orderBy;
@@ -179,7 +193,10 @@ export default class QuoteRequestsService {
       const moverRegionsObjects =
         await this.moverQuotesRepository.getServiceRegionsForMover(moverId);
       const moverRegions: Array<keyof typeof REGION_MAP> = moverRegionsObjects.map((m) => m.region);
-      whereClause.AND = [{ fromRegion: { in: moverRegions } }, { toRegion: { in: moverRegions } }];
+      whereClause.AND.push(
+        { fromRegion: { in: moverRegions } },
+        { toRegion: { in: moverRegions } },
+      );
     }
 
     // isTargetedQuoteQuery가 true이면,

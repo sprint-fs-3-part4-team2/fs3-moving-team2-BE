@@ -2,7 +2,7 @@ import { AUTH_MESSAGES } from '@/constants/authMessages';
 import { EXCEPTION_MESSAGES } from '@/constants/exceptionMessages';
 import { ConflictException, NotFoundException } from '@/core/errors';
 import { UnauthorizedException } from '@/core/errors/unauthorizedException';
-import { generateTokens } from '@/core/security/jwt';
+import { generateAccessToken, generateTokens } from '@/core/security/jwt';
 import UserRepository from '@/modules/users/repository/user.repository';
 import { SignInRequest, SignUpRequest } from '@/structs/authStruct';
 import { LowercaseUserType } from '@/types/userType.types';
@@ -11,6 +11,7 @@ import axios from 'axios';
 import bcrypt from 'bcrypt';
 import { OauthUserInfo } from '../types/userInfo.types';
 import { getUniqueKoreanPhrase } from '@/utils/getUniqueKoreanPhrase';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 
 export default class AuthService {
   private scopes = encodeURIComponent(
@@ -31,7 +32,7 @@ export default class AuthService {
     const userEntity = await this.userRepository.findByEmail(email);
     if (!userEntity) throw new NotFoundException(AUTH_MESSAGES.emailNotExist);
     if (userEntity.userType !== uppercaseType)
-      throw new ConflictException(AUTH_MESSAGES.invalidRole);
+      throw new ConflictException(AUTH_MESSAGES.invalidRole[type]);
 
     const isPasswordValid = await bcrypt.compare(password, userEntity?.password);
     if (!isPasswordValid) throw new UnauthorizedException(AUTH_MESSAGES.invalidPassword);
@@ -60,10 +61,16 @@ export default class AuthService {
   async signUp(signUpDto: SignUpRequest, type: LowercaseUserType) {
     const uppercaseType = type.toUpperCase() as UserType;
     const existingUserByEmail = await this.userRepository.findByEmail(signUpDto.email);
-    if (existingUserByEmail?.userType === uppercaseType) {
-      throw new ConflictException(AUTH_MESSAGES.invalidRole);
+    if (existingUserByEmail && existingUserByEmail?.userType !== uppercaseType) {
+      throw new ConflictException(AUTH_MESSAGES.invalidRole[type]);
     }
     if (existingUserByEmail) throw new ConflictException(EXCEPTION_MESSAGES.duplicatedEmail);
+    const existingUserByPhoneNumber = await this.userRepository.findByPhoneNumber(
+      signUpDto.phoneNumber,
+      type.toUpperCase() as UserType,
+    );
+    if (existingUserByPhoneNumber)
+      throw new ConflictException(EXCEPTION_MESSAGES.duplicatedPhoneNumber);
     const { email, password, name, phoneNumber } = signUpDto;
     const formattedPhoneNumber = phoneNumber.replaceAll('-', '');
 
@@ -86,6 +93,17 @@ export default class AuthService {
         profile: null,
       },
     };
+  }
+
+  refreshToken(refreshToken: string) {
+    try {
+      const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET!) as JwtPayload;
+      const accessToken = generateAccessToken(decoded.userId, decoded.roleId, decoded.type);
+
+      return accessToken;
+    } catch {
+      throw new UnauthorizedException('액세스토큰 갱신 실패');
+    }
   }
 
   fakeSignIn(userId: string, roleId: string, type: LowercaseUserType) {
