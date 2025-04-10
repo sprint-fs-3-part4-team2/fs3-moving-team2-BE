@@ -113,6 +113,14 @@ export async function confirmQuote(moverQuoteId: string, customerId: string) {
       'MOVE_COMPLETED',
       prisma,
     );
+    await prisma.mover.update({
+      where: { id: moverQuote.mover.user.id },
+      data: {
+        totalConfirmedCount: {
+          increment: 1,
+        },
+      },
+    });
     await prisma.moverQuote.update({
       where: { id: moverQuoteId },
       data: {
