@@ -2,7 +2,6 @@ import { MOVE_TYPE } from '@/constants/serviceType';
 import { MoverRepository } from '../repository/moverRepository';
 import { PrismaClient } from '@prisma/client';
 import { regionMap } from '@/constants/serviceType';
-import { QuoteStatus } from '@/types/quoteStatus.types';
 
 export const moverRepository = new MoverRepository();
 const prisma = new PrismaClient();
@@ -95,6 +94,7 @@ export class MoverService {
       isFavorite: userFavorites.includes(mover.id),
       favoriteCount: mover.totalCustomerFavorite ?? 0,
       description: mover.description,
+      introduction: mover.introduction,
       regions: mover.moverServiceRegions.map((r) => reverseRegionMap[r.region]),
     }));
   }
@@ -190,6 +190,9 @@ export class MoverService {
 
     // 로그인한 사용자의 좋아요 여부 가져오기
     let isFavorite = false;
+    let userConfirmedQuotes: string[] = [];
+    let userTargetedQuotes: string[] = [];
+    let userPendingQuotes: string[] = [];
 
     if (userId) {
       const customer = await prisma.customer.findUnique({
@@ -198,30 +201,61 @@ export class MoverService {
       });
 
       if (customer) {
-        const favorite = await prisma.customerFavorite.findFirst({
-          where: {
-            customerId: customer.id,
-            moverId: mover.id,
-          },
-        });
+        const [favorite, confirmedQuotes, targetedQuotes, pendingQuotes] = await Promise.all([
+          prisma.customerFavorite.findFirst({
+            where: {
+              customerId: customer.id,
+              moverId: mover.id,
+            },
+          }),
+          prisma.moverQuote.findMany({
+            where: {
+              quoteRequest: {
+                customerId: customer.id,
+              },
+              quoteMatch: {
+                isCompleted: true,
+              },
+            },
+            select: { moverId: true },
+          }),
+          prisma.targetedQuoteRequest.findMany({
+            where: {
+              quoteRequest: {
+                customerId: customer.id,
+              },
+            },
+            select: { moverId: true },
+          }),
+          prisma.moverQuote.findMany({
+            where: {
+              quoteRequest: {
+                customerId: customer.id,
+              },
+              quoteMatch: null,
+            },
+            select: { moverId: true },
+          }),
+        ]);
 
         isFavorite = !!favorite;
+        userConfirmedQuotes = confirmedQuotes.map((q) => q.moverId);
+        userTargetedQuotes = targetedQuotes.map((t) => t.moverId);
+        userPendingQuotes = pendingQuotes.map((p) => p.moverId);
       }
     }
-
-    // targetedQuoteRequests가 존재하면 isCustomQuote는 true
-    const isCustomQuote = mover.targetedQuoteRequests.length > 0;
-
-    // moverQuotes 중 완료된 견적이 있는지 확인
-    const hasConfirmedQuote = mover.moverQuotes.some((quote) => quote.quoteMatch?.isCompleted);
 
     return {
       id: mover.id,
       moverName: mover.user.name,
       imageUrl: mover.profileImage || '/profile-placeholder.png',
       movingType: mover.moverServices.map((service) => MOVE_TYPE[service.serviceType]),
-      isCustomQuote,
-      hasConfirmedQuote,
+      isCustomQuote: userTargetedQuotes.includes(mover.id),
+      quoteState: userConfirmedQuotes.includes(mover.id)
+        ? 'confirmedQuote'
+        : userPendingQuotes.includes(mover.id)
+          ? 'pendingQuote'
+          : undefined,
       rating: mover.averageRating ?? 0,
       ratingCount: mover.totalReviews,
       experienceYears: mover.experienceYears,
