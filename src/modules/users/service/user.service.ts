@@ -15,7 +15,6 @@ export default class UserService {
     const userId = user.userId;
 
     const userInfo = await this.userRepository.findById(userId);
-    console.log(userInfo);
     if (!userInfo) throw new Error(NOUSER);
     return { name: userInfo.name, phoneNumber: userInfo.phoneNumber, email: userInfo.email };
   }
@@ -26,10 +25,10 @@ export default class UserService {
     const userId = user.userId;
 
     const userCurrentPassword = await this.userRepository.findByIdReturnPassword(userId);
-    if (typeof userCurrentPassword !== 'string') throw new Error(USER_AUTH_FAIL);
+    if (typeof userCurrentPassword !== 'string') throw { message: '유저가 정보 오류' };
 
     const match = await bcrypt.compare(current_password, userCurrentPassword);
-    if (!match) throw new Error(USER_AUTH_FAIL);
+    if (!match) return { message: '비밀번호가 일치하지 않습니다.' };
 
     const hashPw = await bcrypt.hash(new_password, 10);
     const updatedProfile = await this.userRepository.userEdit({
@@ -43,7 +42,10 @@ export default class UserService {
       },
     });
 
-    return updatedProfile;
+    return {
+      data: updatedProfile,
+      message: '프로필 수정이 완료되었습니다.',
+    };
   }
 
   async getMe(userId: string, type: LowercaseUserType) {

@@ -159,6 +159,7 @@ export class MoverRepository {
         user: {
           select: {
             name: true,
+            id: true,
           },
         },
         moverServices: {
@@ -169,6 +170,20 @@ export class MoverRepository {
         moverServiceRegions: {
           select: {
             region: true,
+          },
+        },
+        targetedQuoteRequests: {
+          select: {
+            id: true,
+          },
+        },
+        moverQuotes: {
+          select: {
+            quoteMatch: {
+              select: {
+                isCompleted: true,
+              },
+            },
           },
         },
       },

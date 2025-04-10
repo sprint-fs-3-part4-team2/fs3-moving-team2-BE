@@ -71,9 +71,17 @@ export default class QuoteRequestsRepository {
   }
 
   async getLatestQuoteRequestForCustomer(customerId: string) {
+    const now = new Date();
+
     return await this.prismaClient.quoteRequest.findFirst({
       where: {
         customerId,
+        moveDate: {
+          gt: now,
+        },
+        currentStatus: {
+          in: ['QUOTE_REQUESTED', 'QUOTE_CONFIRMED', 'MOVE_COMPLETED'],
+        },
       },
       orderBy: {
         createdAt: 'desc',
@@ -92,11 +100,17 @@ export default class QuoteRequestsRepository {
   async getAllQuoteRequests(page: number, pageSize: number, whereClause?: any, orderBy?: any) {
     const skip = (page - 1) * pageSize;
 
+    // 현재 날짜 기준 설정
+    const now = new Date();
+
     const filteredWhere = {
       AND: [
         whereClause || {},
         {
           currentStatus: 'QUOTE_REQUESTED',
+          moveDate: {
+            gt: now, // 현재 시간보다 이후인 이사만 표시
+          },
         },
       ],
     };
@@ -167,6 +181,26 @@ export default class QuoteRequestsRepository {
     await this.prismaClient.quoteRequest.delete({
       where: {
         id: quoteRequestId,
+      },
+    });
+  }
+
+  async findLatestQuoteByCustomerId(customerId: string) {
+    return await this.prismaClient.quoteRequest.findFirst({
+      where: {
+        customerId,
+        currentStatus: 'QUOTE_REQUESTED',
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      include: {
+        ...this.CUSTOMER_INCLUDE_CLAUSE,
+        quoteStatusHistories: {
+          orderBy: {
+            createdAt: 'desc',
+          },
+        },
       },
     });
   }

@@ -1,0 +1,92 @@
+[
+  {
+    "id": "cm955ukzy00643n6v4qaw10x1",
+    "customerId": "cm9556wel00643n6ve7tt98jq",
+    "moveType": "SMALL_MOVE",
+    "fromRegion": "SEOUL",
+    "toRegion": "BUSAN",
+    "moveDate": "2025-04-12T09:00:00Z",
+    "currentStatus": "QUOTE_REQUESTED"
+  },
+  {
+    "id": "cm955ukzy00653n6v0kvi102m",
+    "customerId": "cm9556wel00643n6ve7tt98jq",
+    "moveType": "HOME_MOVE",
+    "fromRegion": "INCHEON",
+    "toRegion": "DAEGU",
+    "moveDate": "2025-04-09T10:00:00Z",
+    "currentStatus": "MOVE_COMPLETED"
+  },
+  {
+    "id": "cm955ukzy00663n6vof30cz9r",
+    "customerId": "cm9556wel00643n6ve7tt98jq",
+    "moveType": "OFFICE_MOVE",
+    "fromRegion": "GWANGJU",
+    "toRegion": "DAEJEON",
+    "moveDate": "2025-04-08T11:00:00Z",
+    "currentStatus": "MOVE_COMPLETED"
+  },
+  {
+    "id": "cm955ukzy00673n6v8urehu93",
+    "customerId": "cm9556wel00643n6ve7tt98jq",
+    "moveType": "SMALL_MOVE",
+    "fromRegion": "ULSAN",
+    "toRegion": "JEJU",
+    "moveDate": "2025-04-07T12:00:00Z",
+    "currentStatus": "MOVE_COMPLETED"
+  },
+  {
+    "id": "cm955ukzy00683n6v2eypimm3",
+    "customerId": "cm9556wel00643n6ve7tt98jq",
+    "moveType": "HOME_MOVE",
+    "fromRegion": "SEOUL",
+    "toRegion": "INCHEON",
+    "moveDate": "2025-04-06T13:00:00Z",
+    "currentStatus": "MOVE_COMPLETED"
+  },
+  {
+    "id": "cm955ukzz00693n6vytalqns3",
+    "customerId": "cm9556wel00643n6ve7tt98jq",
+    "moveType": "OFFICE_MOVE",
+    "fromRegion": "SEOUL",
+    "toRegion": "DAEGU",
+    "moveDate": "2025-04-05T13:00:00Z",
+    "currentStatus": "MOVE_COMPLETED"
+  },
+  {
+    "id": "cm955ukzz006a3n6vzryracai",
+    "customerId": "cm9556wel00643n6ve7tt98jq",
+    "moveType": "OFFICE_MOVE",
+    "fromRegion": "SEOUL",
+    "toRegion": "DAEGU",
+    "moveDate": "2025-04-04T13:00:00Z",
+    "currentStatus": "MOVE_COMPLETED"
+  },
+  {
+    "id": "cm955ukzz006b3n6vamgmea3w",
+    "customerId": "cm9556wel00643n6ve7tt98jq",
+    "moveType": "OFFICE_MOVE",
+    "fromRegion": "SEOUL",
+    "toRegion": "DAEGU",
+    "moveDate": "2025-04-03T13:00:00Z",
+    "currentStatus": "MOVE_COMPLETED"
+  },
+  {
+    "id": "cm955ukzz006c3n6vu6ojlfeq",
+    "customerId": "cm9556wel00643n6ve7tt98jq",
+    "moveType": "OFFICE_MOVE",
+    "fromRegion": "SEOUL",
+    "toRegion": "DAEGU",
+    "moveDate": "2025-04-02T13:00:00Z",
+    "currentStatus": "MOVE_COMPLETED"
+  },
+  {
+    "id": "cm955ukzz006d3n6vb7041yqf",
+    "customerId": "cm9556wel00643n6ve7tt98jq",
+    "moveType": "OFFICE_MOVE",
+    "fromRegion": "SEOUL",
+    "toRegion": "DAEGU",
+    "moveDate": "2025-04-01T13:00:00Z",
+    "currentStatus": "MOVE_COMPLETED"
+  }
+]

@@ -5,6 +5,7 @@ import { EXCEPTION_MESSAGES } from '@/constants/exceptionMessages';
 import { UnauthorizedException } from '@/core/errors/unauthorizedException';
 import { ForbiddenException } from '@/core/errors';
 import { quoteRequestsRepository } from '@/modules/quoteRequests/routes';
+import { createNotification } from '@/modules/notification/service/notificationService';
 
 const prisma = new PrismaClient();
 
@@ -31,6 +32,11 @@ export async function getPendingQuotes(userId: string, roleId: string) {
   const pendingQuotes = await prisma.quoteRequest.findFirst({
     where: {
       customerId: roleId,
+      NOT: {
+        quoteStatusHistories: {
+          some: { status: 'MOVE_COMPLETED' },
+        },
+      },
       quoteStatusHistories: {
         some: { status: 'QUOTE_REQUESTED' },
       },
@@ -42,6 +48,18 @@ export async function getPendingQuotes(userId: string, roleId: string) {
         include: {
           mover: {
             include: {
+              user: true,
+              moverServices: true,
+            },
+          },
+        },
+      },
+      targetedQuoteRequests: {
+        include: {
+          moverQuote: true,
+          mover: {
+            include: {
+              user: true,
               moverServices: true,
             },
           },
@@ -53,9 +71,6 @@ export async function getPendingQuotes(userId: string, roleId: string) {
     },
     take: 1,
   });
-  if (!pendingQuotes) {
-    throw new NotFoundException(EXCEPTION_MESSAGES.quoteNotFound);
-  }
   return pendingQuotes;
 }
 
@@ -69,6 +84,16 @@ export async function confirmQuote(moverQuoteId: string, customerId: string) {
           select: {
             customerId: true,
             id: true,
+          },
+        },
+        mover: {
+          select: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
           },
         },
       },
@@ -97,6 +122,12 @@ export async function confirmQuote(moverQuoteId: string, customerId: string) {
           },
         },
       },
+    });
+    await createNotification({
+      userId: moverQuote.mover.user.id,
+      messageType: 'quoteConfirm',
+      moverName: moverQuote.mover.user.name,
+      url: '/mover/quotes/submitted',
     });
     return { message: '견적이 확정되었습니다.' };
   });

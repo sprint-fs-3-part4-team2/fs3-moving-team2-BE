@@ -12,5 +12,8 @@ export const AUTH_MESSAGES = {
   onlyForMover: '기사님만 접근할 수 있습니다.',
   OnlyForCustomer: '일반 사용자만 접근할 수 있습니다.',
   emailNotExist: '존재하지 않는 이메일입니다.',
-  invalidRole: '고객/기사님 유형을 확인해주세요.',
+  invalidRole: {
+    customer: '중복된 이메일의 기사님 계정이 존재합니다.',
+    mover: '중복된 이메일의 일반 사용자 계정이 존재합니다.',
+  },
 };

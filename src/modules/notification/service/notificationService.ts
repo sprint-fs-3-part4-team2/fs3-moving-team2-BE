@@ -69,12 +69,14 @@ export async function createNotification(postData: {
   userId: string; // 알림 보여줄 유저
   messageType: messageType; // MESSAGE_MAP 에서 선택해주세용
   moverName?: string; // 기사 이름
+  customerName?: string; // 고객 이름
   moveType?: string; // 견적
   fromRegion?: string; // 출발지
   toRegion?: string; // 도착지
   url?: string;
 }) {
-  const { userId, messageType, moverName, moveType, fromRegion, toRegion, url } = postData;
+  const { userId, messageType, moverName, customerName, moveType, fromRegion, toRegion, url } =
+    postData;
 
   const moveTypeMap: Record<string, string> = {
     SMALL_MOVE: '소형이사',
@@ -85,7 +87,7 @@ export async function createNotification(postData: {
 
   const MESSAGE_MAP: Record<string, string> = {
     quoteArrive: `${moverName} 기사님의 ${moveTypeKor} 견적이 도착했어요!`,
-    quoteRequest: '지정 견적 요청이 도착했어요!',
+    quoteRequest: `${customerName} 님의 지정 견적 요청이 도착했어요!`,
     quoteConfirm: `${moverName} 기사님의 견적이 확정되었어요!!`,
     quoteRefuse: `${moverName} 기사님이 견적 요청을 거절했어요..`,
     dayBefore: `내일은 ${fromRegion} -> ${toRegion} 이사 예정일이에요!`,
@@ -94,9 +96,9 @@ export async function createNotification(postData: {
 
   const HIGHLIGHT_WORDS: Record<string, string[]> = {
     quoteArrive: [moveTypeKor ?? '', '견적'],
-    quoteRequest: ['지정 견적 요청', '도착'],
+    quoteRequest: [`${customerName}`, '지정 견적 요청', '도착'],
     quoteConfirm: [moveTypeKor ?? '', '확정'],
-    quoteRefuse: ['지정 견적 요청', '도착'],
+    quoteRefuse: ['지정 견적 요청', '거절'],
     dayBefore: [`${fromRegion} -> ${toRegion} 이사 예정일`],
     newReview: ['새로운 리뷰'],
   };
