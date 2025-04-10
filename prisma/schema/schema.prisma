@@ -12,7 +12,7 @@ enum UserType {
   CUSTOMER
   MOVER
 }
-  
+
 model User {
   id            String         @id @default(cuid())
   userType      UserType       @map("user_type")
@@ -26,6 +26,8 @@ model User {
   socialLogin   SocialLogin? // 유저-소셜로그인 1:1
   customer      Customer? // 유저-고객 1:1
   mover         Mover? // 유저-이사업자 1:1
+  ChatMessage   ChatMessage[]
+  ChatRoomUser  ChatRoomUser[]
 
   @@unique([userType, phoneNumber]) // 휴대폰 번호와 유저 타입이 중복되지 않도록 유니크 제약 추가
   @@map("user")
@@ -202,9 +204,9 @@ enum AddressType {
 model QuoteRequestAddress {
   id             String       @id @default(cuid())
   quoteRequestId String       @map("quote_request_id")
-  sido           String  // 시도
+  sido           String // 시도
   sigungu        String? // 시군구
-  street         String  // 도로명 (시도, 시군구 제외)
+  street         String // 도로명 (시도, 시군구 제외)
   fullAddress    String       @map("full_address") // 상세 주소
   type           AddressType // 출발지/도착지
   quoteRequest   QuoteRequest @relation(fields: [quoteRequestId], references: [id], onDelete: Cascade) // 견적요청주소-견적요청 1:N
@@ -299,4 +301,47 @@ model Review {
   quoteMatch   QuoteMatch @relation(fields: [quoteMatchId], references: [id], onDelete: Cascade) // 견적매칭-리뷰 1:N
 
   @@map("review")
+}
+
+// 채팅 user-user/ user-mover/ mover-user/ mover-mover
+model ChatRoom {
+  id          String         @id @default(cuid())
+  users       ChatRoomUser[]
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @updatedAt @map("updated_at")
+  ChatMessage ChatMessage[]
+
+  @@map("chat_room")
+}
+
+enum ChatRole {
+  ONER
+  MEMBER
+}
+
+model ChatRoomUser {
+  userId     String
+  chatRoomId String
+  joinedAt   DateTime @default(now()) // 추가 필드 가능
+  role       ChatRole @default(MEMBER) // 역할 필드 추가 가능
+
+  user     User     @relation(fields: [userId], references: [id])
+  chatRoom ChatRoom @relation(fields: [chatRoomId], references: [id])
+
+  @@id([userId, chatRoomId]) // 복합 키 설정 (중복 방지)
+  @@map("chat_room_user")
+}
+
+// 채팅 메세지
+model ChatMessage {
+  id         String   @id @default(cuid())
+  content    String   @default("")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
+  chatRoomId String   @map("chat_room_id")
+  userId     String   @map("user_id")
+
+  @@map("chat_message")
 }

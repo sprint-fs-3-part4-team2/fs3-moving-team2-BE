@@ -1,4 +1,4 @@
-import { PrismaClient, UserType } from '@prisma/client';
+import { Prisma, PrismaClient, UserType } from '@prisma/client';
 import { InfoEditType } from '../types/repo.type';
 import { SignUpRequest } from '@/structs/authStruct';
 

@@ -21,6 +21,11 @@ import userQuoteRouter from './modules/userQuotes/routes';
 // import { startNotificationListener } from './modules/notification/controller/sseController';
 import { startNotificationScheduler } from './schedulers/movingReminder';
 import quoteListRouter from './modules/quotesList/routes';
+import chatRouter from './modules/chat/routes';
+// 채팅 개발 중
+import { createServer } from 'http';
+import { Server } from 'socket.io';
+import ChatIo from './chatSocket';
 
 dotenv.config();
 
@@ -67,6 +72,7 @@ app.use('/profile', profileRouter);
 app.use('/movers', moverRouter);
 app.use('/quote', userQuoteRouter);
 app.use('/quotes', quoteListRouter);
+app.use('/chat', chatRouter);
 
 // // sse 리스너 실행
 // startNotificationListener();
@@ -74,8 +80,20 @@ app.use('/quotes', quoteListRouter);
 // 알림 스케줄러 실행
 startNotificationScheduler();
 
+const server = createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: allowedOrigins.length > 0 ? allowedOrigins : '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    credentials: true,
+  },
+});
+// 채팅 기능 주석
+const chatNamespace = io.of('/chat');
+ChatIo(chatNamespace);
+
 // 서버 실행
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`Server listening on port ${port}`);
 });
 
