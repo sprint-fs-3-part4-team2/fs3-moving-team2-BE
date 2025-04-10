@@ -44,12 +44,12 @@ export default class TargetedQuoteRequestService {
       throw new ConflictException('이미 해당 이사업체에 대한 견적 요청이 존재합니다.');
     }
 
-    // 3. 현재 지정 견적 요청 수 확인 (5명 제한)
+    // 3. 현재 지정 견적 요청 수 확인 (3명 까지 가능)
     const existingRequests = await this.targetedQuoteRequestRepository.findByQuoteId(
       latestQuote.id,
     );
-    if (existingRequests.length >= 5) {
-      throw new ConflictException('지정 견적 요청은 최대 5명까지만 가능합니다.');
+    if (existingRequests.length > 3) {
+      throw new ConflictException('지정 견적 요청은 최대 3명까지만 가능합니다.');
     }
 
     // 4. 견적 요청 생성
