@@ -94,6 +94,7 @@ export class MoverService {
       isFavorite: userFavorites.includes(mover.id),
       favoriteCount: mover.totalCustomerFavorite ?? 0,
       description: mover.description,
+      introduction: mover.introduction,
       regions: mover.moverServiceRegions.map((r) => reverseRegionMap[r.region]),
     }));
   }
