@@ -40,3 +40,8 @@
 ---
 
 ## 팀원별 구현 기능 상세
+
+## 프로젝트 DB ERD
+
+![무빙 ERD](https://github.com/user-attachments/assets/3417c4a3-59c3-4c9a-b2ca-5cfa30b77c32)
+
