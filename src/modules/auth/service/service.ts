@@ -106,11 +106,6 @@ export default class AuthService {
     }
   }
 
-  fakeSignIn(userId: string, roleId: string, type: LowercaseUserType) {
-    const tokens = generateTokens(userId, roleId, type);
-    return tokens;
-  }
-
   async findOrCreateUser(userInfo: OauthUserInfo, type: LowercaseUserType) {
     let user = await this.userRepository.findByEmail(userInfo.email);
     let token = {};

@@ -101,18 +101,6 @@ export default class AuthController {
     return res.status(200).json({ message: '액세스 토큰 갱신 성공' });
   };
 
-  fakeSignIn = async (req: Request, res: Response) => {
-    const userId = req.query.userId as string;
-    const roleId = req.query.roleId as string;
-    const type = req.query.type as 'customer' | 'mover';
-
-    const tokens = this.authService.fakeSignIn(userId, roleId, type);
-    this.setAccessToken(res, tokens.accessToken);
-    this.setRefreshToken(res, tokens.refreshToken);
-
-    return res.status(201).json({ message: '임의 로그인 성공' });
-  };
-
   snsLogin = async (req: Request, res: Response) => {
     const { provider } = req.params; // 로그인 제공자 (google, kakao, naver)
     const { userType } = req.query;
