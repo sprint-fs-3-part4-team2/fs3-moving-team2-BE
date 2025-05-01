@@ -68,9 +68,9 @@ jobs:
           # 첫 번째 데이터베이스(기본 데이터베이스)
           npx prisma db push --schema=./prisma/schema/schema.prisma
 
-          DATABASE_URL="postgresql://postgres:postgres@localhost:5433/test_db_2" npx prisma db push --schema=./prisma/schema/schema.prisma
+          DATABASE_URL=$(grep DATABASE_URL_2 .env.test | cut -d '=' -f2) npx prisma db push --schema=./prisma/schema/schema.prisma
 
-          DATABASE_URL="postgresql://postgres:postgres@localhost:5434/test_db_3" npx prisma db push --schema=./prisma/schema/schema.prisma
+          DATABASE_URL=$(grep DATABASE_URL_3 .env.test | cut -d '=' -f2) npx prisma db push --schema=./prisma/schema/schema.prisma
 
       - name: Run tests
         run: npm test
