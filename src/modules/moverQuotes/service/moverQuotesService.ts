@@ -16,6 +16,8 @@ export default class QuotesService {
   async getQuoteByIdForCustomer(quoteId: string) {
     const quote = await this.quotesRepository.getQuoteForCustomer(quoteId);
     if (!quote) throw new NotFoundException(EXCEPTION_MESSAGES.quoteNotFound);
+    console.log(quoteId);
+    console.log(quote.quoteMatch);
 
     return QuoteMapper.toQuoteForCustomerDto(quote);
   }
@@ -74,7 +76,7 @@ export default class QuotesService {
         messageType: 'quoteArrive',
         moverName: mover.user.name,
         moveType: quote.moveType,
-        url: `/user/quotes/${newMoverQuote.id}`,
+        url: `/quote-requests/${quoteId}`,
       });
 
       // 5. 결과 조회
