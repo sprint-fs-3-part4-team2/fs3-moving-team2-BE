@@ -94,5 +94,6 @@ describe('quoteRequestsRepository test', () => {
     expect(quoteRequest?.quoteRequestAddresses[1].type).toBe('ARRIVAL');
     expect(quoteRequest?.quoteStatusHistories).toHaveLength(1);
     expect(quoteRequest?.quoteStatusHistories[0].status).toBe('QUOTE_REQUESTED');
+    expect(quoteRequest?.quoteStatusHistories[0].createdAt).toBeDefined();
   });
 });
