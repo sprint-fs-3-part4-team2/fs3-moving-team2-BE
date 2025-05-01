@@ -69,9 +69,9 @@ jobs:
 
       - name: Run Prisma db push for all databases
         run: |
-          npx prisma db push --schema=./prisma/schema/schema.prisma --env-file .env.db1
-          npx prisma db push --schema=./prisma/schema/schema.prisma --env-file .env.db2
-          npx prisma db push --schema=./prisma/schema/schema.prisma --env-file .env.db3
+          dotenv -e .env.db1 -- npx prisma db push --schema=./prisma/schema/schema.prisma
+          dotenv -e .env.db2 -- npx prisma db push --schema=./prisma/schema/schema.prisma
+          dotenv -e .env.db3 -- npx prisma db push --schema=./prisma/schema/schema.prisma
 
       - name: Run tests
         run: npm test
