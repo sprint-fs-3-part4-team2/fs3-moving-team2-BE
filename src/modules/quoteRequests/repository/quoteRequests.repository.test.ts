@@ -2,7 +2,7 @@ import { Customer, PrismaClient } from '@prisma/client';
 import QuoteRequestsRepository from './quoteRequests.repository';
 import { createCustomer } from '@/testUtils/factories/customer.factory';
 import { cleanupMock } from '@/testUtils/cleanUpMock';
-import { createPendingQuoteRequest } from '@/testUtils/factories/quoteRequest.factory';
+import { createQuoteRequest } from '@/testUtils/factories/quoteRequest.factory';
 
 describe('quoteRequestsRepository test', () => {
   const testPrismaClient = new PrismaClient({
@@ -64,8 +64,8 @@ describe('quoteRequestsRepository test', () => {
   test('getLatestQuoteRequestForCustomer 테스트', async () => {
     const pastDate = new Date();
     pastDate.setMonth(pastDate.getMonth() - 1);
-    const pendingQuoteRequest = await createPendingQuoteRequest(testPrismaClient, customer!.id);
-    const confirmedQuoteRequest = await createPendingQuoteRequest(testPrismaClient, customer!.id, {
+    const pendingQuoteRequest = await createQuoteRequest(testPrismaClient, customer!.id);
+    const confirmedQuoteRequest = await createQuoteRequest(testPrismaClient, customer!.id, {
       moveDate: pastDate,
       currentStatus: 'MOVE_COMPLETED',
     });

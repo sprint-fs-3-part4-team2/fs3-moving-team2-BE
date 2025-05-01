@@ -1,6 +1,6 @@
 import { Customer, Mover, PrismaClient } from '@prisma/client';
 import MoverQuotesRepository from '@/modules/moverQuotes/repository/moverQuotesRepository';
-import { createPendingQuoteRequest } from '@/testUtils/factories/quoteRequest.factory';
+import { createQuoteRequest } from '@/testUtils/factories/quoteRequest.factory';
 import { cleanupMock } from '@/testUtils/cleanUpMock';
 import { createCustomer } from '@/testUtils/factories/customer.factory';
 import { createMover } from '@/testUtils/factories/mover.factory';
@@ -26,7 +26,7 @@ describe('moverQuotesRepository', () => {
   });
 
   test('getQuoteForCustomer 테스트', async () => {
-    const quoteRequest = await createPendingQuoteRequest(testPrismaClient, customer!.id);
+    const quoteRequest = await createQuoteRequest(testPrismaClient, customer!.id);
     const moverQuote = await testPrismaClient.moverQuote.create({
       data: {
         quoteRequestId: quoteRequest.id,
