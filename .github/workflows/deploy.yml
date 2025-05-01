@@ -53,19 +53,20 @@ jobs:
           # 데이터베이스 연결 확인
           docker exec fs3-moving-team2-be-postgres-1-1 pg_isready -U postgres || exit 1
 
-      - name: Run Prisma db push for all databases
+      - name: Create .env.test files
         run: |
-          # 첫 번째 데이터베이스
-          echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/test_db_1" > .env
-          npx prisma db push --schema=./prisma/schema/schema.prisma
+          # Create .env.test file with all database URLs
+          echo "DATABASE_URL_1=postgresql://postgres:postgres@localhost:5432/test_db_1" > .env.test
+          echo "DATABASE_URL_2=postgresql://postgres:postgres@localhost:5433/test_db_2" >> .env.test
+          echo "DATABASE_URL_3=postgresql://postgres:postgres@localhost:5434/test_db_3" >> .env.test
 
-          # 두 번째 데이터베이스
-          echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5433/test_db_2" > .env
-          npx prisma db push --schema=./prisma/schema/schema.prisma
-
-          # 세 번째 데이터베이스
-          echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5434/test_db_3" > .env
-          npx prisma db push --schema=./prisma/schema/schema.prisma
+          # Push schema to each database
+          # First database
+          DATABASE_URL=$(cat .env.test | grep DATABASE_URL_1 | cut -d'=' -f2) npx prisma db push --schema=./prisma/schema/schema.prisma
+          # Second database
+          DATABASE_URL=$(cat .env.test | grep DATABASE_URL_2 | cut -d'=' -f2) npx prisma db push --schema=./prisma/schema/schema.prisma
+          # Third database
+          DATABASE_URL=$(cat .env.test | grep DATABASE_URL_3 | cut -d'=' -f2) npx prisma db push --schema=./prisma/schema/schema.prisma
 
       - name: Run tests
         run: npm test
