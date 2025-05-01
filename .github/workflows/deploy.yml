@@ -53,25 +53,19 @@ jobs:
           # 데이터베이스 연결 확인
           docker exec fs3-moving-team2-be-postgres-1-1 pg_isready -U postgres || exit 1
 
-      - name: Create .env.test file
-        run: |
-          # 첫 번째 DB를 위한 .env 파일 생성
-          echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/test_db_1" > .env.db1
-
-           # 두 번째 DB를 위한 .env 파일 생성
-           echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5433/test_db_2" > .env.db2
-
-           # 세 번째 DB를 위한 .env 파일 생성
-           echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5434/test_db_3" > .env.db3
-
-      - name: Run prisma generate
-        run: npx prisma generate
-
       - name: Run Prisma db push for all databases
         run: |
-          dotenv -e .env.db1 -- npx prisma db push --schema=./prisma/schema/schema.prisma
-          dotenv -e .env.db2 -- npx prisma db push --schema=./prisma/schema/schema.prisma
-          dotenv -e .env.db3 -- npx prisma db push --schema=./prisma/schema/schema.prisma
+          # 첫 번째 데이터베이스
+          echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/test_db_1" > .env
+          npx prisma db push --schema=./prisma/schema/schema.prisma
+
+          # 두 번째 데이터베이스
+          echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5433/test_db_2" > .env
+          npx prisma db push --schema=./prisma/schema/schema.prisma
+
+          # 세 번째 데이터베이스
+          echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5434/test_db_3" > .env
+          npx prisma db push --schema=./prisma/schema/schema.prisma
 
       - name: Run tests
         run: npm test
