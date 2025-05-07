@@ -11,14 +11,6 @@ import {
 type OauthTypes = 'kakao' | 'naver' | 'google';
 
 export default class AuthController {
-  private COOKIE_OPTIONS = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? ('none' as const) : ('lax' as const),
-    path: '/',
-    domain: process.env.NODE_ENV === 'production' ? '.moving-app.site' : 'localhost',
-  };
-
   private ROOT_URL =
     process.env.NODE_ENV === 'production' ? process.env.DEPLOYED_URL : process.env.LOCALHOST_URL;
 
@@ -85,8 +77,8 @@ export default class AuthController {
   };
 
   signOut = async (req: Request, res: Response) => {
-    res.clearCookie('accessToken', this.COOKIE_OPTIONS);
-    res.clearCookie('refreshToken', this.COOKIE_OPTIONS);
+    res.clearCookie('accessToken', COOKIE_OPTIONS);
+    res.clearCookie('refreshToken', COOKIE_OPTIONS);
 
     return res.status(200).json({ message: '로그아웃 성공' });
   };
