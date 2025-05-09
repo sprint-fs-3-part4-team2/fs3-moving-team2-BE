@@ -13,7 +13,7 @@ declare global {
   namespace Express {
     interface Request {
       validatedQuery: ValidatedQuery;
-      user?: {
+      userInfo?: {
         userId: string;
         roleId: string;
         type: LowercaseUserType;

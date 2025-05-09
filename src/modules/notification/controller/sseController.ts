@@ -60,7 +60,7 @@
 
 // // SSE 연결 엔드포인트
 // export const handleSSEConnection = (req: any, res: Response) => {
-//   const userId = req.user?.userId;
+//   const userId = req.appUser?.userId;
 //   console.log('userId', userId);
 //   if (!userId) {
 //     res.status(400).send('userId가 필요합니다.');

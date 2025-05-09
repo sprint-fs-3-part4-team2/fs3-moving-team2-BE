@@ -10,7 +10,7 @@ export class MoverController {
   getMovers: RequestHandler = async (req, res) => {
     try {
       const { sortBy, area, service } = req.query;
-      const userId = req.user?.userId;
+      const userId = req.userInfo?.userId;
 
       // 정렬 옵션 검증
       const validSortOptions = ['reviews', 'rating', 'confirmed', 'experience'];
@@ -75,7 +75,7 @@ export class MoverController {
   searchMovers: RequestHandler = async (req, res) => {
     try {
       const { keyword } = req.query;
-      const userId = req.user?.userId;
+      const userId = req.userInfo?.userId;
 
       if (!keyword || typeof keyword !== 'string' || keyword.trim().length < 2) {
         res.status(400).json({
@@ -104,7 +104,7 @@ export class MoverController {
   getMoverById: RequestHandler = async (req, res) => {
     try {
       const { id } = req.params;
-      const userId = req.user?.userId;
+      const userId = req.userInfo?.userId;
 
       if (!id) {
         res.status(400).json({

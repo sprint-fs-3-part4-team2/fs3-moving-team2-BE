@@ -19,7 +19,7 @@ export default class QuotesController {
   };
 
   getQuotesListByMover = async (req: Request, res: Response) => {
-    const moverId = req.user?.roleId ?? '';
+    const moverId = req.userInfo?.roleId ?? '';
     const { page, pageSize } = req.query;
     const numberedPage = page !== undefined ? Number(page) : 1;
     const numberedPageSize = pageSize !== undefined ? Number(pageSize) : 4;
@@ -34,7 +34,7 @@ export default class QuotesController {
   };
 
   submitQuoteByMover = async (req: Request, res: Response) => {
-    const moverId = req.user?.roleId ?? '';
+    const moverId = req.userInfo?.roleId ?? '';
     const quoteId = req.params.quoteId;
     const price = req.body.price;
     const comment = req.body.comment;

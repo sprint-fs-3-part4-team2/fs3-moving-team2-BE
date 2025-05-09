@@ -5,7 +5,7 @@ export default class QuoteRequestsController {
   constructor(private quoteRequestsService: QuoteRequestsService) {}
 
   createQuoteRequest = async (req: Request, res: Response) => {
-    const customerId = req.user?.roleId ?? '';
+    const customerId = req.userInfo?.roleId ?? '';
 
     if (!customerId) {
       return res.status(400).json({ error: 'Customer ID is required' });
@@ -16,7 +16,7 @@ export default class QuoteRequestsController {
   };
 
   getLatestQuoteRequestForCustomer = async (req: Request, res: Response) => {
-    const customerId = req.user?.roleId ?? '';
+    const customerId = req.userInfo?.roleId ?? '';
 
     if (!customerId) {
       return res.status(400).json({ error: 'Customer ID is required' });
@@ -28,7 +28,7 @@ export default class QuoteRequestsController {
   };
 
   getAllQuoteRequests = async (req: Request, res: Response) => {
-    const moverId = req.user?.roleId ?? '';
+    const moverId = req.userInfo?.roleId ?? '';
 
     if (!moverId) {
       return res.status(400).json({ error: 'Mover ID is required' });
@@ -61,7 +61,7 @@ export default class QuoteRequestsController {
   };
 
   cancelQuoteRequest = async (req: Request, res: Response) => {
-    const customerId = req.user?.roleId ?? '';
+    const customerId = req.userInfo?.roleId ?? '';
 
     if (!customerId) {
       return res.status(400).json({ error: 'Customer ID is required' });

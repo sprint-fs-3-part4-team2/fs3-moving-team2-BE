@@ -24,6 +24,7 @@
   },
   "prisma": {
     "seed": "ts-node ./src/mocks/seed.ts",
+    "schema": "prisma/schema/schema.prisma",
     "generate": "prisma generate"
   },
   "lint-staged": {
@@ -48,6 +49,10 @@
     "@types/multer": "^1.4.12",
     "@types/node": "^22.13.10",
     "@types/node-cron": "^3.0.11",
+    "@types/passport": "^1.0.17",
+    "@types/passport-google-oauth20": "^2.0.16",
+    "@types/passport-kakao": "^1.0.3",
+    "@types/passport-naver": "^1.0.4",
     "@types/pg": "^8.11.11",
     "@types/supertest": "^6.0.2",
     "@types/swagger-jsdoc": "^6.0.4",

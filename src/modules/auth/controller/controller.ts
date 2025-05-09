@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import AuthService from '../service/service';
 import { LowercaseUserType } from '@/types/userType.types';
 import { UnauthorizedException } from '@/core/errors/unauthorizedException';
@@ -7,18 +7,10 @@ import {
   ACCESS_TOKEN_MAX_AGE,
   REFRESH_TOKEN_MAX_AGE,
 } from '../../../constants/cookieOptions';
-
-type OauthTypes = 'kakao' | 'naver' | 'google';
+import passport from 'passport';
+import { NotFoundException } from '@/core/errors';
 
 export default class AuthController {
-  private COOKIE_OPTIONS = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? ('none' as const) : ('lax' as const),
-    path: '/',
-    domain: process.env.NODE_ENV === 'production' ? '.moving-app.site' : 'localhost',
-  };
-
   private ROOT_URL =
     process.env.NODE_ENV === 'production' ? process.env.DEPLOYED_URL : process.env.LOCALHOST_URL;
 
@@ -36,6 +28,8 @@ export default class AuthController {
     customer: `${this.ROOT_URL}/mover/sign-in`,
     mover: `${this.ROOT_URL}/user/sign-in`,
   };
+
+  private GOOGLE_SCOPE = 'email profile https://www.googleapis.com/auth/user.phonenumbers.read';
 
   constructor(private authService: AuthService) {}
 
@@ -85,8 +79,8 @@ export default class AuthController {
   };
 
   signOut = async (req: Request, res: Response) => {
-    res.clearCookie('accessToken', this.COOKIE_OPTIONS);
-    res.clearCookie('refreshToken', this.COOKIE_OPTIONS);
+    res.clearCookie('accessToken', COOKIE_OPTIONS);
+    res.clearCookie('refreshToken', COOKIE_OPTIONS);
 
     return res.status(200).json({ message: '로그아웃 성공' });
   };
@@ -101,7 +95,7 @@ export default class AuthController {
     return res.status(200).json({ message: '액세스 토큰 갱신 성공' });
   };
 
-  snsLogin = async (req: Request, res: Response) => {
+  snsLogin = async (req: Request, res: Response, next?: NextFunction) => {
     const { provider } = req.params; // 로그인 제공자 (google, kakao, naver)
     const { userType } = req.query;
     if (!userType || (userType !== 'customer' && userType !== 'mover')) {
@@ -109,17 +103,15 @@ export default class AuthController {
     }
 
     const state = this.authService.generateState({ userType: userType as string });
-    const loginUrl = this.authService.getSnsLoginUrl(provider as OauthTypes, state);
-    return res.redirect(loginUrl);
+    const scope =
+      provider === 'google' ? [this.GOOGLE_SCOPE, 'email', 'profile'] : ['email', 'profile'];
+
+    passport.authenticate(provider, { state, scope })(req, res, next);
   };
 
-  oAuthCallback = async (req: Request, res: Response) => {
+  oAuthCallback = async (req: Request, res: Response, next?: NextFunction) => {
     const { provider } = req.params;
-    const { code, state } = req.query;
-
-    if (!code || typeof code !== 'string') {
-      return res.status(400).json({ message: '인증 코드가 없습니다.' });
-    }
+    const { state } = req.query;
 
     let userType: LowercaseUserType = 'customer';
 
@@ -140,41 +132,23 @@ export default class AuthController {
       }
     }
 
-    try {
-      let token;
-
-      switch (provider) {
-        case 'google': {
-          const googleResult = await this.authService.handleGoogleCallback(
-            code,
-            provider,
-            userType,
-          );
-          token = googleResult.tokens;
-          break;
-        }
-        case 'naver': {
-          const naverResult = await this.authService.handleNaverCallback(code, provider, userType);
-          token = naverResult.tokens;
-          break;
-        }
-        case 'kakao': {
-          const kakaoResult = await this.authService.handleKakaoCallback(code, provider, userType);
-          token = kakaoResult.tokens;
-          break;
-        }
-        default:
-          return res.status(400).json({ message: '지원하지 않는 로그인 제공자입니다.' });
-      }
-      const { accessToken, refreshToken } = token;
-
-      this.setAccessToken(res, accessToken);
-      this.setRefreshToken(res, refreshToken);
-      res.redirect(this.REDIRECT_URL_ON_SUCCESS[userType]);
-    } catch (error: any) {
-      if (error.message === 'wrong type')
+    passport.authenticate(provider, { session: false }, async (error: any, userInfo: any) => {
+      if (error || !userInfo) {
         return res.redirect(`${this.REDIRECT_URL_ON_FAIL[userType]}${this.FAIL_QUERY[userType]}`);
-      return res.status(500).json({ message: '로그인 중 오류 발생' });
-    }
+      }
+
+      try {
+        const response = await this.authService.findOrCreateUser(userInfo, userType);
+        if (!response) throw new NotFoundException('사용자 생성 실패');
+        const { accessToken, refreshToken } = response.tokens;
+
+        this.setAccessToken(res, accessToken);
+        this.setRefreshToken(res, refreshToken);
+        res.redirect(this.REDIRECT_URL_ON_SUCCESS[userType]);
+      } catch (error: any) {
+        console.log(error);
+        return res.status(500).json({ message: '로그인 중 오류 발생' });
+      }
+    })(req, res, next);
   };
 }

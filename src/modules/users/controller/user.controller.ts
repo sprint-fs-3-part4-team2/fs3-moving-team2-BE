@@ -6,11 +6,11 @@ export default class UserController {
   constructor(private userService: UserService) {}
 
   getMoverBasicInfo = async (req: Request, res: Response) => {
-    const userId = req.user?.userId ?? '';
-    const userType = req.user?.type ?? '';
+    const userId = req.userInfo?.userId ?? '';
+    const userType = req.userInfo?.type ?? '';
     if (!userType || !userId) return res.status(200).json(null);
 
-    const data = await this.userService.mbiGet(req.user);
+    const data = await this.userService.mbiGet(req.userInfo);
 
     res.status(200).json({ ok: true, data });
   };
@@ -18,8 +18,8 @@ export default class UserController {
   patchMoverBasicInfo = async (req: Request, res: Response) => {
     const { current_password, new_password, phoneNumber, name }: EditBaiscInfoBody = req.body;
 
-    const userId = req.user?.userId ?? '';
-    const userType = req.user?.type ?? '';
+    const userId = req.userInfo?.userId ?? '';
+    const userType = req.userInfo?.type ?? '';
     if (!userType || !userId) return res.status(200).json(null);
 
     const { data, message } = await this.userService.mbiEdit(
@@ -29,7 +29,7 @@ export default class UserController {
         phoneNumber,
         name,
       },
-      req.user,
+      req.userInfo,
     );
     if (!data) {
       return res.status(203).json({ ok: false, message });
@@ -43,8 +43,8 @@ export default class UserController {
   };
 
   getMe = async (req: Request, res: Response) => {
-    const userId = req.user?.userId ?? '';
-    const userType = req.user?.type ?? '';
+    const userId = req.userInfo?.userId ?? '';
+    const userType = req.userInfo?.type ?? '';
     if (!userType || !userId) return res.status(200).json(null);
     const userData = await this.userService.getMe(userId, userType);
 

@@ -2,8 +2,8 @@ import { RequestHandler } from 'express';
 import * as reviewService from '../service/reviewService';
 
 export const getPendingReviews: RequestHandler = async (req, res) => {
-  const userId = req.user?.userId;
-  const roleId = req.user?.roleId;
+  const userId = req.userInfo?.userId;
+  const roleId = req.userInfo?.roleId;
 
   if (!userId) {
     res.status(401).json({ message: '로그인 필요' });
@@ -25,8 +25,8 @@ export const getPendingReviews: RequestHandler = async (req, res) => {
 };
 
 export const submitReview: RequestHandler = async (req, res) => {
-  const userId = req.user?.userId;
-  const roleId = req.user?.roleId;
+  const userId = req.userInfo?.userId;
+  const roleId = req.userInfo?.roleId;
 
   if (!userId) {
     res.status(401).json({ message: '로그인 필요' });

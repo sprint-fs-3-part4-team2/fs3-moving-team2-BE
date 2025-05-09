@@ -9,7 +9,7 @@ export const extractUserMiddleware = (req: Request, res: Response, next: NextFun
   }
   try {
     const decoded = jwt.verify(accessToken, process.env.JWT_SECRET!) as JwtPayload;
-    req.user = { userId: decoded.userId, type: decoded.type, roleId: decoded.roleId };
+    req.userInfo = { userId: decoded.userId, type: decoded.type, roleId: decoded.roleId };
   } catch {
     console.error('userId 조회 실패');
   }

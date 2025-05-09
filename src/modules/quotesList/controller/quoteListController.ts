@@ -15,8 +15,8 @@ function handleError(error: unknown, res: Response) {
 // 내 견적 요청 목록 조회
 export async function getQuoteRequests(req: Request, res: Response) {
   try {
-    const userId = req.user?.userId ?? '';
-    const roleId = req.user?.roleId ?? '';
+    const userId = req.userInfo?.userId ?? '';
+    const roleId = req.userInfo?.roleId ?? '';
     const quoteRequests = await quoteListService.getQuoteRequests(
       userId as string,
       roleId as string,
@@ -30,7 +30,7 @@ export async function getQuoteRequests(req: Request, res: Response) {
 // 기사님에게 받은 견적 목록 조회
 export async function getQuotesFromDrivers(req: Request, res: Response) {
   try {
-    const userId = req?.user?.roleId ?? '';
+    const userId = req?.userInfo?.roleId ?? '';
     const quoteRequestedId = req?.params?.quoteRequestId ?? '';
     if (!userId || !quoteRequestedId) {
       return res.status(400).json({ error: 'userId와 quoteRequestedId 필요합니다.' });

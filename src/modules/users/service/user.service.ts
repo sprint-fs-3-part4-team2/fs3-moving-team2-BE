@@ -10,7 +10,7 @@ const USER_AUTH_FAIL = '유저 정보 인증 실패';
 export default class UserService {
   constructor(private userRepository: UserRepository) {}
 
-  async mbiGet(user: Request['user']) {
+  async mbiGet(user: Request['userInfo']) {
     if (!user) throw new Error(NOUSER);
     const userId = user.userId;
 
@@ -19,7 +19,7 @@ export default class UserService {
     return { name: userInfo.name, phoneNumber: userInfo.phoneNumber, email: userInfo.email };
   }
 
-  async mbiEdit(body: Omit<EditBaiscInfoBody, 'email' | 'userType'>, user: Request['user']) {
+  async mbiEdit(body: Omit<EditBaiscInfoBody, 'email' | 'userType'>, user: Request['userInfo']) {
     const { new_password, phoneNumber, name, current_password } = body;
     if (!user) throw new Error(NOUSER);
     const userId = user.userId;
