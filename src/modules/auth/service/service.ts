@@ -9,8 +9,8 @@ import { LowercaseUserType } from '@/types/userType.types';
 import { UserType } from '@prisma/client';
 import axios from 'axios';
 import bcrypt from 'bcrypt';
-import { OauthUserInfo } from '../types/userInfo.types';
 import { getUniqueKoreanPhrase } from '@/utils/getUniqueKoreanPhrase';
+import { OauthUserInfo, UserWithRelations } from '../types/userInfo.types';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 
 export default class AuthService {
@@ -106,75 +106,61 @@ export default class AuthService {
     }
   }
 
-  async findOrCreateUser(userInfo: OauthUserInfo, type: LowercaseUserType) {
-    let user = await this.userRepository.findByEmail(userInfo.email);
-    let token = {};
+  // findOrCreateUser에서 사용하는 메서드 : 소셜 로그인 회원 생성
+  async createSocialLoginUser(userInfo: OauthUserInfo, type: LowercaseUserType) {
     const password = await bcrypt.hash('password1!', this.SALT_ROUNDS);
-    if (!user) {
-      user = await this.userRepository.createWithSocialLogin(
-        {
-          email: userInfo.email,
-          password: password,
-          name: userInfo.name,
-          phoneNumber: userInfo.phoneNumber,
-        },
-        type.toUpperCase() as UserType,
-        userInfo.provider,
-        userInfo.providerId,
-      );
-      const userId = user.id;
-      token = generateTokens(userId, '', type);
-      const role = user[type];
-      return {
-        tokens: token,
-        user: {
-          id: userId,
-          email: user.email,
-          phoneNumber: user.phoneNumber,
-          name: user.name,
-          [type]: role,
-        },
-      };
-    }
+    const user = await this.userRepository.createWithSocialLogin(
+      {
+        email: userInfo.email,
+        password: password,
+        name: userInfo.name,
+        phoneNumber: userInfo.phoneNumber,
+      },
+      type.toUpperCase() as UserType,
+      userInfo.provider,
+      userInfo.providerId,
+    );
+    return this.generateUserResponse(user, type);
+  }
+
+  // findOrCreateUser에서 사용하는 메서드 : 일반회원에 소셜 로그인 추가
+  async addSocialLoginUser(userInfo: OauthUserInfo, type: LowercaseUserType) {
+    const userUpdated = await this.userRepository.addSocialProvider(
+      userInfo.email,
+      userInfo.provider,
+      userInfo.providerId,
+    );
+    return this.generateUserResponse(userUpdated, type);
+  }
+
+  // findOrCreateUser, createSocialLoginUser, addSocialLoginUser에서 사용하는 메서드
+  private generateUserResponse(user: UserWithRelations, type: LowercaseUserType) {
+    const profile = user[type];
+    const roleId = profile?.id ?? '';
+    const token = generateTokens(user.id, roleId, type);
+    return {
+      tokens: token,
+      user: {
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+        name: user.name,
+        [type]: profile,
+      },
+    };
+  }
+
+  // 소셜 로그인 회원을 찾거나 생성
+  async findOrCreateUser(userInfo: OauthUserInfo, type: LowercaseUserType) {
+    const user = await this.userRepository.findByEmail(userInfo.email);
+    if (!user) return await this.createSocialLoginUser(userInfo, type);
 
     if (user?.userType !== type.toUpperCase()) {
       throw new ConflictException('wrong type');
     }
 
-    if (user && !user.socialLogin) {
-      user = await this.userRepository.addSocialProvider(
-        user.email,
-        userInfo.provider,
-        userInfo.providerId,
-      );
-      const role = user[type];
-      token = generateTokens(user.id, user[type]?.id ?? '', type);
-      return {
-        tokens: token,
-        user: {
-          id: user.id,
-          email: user.email,
-          phoneNumber: user.phoneNumber,
-          name: user.name,
-          [type]: role,
-        },
-      };
-    }
+    if (user && !user.socialLogin) return await this.addSocialLoginUser(userInfo, type);
 
-    if (user) {
-      const roleId = type === 'mover' ? (user.mover?.id ?? '') : (user.customer?.id ?? '');
-      token = generateTokens(user.id, roleId, type);
-
-      return {
-        tokens: token,
-        user: {
-          email: user.email,
-          phoneNumber: user.phoneNumber,
-          name: user.name,
-          [type]: user[type],
-        },
-      };
-    }
+    return this.generateUserResponse(user, type);
   }
 
   getSnsLoginUrl = (provider: keyof typeof this.SNS_AUTH_URLS, state?: string) => {
