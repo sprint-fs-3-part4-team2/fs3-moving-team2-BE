@@ -24,6 +24,7 @@
   },
   "prisma": {
     "seed": "ts-node ./src/mocks/seed.ts",
+    "schema": "prisma/schema/schema.prisma",
     "generate": "prisma generate"
   },
   "lint-staged": {
