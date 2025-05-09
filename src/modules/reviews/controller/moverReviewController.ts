@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { getMoverReviews } from '../service/moverReview';
 
 export async function getMoverSubmittedReviews(req: Request, res: Response) {
-  const roleId = req?.user?.roleId ?? '';
+  const roleId = req?.userInfo?.roleId ?? '';
 
   try {
     const submittedMoverReviews = await getMoverReviews(roleId);

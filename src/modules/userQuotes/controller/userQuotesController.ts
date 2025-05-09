@@ -16,8 +16,8 @@ function handleError(error: unknown, res: Response) {
 // 대기 중인 견적 목록 조회
 export async function getPendingQuotes(req: Request, res: Response): Promise<Response> {
   try {
-    const userId = req?.user?.userId ?? '';
-    const roleId = req?.user?.roleId ?? '';
+    const userId = req?.userInfo?.userId ?? '';
+    const roleId = req?.userInfo?.roleId ?? '';
     const pendingQuotes = await quoteService.getPendingQuotes(userId as string, roleId as string);
     return res.status(200).json({ data: pendingQuotes });
   } catch (error) {
@@ -28,7 +28,7 @@ export async function getPendingQuotes(req: Request, res: Response): Promise<Res
 // 견적 확정
 export async function confirmQuote(req: Request, res: Response): Promise<Response> {
   try {
-    const customerId = req.user?.roleId ?? '';
+    const customerId = req.userInfo?.roleId ?? '';
     const { moverQuoteId } = req.params;
     if (!moverQuoteId) {
       return res.status(400).json({ error: 'moverQuoteId가 필요합니다.' });

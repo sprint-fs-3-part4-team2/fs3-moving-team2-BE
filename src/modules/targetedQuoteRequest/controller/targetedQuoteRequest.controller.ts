@@ -5,7 +5,7 @@ export default class TargetedQuoteRequestController {
   constructor(private targetedQuoteRequestService: TargetedQuoteRequestService) {}
 
   createTargetedQuoteRequest = async (req: Request, res: Response) => {
-    const customerId = req.user?.roleId ?? '';
+    const customerId = req.userInfo?.roleId ?? '';
     const { moverId } = req.body;
 
     if (!customerId) {
@@ -25,7 +25,7 @@ export default class TargetedQuoteRequestController {
   };
 
   rejectQuoteByMover = async (req: Request, res: Response) => {
-    const moverId = req.user?.roleId ?? '';
+    const moverId = req.userInfo?.roleId ?? '';
     const quoteId = req.params.quoteId;
     const rejectionReason = req.body.rejectionReason;
 

@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import getReviewsByUserId from '../service/completedService';
 
 export async function getSubmittedReviews(req: Request, res: Response) {
-  const roleId = req.user?.roleId ?? '';
+  const roleId = req.userInfo?.roleId ?? '';
 
   try {
     const submittedReviews = await getReviewsByUserId(roleId);

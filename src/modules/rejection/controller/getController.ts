@@ -4,7 +4,7 @@ import { getRejectedTargetedQuoteRequestsByMover } from '../service/getService';
 export const getRejectedQuotes: RequestHandler = async (req, res) => {
   if (res.headersSent) return;
 
-  const userId = req.user?.roleId;
+  const userId = req.userInfo?.roleId;
   if (!userId) {
     res.status(401).json({ message: '로그인 필요' });
     return;

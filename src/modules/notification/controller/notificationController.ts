@@ -3,7 +3,7 @@ import * as notificationService from '../service/notificationService';
 
 export async function getNotifications(req: Request, res: Response) {
   try {
-    const userId = req.user?.userId;
+    const userId = req.userInfo?.userId;
 
     if (!userId) {
       res.status(401).json({ message: '유저 id를 확인할 수 없습니다' });
@@ -24,7 +24,7 @@ export async function getNotifications(req: Request, res: Response) {
 
 export async function updateToRead(req: Request, res: Response) {
   try {
-    const userId = req.user?.userId;
+    const userId = req.userInfo?.userId;
     const notificationId = req.params.id;
     if (!userId) {
       res.status(401).json({ message: '유저 id를 확인할 수 없습니다' });

@@ -48,7 +48,7 @@ const generateAndSetCookie = (
 // 고객 프로필 등록 (이미지, 이용 서비스, 지역)
 export async function postCustomerProfileInfo(req: Request, res: Response) {
   try {
-    const userId = req.user?.userId ?? '';
+    const userId = req.userInfo?.userId ?? '';
     // const userId = 'cm914rhmu0004voa4kee6s779';
     console.log(userId);
     if (!userId) {
@@ -101,7 +101,7 @@ export async function postCustomerProfileInfo(req: Request, res: Response) {
 // 고객 프로필 수정 (현재 비밀번호, 새 비밀번호, 새 비밀번호 확인, 이미지, 이용 서비스, 지역)
 export async function patchCustomerProfileInfo(req: Request, res: Response) {
   try {
-    const userId = req.user?.userId ?? '';
+    const userId = req.userInfo?.userId ?? '';
 
     if (!userId) {
       res.status(401).json({ message: '등록된 유저가 아닙니다' });
@@ -132,7 +132,7 @@ export async function patchCustomerProfileInfo(req: Request, res: Response) {
 // 기사 프로필 등록 (이미지, 별명, 경력, 한 줄 소개, 상세설명, 제공 서비스, 지역)
 export async function postMoverProfileInfo(req: Request, res: Response) {
   try {
-    const userId = req.user?.userId ?? '';
+    const userId = req.userInfo?.userId ?? '';
 
     if (!userId) {
       res.status(401).json({ message: '등록된 유저가 아닙니다' });
@@ -179,7 +179,7 @@ export async function postMoverProfileInfo(req: Request, res: Response) {
 // 기사 프로필 수정 (이미지, 별명, 경력, 한 줄 소개, 상세설명, 제공 서비스, 지역)
 export async function patchMoverProfileInfo(req: Request, res: Response) {
   try {
-    const userId = req.user?.userId ?? '';
+    const userId = req.userInfo?.userId ?? '';
 
     if (!userId) {
       res.status(401).json({ message: '등록된 유저가 아닙니다' });

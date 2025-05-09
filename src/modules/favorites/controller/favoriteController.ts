@@ -14,8 +14,8 @@ function handleError(error: unknown, res: Response) {
 // 찜한 목록 조회
 export async function getFavorites(req: Request, res: Response): Promise<Response> {
   try {
-    const userId = req?.user?.userId ?? '';
-    const roleId = req?.user?.roleId ?? '';
+    const userId = req?.userInfo?.userId ?? '';
+    const roleId = req?.userInfo?.roleId ?? '';
     const favorites = await favoriteService.getFavorites(userId as string, roleId as string);
     return res.status(200).json({ data: favorites });
   } catch (error) {
@@ -26,7 +26,7 @@ export async function getFavorites(req: Request, res: Response): Promise<Respons
 // 찜하기 추가
 export async function addFavorite(req: Request, res: Response): Promise<Response> {
   try {
-    const userId = req?.user?.roleId ?? '';
+    const userId = req?.userInfo?.roleId ?? '';
     const moverId = req?.params?.moverId ?? '';
     if (!userId || !moverId) {
       return res.status(400).json({ error: 'userId와 moverId가 필요합니다.' });
@@ -41,7 +41,7 @@ export async function addFavorite(req: Request, res: Response): Promise<Response
 // 찜하기 취소
 export async function removeFavorite(req: Request, res: Response): Promise<Response> {
   try {
-    const userId = req?.user?.roleId ?? '';
+    const userId = req?.userInfo?.roleId ?? '';
     const moverId = req?.params?.moverId ?? '';
     if (!userId || !moverId) {
       return res.status(400).json({ error: 'userId와 moverId가 필요합니다.' });
@@ -56,7 +56,7 @@ export async function removeFavorite(req: Request, res: Response): Promise<Respo
 // 찜하기 상태 확인
 export async function checkFavoriteStatus(req: Request, res: Response): Promise<Response> {
   try {
-    const userId = req?.user?.roleId ?? '';
+    const userId = req?.userInfo?.roleId ?? '';
     const moverId = req?.params?.moverId ?? '';
     if (!userId || !moverId) {
       return res.status(400).json({ error: 'userId와 moverId가 필요합니다.' });
