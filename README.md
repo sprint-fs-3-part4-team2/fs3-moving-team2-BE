@@ -135,11 +135,11 @@
 
 #### 유저 정보 추출 미들웨어
 
-- 쿠키에 담긴 JWT를 decode하여 req?.appUser 객체에 userId,roleId,userType 값을 할당하는 미들웨어 구현
+- 쿠키에 담긴 JWT를 decode하여 Req.user 객체에 userId,roleId,userType 값을 할당하는 미들웨어 구현
 
 #### 유저 타입 검증 미들웨어
 
-- API마다 호출 가능한 유저 타입이 달라지는데 req?.appUser에 저장된 userType을 통해서 호출 가능한 타입의 사용자인지 확인하고 아닐 경우 401 상태와 메시지를 응답하는 미들웨어 구현
+- API마다 호출 가능한 유저 타입이 달라지는데 Req.user에 저장된 userType을 통해서 호출 가능한 타입의 사용자인지 확인하고 아닐 경우 401 상태와 메시지를 응답하는 미들웨어 구현
 
 #### 견적 요청 취소 API
 

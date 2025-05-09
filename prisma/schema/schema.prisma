@@ -22,7 +22,7 @@ model User {
   password      String // 비밀번호
   createdAt     DateTime       @default(now()) @map("created_at")
   updatedAt     DateTime       @updatedAt @map("updated_at")
-  notifications Notification[] // 유저-알람 1:N
+  notifications Notification[] // 유저-알림 1:N
   socialLogin   SocialLogin? // 유저-소셜로그인 1:1
   customer      Customer? // 유저-고객 1:1
   mover         Mover? // 유저-이사업자 1:1
@@ -31,16 +31,16 @@ model User {
   @@map("user")
 }
 
-// 알람
+// 알림
 model Notification {
   id        String   @id @default(cuid())
   userId    String   @map("user_id")
-  message   String // 알람 내용
+  message   String // 알림 내용
   highlight String[] // 하이라이트 단어들 저장할 곳
-  isRead    Boolean  @default(false) @map("is_read") // 알람 읽음 여부
-  url       String? // 알람 클릭 시 이동할 url
+  isRead    Boolean  @default(false) @map("is_read") // 알림 읽음 여부
+  url       String? // 알림 클릭 시 이동할 url
   createdAt DateTime @default(now()) @map("created_at")
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade) // 알람-유저 1:N
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade) // 알림-유저 1:N
 
   @@map("notification")
 }
