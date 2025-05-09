@@ -21,6 +21,8 @@ import userQuoteRouter from './modules/userQuotes/routes';
 // import { startNotificationListener } from './modules/notification/controller/sseController';
 import { startNotificationScheduler } from './schedulers/movingReminder';
 import quoteListRouter from './modules/quotesList/routes';
+import passport from 'passport';
+import { setupAuthStrategies } from './modules/auth/strategy';
 
 dotenv.config();
 
@@ -46,6 +48,9 @@ app.use(express.json());
 app.use(extractUserMiddleware);
 app.use(express.urlencoded({ extended: true })); // 필요한거야?  // body-parser 대체
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec)); // swagger 설정
+app.use(passport.initialize());
+
+setupAuthStrategies();
 
 // 기본 라우터 설정
 app.get('/', (req: Request, res: Response) => {
