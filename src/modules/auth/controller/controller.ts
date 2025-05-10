@@ -113,19 +113,16 @@ export default class AuthController {
     const { provider } = req.params;
     const { state } = req.query;
 
+    if (!state) {
+      return res.status(400).json({ message: '상태 정보가 없습니다.' });
+    }
+
     let userType: LowercaseUserType = 'customer';
 
-    if (state && typeof state === 'string') {
+    if (typeof state === 'string') {
       try {
         const decodedState = this.authService.decodeState(state);
         userType = decodedState.userType as LowercaseUserType;
-        // 상태 정보 유효성 검증 (예: 타임스탬프 확인)
-        const now = Date.now();
-        const stateAge = now - decodedState.timestamp;
-        if (stateAge > 10 * 60 * 1000) {
-          // 10분 이상 지난 state는 거부
-          return res.status(400).json({ message: '만료된 인증 요청입니다.' });
-        }
       } catch (error) {
         console.error('상태 정보 디코딩 실패:', error);
         return res.status(400).json({ message: '유효하지 않은 상태 정보입니다.' });
@@ -136,17 +133,15 @@ export default class AuthController {
       if (error || !userInfo) {
         return res.redirect(`${this.REDIRECT_URL_ON_FAIL[userType]}${this.FAIL_QUERY[userType]}`);
       }
-
       try {
         const response = await this.authService.findOrCreateUser(userInfo, userType);
-        if (!response) throw new NotFoundException('사용자 생성 실패');
+        if (!response) return res.status(500).json({ message: '사용자 생성 실패' });
         const { accessToken, refreshToken } = response.tokens;
 
         this.setAccessToken(res, accessToken);
         this.setRefreshToken(res, refreshToken);
-        res.redirect(this.REDIRECT_URL_ON_SUCCESS[userType]);
+        return res.redirect(this.REDIRECT_URL_ON_SUCCESS[userType]);
       } catch (error: any) {
-        console.log(error);
         return res.status(500).json({ message: '로그인 중 오류 발생' });
       }
     })(req, res, next);
