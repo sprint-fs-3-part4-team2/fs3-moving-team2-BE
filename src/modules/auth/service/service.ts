@@ -156,13 +156,17 @@ export default class AuthService {
     const stateObj = {
       userType: data.userType,
     };
-    return jwt.sign(stateObj, process.env.OAUTH_STATE_SECRET!, {
+    const token = jwt.sign(stateObj, process.env.OAUTH_STATE_SECRET!, {
       expiresIn: '5m',
     });
+    return encodeURIComponent(token);
   }
 
   decodeState(state: string) {
-    const decoded = jwt.verify(state, process.env.OAUTH_STATE_SECRET!) as JwtPayload;
+    const decoded = jwt.verify(
+      decodeURIComponent(state),
+      process.env.OAUTH_STATE_SECRET!,
+    ) as JwtPayload;
     return {
       userType: decoded.userType,
     };
