@@ -152,25 +152,19 @@ export default class AuthService {
     return this.generateUserResponse(user, type);
   }
 
-  generateState(data: { userType: string }): string {
+  generateState(data: { userType: string }) {
     const stateObj = {
       userType: data.userType,
-      timestamp: Date.now(),
     };
     return jwt.sign(stateObj, process.env.OAUTH_STATE_SECRET!, {
       expiresIn: '5m',
     });
   }
 
-  decodeState(state: string): { userType: string; timestamp: number } {
-    try {
-      const decoded = jwt.verify(state, process.env.OAUTH_STATE_SECRET!) as JwtPayload;
-      return {
-        userType: decoded.userType,
-        timestamp: decoded.timestamp,
-      };
-    } catch {
-      throw new Error('상태 정보를 디코딩할 수 없습니다.');
-    }
+  decodeState(state: string) {
+    const decoded = jwt.verify(state, process.env.OAUTH_STATE_SECRET!) as JwtPayload;
+    return {
+      userType: decoded.userType,
+    };
   }
 }
