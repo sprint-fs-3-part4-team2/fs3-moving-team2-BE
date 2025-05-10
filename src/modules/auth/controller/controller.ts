@@ -113,9 +113,13 @@ export default class AuthController {
     const { provider } = req.params;
     const { state } = req.query;
 
+    if (!state) {
+      return res.status(400).json({ message: '상태 정보가 없습니다.' });
+    }
+
     let userType: LowercaseUserType = 'customer';
 
-    if (state && typeof state === 'string') {
+    if (typeof state === 'string') {
       try {
         const decodedState = this.authService.decodeState(state);
         userType = decodedState.userType as LowercaseUserType;
