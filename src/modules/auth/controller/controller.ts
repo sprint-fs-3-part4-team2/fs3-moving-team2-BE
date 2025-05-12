@@ -8,7 +8,6 @@ import {
   REFRESH_TOKEN_MAX_AGE,
 } from '../../../constants/cookieOptions';
 import passport from 'passport';
-import { NotFoundException } from '@/core/errors';
 
 export default class AuthController {
   private ROOT_URL =
@@ -22,11 +21,12 @@ export default class AuthController {
   private FAIL_QUERY = {
     customer: '?warn=moverAccountExist',
     mover: '?warn=customerAccountExist',
+    invalidRequest: '?warn=invalidRequest',
   };
 
   private REDIRECT_URL_ON_FAIL = {
-    customer: `${this.ROOT_URL}/mover/sign-in`,
-    mover: `${this.ROOT_URL}/user/sign-in`,
+    customer: `${this.ROOT_URL}/user/sign-in`,
+    mover: `${this.ROOT_URL}/mover/sign-in`,
   };
 
   private GOOGLE_SCOPE = 'email profile https://www.googleapis.com/auth/user.phonenumbers.read';
@@ -109,15 +109,19 @@ export default class AuthController {
     passport.authenticate(provider, { state, scope })(req, res, next);
   };
 
+  private redirectToError = (userType: LowercaseUserType, query: string, res: Response) => {
+    return res.redirect(`${this.REDIRECT_URL_ON_FAIL[userType]}${query}`);
+  };
+
   oAuthCallback = async (req: Request, res: Response, next?: NextFunction) => {
     const { provider } = req.params;
     const { state } = req.query;
 
-    if (!state) {
-      return res.status(400).json({ message: '상태 정보가 없습니다.' });
-    }
-
     let userType: LowercaseUserType = 'customer';
+
+    if (!state) {
+      return this.redirectToError(userType, this.FAIL_QUERY.invalidRequest, res);
+    }
 
     if (typeof state === 'string') {
       try {
@@ -125,24 +129,28 @@ export default class AuthController {
         userType = decodedState.userType as LowercaseUserType;
       } catch (error) {
         console.error('상태 정보 디코딩 실패:', error);
-        return res.status(400).json({ message: '유효하지 않은 상태 정보입니다.' });
+        return this.redirectToError(userType, this.FAIL_QUERY.invalidRequest, res);
       }
     }
 
     passport.authenticate(provider, { session: false }, async (error: any, userInfo: any) => {
+      const oppositeUserType = userType === 'customer' ? 'mover' : 'customer';
       if (error || !userInfo) {
-        return res.redirect(`${this.REDIRECT_URL_ON_FAIL[userType]}${this.FAIL_QUERY[userType]}`);
+        return this.redirectToError(userType, this.FAIL_QUERY.invalidRequest, res);
       }
       try {
         const response = await this.authService.findOrCreateUser(userInfo, userType);
-        if (!response) return res.status(500).json({ message: '사용자 생성 실패' });
+        if (!response) return this.redirectToError(userType, this.FAIL_QUERY.invalidRequest, res);
         const { accessToken, refreshToken } = response.tokens;
 
         this.setAccessToken(res, accessToken);
         this.setRefreshToken(res, refreshToken);
         return res.redirect(this.REDIRECT_URL_ON_SUCCESS[userType]);
       } catch (error: any) {
-        return res.status(500).json({ message: '로그인 중 오류 발생' });
+        if (error.message === 'wrong type') {
+          return this.redirectToError(oppositeUserType, this.FAIL_QUERY[userType], res);
+        }
+        return this.redirectToError(userType, this.FAIL_QUERY.invalidRequest, res);
       }
     })(req, res, next);
   };
