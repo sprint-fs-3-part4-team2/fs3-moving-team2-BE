@@ -21,7 +21,6 @@ export default class AuthController {
   private FAIL_QUERY = {
     customer: '?warn=moverAccountExist',
     mover: '?warn=customerAccountExist',
-    common: '?warn=failed',
     invalidRequest: '?warn=invalidRequest',
   };
 
@@ -137,11 +136,11 @@ export default class AuthController {
     passport.authenticate(provider, { session: false }, async (error: any, userInfo: any) => {
       const oppositeUserType = userType === 'customer' ? 'mover' : 'customer';
       if (error || !userInfo) {
-        return this.redirectToError(userType, this.FAIL_QUERY.common, res);
+        return this.redirectToError(userType, this.FAIL_QUERY.invalidRequest, res);
       }
       try {
         const response = await this.authService.findOrCreateUser(userInfo, userType);
-        if (!response) return this.redirectToError(userType, this.FAIL_QUERY.common, res);
+        if (!response) return this.redirectToError(userType, this.FAIL_QUERY.invalidRequest, res);
         const { accessToken, refreshToken } = response.tokens;
 
         this.setAccessToken(res, accessToken);
@@ -151,7 +150,7 @@ export default class AuthController {
         if (error.message === 'wrong type') {
           return this.redirectToError(oppositeUserType, this.FAIL_QUERY[userType], res);
         }
-        return this.redirectToError(userType, this.FAIL_QUERY.common, res);
+        return this.redirectToError(userType, this.FAIL_QUERY.invalidRequest, res);
       }
     })(req, res, next);
   };
