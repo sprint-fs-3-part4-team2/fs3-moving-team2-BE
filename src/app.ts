@@ -23,6 +23,7 @@ import { startNotificationScheduler } from './schedulers/movingReminder';
 import quoteListRouter from './modules/quotesList/routes';
 import passport from 'passport';
 import { setupAuthStrategies } from './modules/auth/strategy';
+import { csrfMiddleware } from './core/middleware/csrf';
 
 dotenv.config();
 
@@ -41,6 +42,7 @@ app.use(
     origin: allowedOrigins,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token'],
   }),
 );
 app.use(cookieParser());
@@ -51,6 +53,8 @@ app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec)); // swagger 설�
 app.use(passport.initialize());
 
 setupAuthStrategies();
+
+app.use(csrfMiddleware);
 
 // 기본 라우터 설정
 app.get('/', (req: Request, res: Response) => {
