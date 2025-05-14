@@ -1,0 +1,123 @@
+name: CI
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: tsc
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Start Docker containers
+        run: |
+          docker compose -f docker-compose.test.yml up -d
+          sleep 15
+
+          # 컨테이너 상태 확인
+          docker ps
+
+          if ! docker ps | grep postgres-1; then
+            echo "postgres-1 컨테이너가 실행되지 않았습니다."
+            docker compose -f docker-compose.test.yml logs
+            exit 1
+          fi
+
+          # 데이터베이스 연결 확인
+          docker exec fs3-moving-team2-be-postgres-1-1 pg_isready -U postgres || exit 1
+
+      - name: Create .env.test files
+        run: |
+          # Create .env.test file with all database URLs
+          echo "DATABASE_URL_1=postgresql://postgres:postgres@localhost:5432/test_db_1" > .env.test
+          echo "DATABASE_URL_2=postgresql://postgres:postgres@localhost:5433/test_db_2" >> .env.test
+          echo "DATABASE_URL_3=postgresql://postgres:postgres@localhost:5434/test_db_3" >> .env.test
+          # Add DATABASE_URL for Prisma schema loading (using URL_1 as default)
+          echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/test_db_1" >> .env.test
+
+          # Push schema to each database
+          # First database
+          DATABASE_URL=$(cat .env.test | grep DATABASE_URL_1 | cut -d'=' -f2) npx prisma db push --schema=./prisma/schema/schema.prisma
+          # Second database
+          DATABASE_URL=$(cat .env.test | grep DATABASE_URL_2 | cut -d'=' -f2) npx prisma db push --schema=./prisma/schema/schema.prisma
+          # Third database
+          DATABASE_URL=$(cat .env.test | grep DATABASE_URL_3 | cut -d'=' -f2) npx prisma db push --schema=./prisma/schema/schema.prisma
+
+      - name: Run tests
+        run: npm test
+
+      - name: Stop Docker containers
+        if: always()
+        run: docker compose -f docker-compose.test.yml down
+
+      - name: Add success comment
+        if: success()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const commitMessage = context.payload.head_commit?.message || context.payload.pull_request?.title || "N/A";
+            const commitHash = context.sha.substring(0,7);
+            const commitUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/commit/${context.sha}`
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `✅ 빌드,단위 테스트 성공!
+              
+              📝 **커밋 정보**
+            - **메시지**: ${commitMessage}
+            - **해시**: [\`${commitHash}\`](${commitUrl})
+            - **작성자**: @${context.actor}`,
+            })
+      - name: Add failure comment
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const commitMessage = context.payload.head_commit?.message || context.payload.pull_request?.title || "N/A";
+            const commitHash = context.sha.substring(0,7);
+            const commitUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/commit/${context.sha}`
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `❌ 빌드,단위 테스트 실패!
+              
+              📝 **커밋 정보**
+            - **메시지**: ${commitMessage}
+            - **해시**: [\`${commitHash}\`](${commitUrl})
+            - **작성자**: @${context.actor}`,
+            })
