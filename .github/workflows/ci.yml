@@ -74,3 +74,46 @@ jobs:
       - name: Stop Docker containers
         if: always()
         run: docker compose -f docker-compose.test.yml down
+
+      - name: Add success comment
+        if: success()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const commitMessage = context.payload.head_commit?.message || context.payload.pull_request?.title || "N/A";
+            const commitHash = context.sha.substring(0,7);
+            const commitUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/commit/${context.sha}`
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `✅ 빌드,단위 테스트 성공!
+              
+              📝 **커밋 정보**
+            - **메시지**: ${commitMessage}
+            - **해시**: [\`${commitHash}\`](${commitUrl})
+            - **작성자**: @${context.actor}`,
+            })
+      - name: Add failure comment
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const commitMessage = context.payload.head_commit?.message || context.payload.pull_request?.title || "N/A";
+            const commitHash = context.sha.substring(0,7);
+            const commitUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/commit/${context.sha}`
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `❌ 빌드,단위 테스트 실패!
+              
+              📝 **커밋 정보**
+            - **메시지**: ${commitMessage}
+            - **해시**: [\`${commitHash}\`](${commitUrl})
+            - **작성자**: @${context.actor}`,
+            })
