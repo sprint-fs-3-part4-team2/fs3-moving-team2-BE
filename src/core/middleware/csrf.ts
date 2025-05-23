@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 
-const ALLOWED_OAUTH_PATHS = ['/auth/callback', '/auth/naver', '/auth/google', '/auth/kakao'];
+const ALLOWED_OAUTH_PATHS = ['/auth'];
 
 export const csrfMiddleware = (req: Request, res: Response, next: NextFunction) => {
   const csrfTokenFromCookie = req.cookies.csrfToken;
